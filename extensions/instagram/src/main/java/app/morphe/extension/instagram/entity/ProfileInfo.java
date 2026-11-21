@@ -36,9 +36,12 @@ public class ProfileInfo extends Entity {
     }
 
     public UserData getUserData() throws Exception {
-        Entity userDetailViewModel = getUserDetailViewModel();
-        Object userDataObject = userDetailViewModel.getField("fieldName");
-        return new UserData(userDataObject);
+        return new UserData(getProfileUser(getUserDetailViewModel().getObject()));
+    }
+
+    public static Object getProfileUser(Object viewModel) {
+        // Replaced with the active profile state read from Instagram's view model.
+        return null;
     }
 
 }

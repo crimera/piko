@@ -9,8 +9,10 @@ package app.crimera.patches.instagram.misc.directMessage.markChatAsReadPatch
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.literal
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -48,11 +50,16 @@ internal object GetButtonEnumClassNameExtensionFingerprint : Fingerprint(
 
 // --------------------------------------
 internal object DmInfoJsonParserFingerprint : Fingerprint(
-    returnType = "V",
-    parameters = listOf("L", "L", "Ljava/lang/String;"),
+    name = "unsafeParseFromJson",
+    returnType = "Ljava/lang/Object;",
+    parameters = listOf("L"),
     filters = listOf(
         string("visual_messages_newest_cursor"),
-        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
+        methodCall(smali = "Ljava/lang/String;->equals(Ljava/lang/Object;)Z", location = MatchAfterImmediately()),
+        methodCall(parameters = emptyList(), returnType = "Ljava/lang/String;"),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT, location = MatchAfterImmediately()),
     ),
 )
 
@@ -66,21 +73,19 @@ internal object ThreadLongPressButtonsEnumInitFingerprint : Fingerprint(
 )
 
 internal object ThreadLongPressMuteButtonBuilderFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     parameters = listOf(USER_SESSION_CLASS, "L", "Ljava/util/List;"),
     filters =
         listOf(
-            literal(0),
-            literal(25),
+            methodCall(parameters = emptyList(), returnType = "Lcom/instagram/model/direct/DirectThreadKey;"),
+            methodCall(name = "isMuted", parameters = emptyList(), returnType = "Z"),
+            methodCall(smali = "Ljava/util/List;->add(Ljava/lang/Object;)Z"),
         ),
 )
 
-internal object ThreadLongPressButtonStringListFingerprint : Fingerprint(
-    strings = listOf("[DEBUG] Thread info"),
-    returnType = "[Ljava/lang/String;",
-)
-
 internal object ThreadLongPressButtonActionFingerprint : Fingerprint(
-    classFingerprint = ThreadLongPressButtonStringListFingerprint,
-    strings = listOf("direct_inbox_action", "thread_unflag"),
+    isStatic = false,
+    returnType = "V",
+    filters = listOf(string("inbox_thread_long_press"), string("thread_mark_unread"), string("thread_unflag")),
 )

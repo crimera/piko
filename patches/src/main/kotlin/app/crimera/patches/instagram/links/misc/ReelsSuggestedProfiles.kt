@@ -23,7 +23,7 @@ internal fun hideReelsSuggestions() {
         val method = it.method
         val loopIndex = it.instructionMatches[1].index
         val scratch = it.instructionMatches[2].instruction.registersUsed.single()
-        val castMatch = it.instructionMatches.last()
+        val castMatch = it.instructionMatches[6]
         val castIndex = castMatch.index
         val cast = castMatch.instruction
         val itemRegister = cast.registersUsed.single()

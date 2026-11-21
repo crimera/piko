@@ -175,6 +175,17 @@
     <string name="piko_newx_media_picker_resolution_button_summary">Shows the icon that opens the resolution chooser per media item in the download media picker</string>
     <string name="piko_newx_media_picker_thumbnails_title">Load media thumbnails</string>
     <string name="piko_newx_media_picker_thumbnails_summary">Loads image previews in the download media picker instead of media type icons</string>
+    <string name="piko_newx_media_picker_layout_title">Media picker layout</string>
+    <string name="piko_newx_media_picker_layout_summary">Choose how media items are arranged in the download media picker</string>
+    <string name="piko_newx_media_picker_layout_list">List</string>
+    <string name="piko_newx_media_picker_layout_grid">Grid</string>
+    <string name="piko_newx_media_picker_layout_staggered">Staggered</string>
+    <string name="piko_newx_media_picker_grid_columns_title">Grid columns</string>
+    <string name="piko_newx_media_picker_grid_columns_summary">Number of columns in the download media picker grid view</string>
+    <string name="piko_newx_media_picker_grid_columns_auto">Auto</string>
+    <string name="piko_newx_media_picker_grid_columns_2">2 columns</string>
+    <string name="piko_newx_media_picker_grid_columns_3">3 columns</string>
+    <string name="piko_newx_media_picker_grid_columns_4">4 columns</string>
     <string name="piko_newx_media_picker_merge_button_title">Show merge button</string>
     <string name="piko_newx_media_picker_merge_button_summary">Shows a button to download and merge split artwork images in the media picker</string>
     <string name="piko_newx_inline_download_image_resolution_title">Photo quality</string>

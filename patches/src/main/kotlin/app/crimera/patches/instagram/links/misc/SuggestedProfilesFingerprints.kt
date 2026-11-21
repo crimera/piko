@@ -20,6 +20,17 @@ import com.android.tools.smali.dexlib2.Opcode
 internal const val FOLLOW_LIST_SUGGESTIONS = "FollowListFragment.ShouldFetchSuggestedUsers"
 internal const val FOLLOW_REQUEST_SUGGESTIONS = "ARG_SHOW_SUGGESTED_USERS"
 
+internal object ApiRequestBuilderFingerprint : Fingerprint(
+    parameters = emptyList(),
+    returnType = "L",
+    filters = listOf(
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        string("IgApi"),
+        string("path must be set on a request"),
+    ),
+)
+
 /**
  * A suggestion flag read from the fragment arguments, repeated for each read of [key].
  */
@@ -67,7 +78,8 @@ internal object FriendingCenterResponseFingerprint : Fingerprint(
 
 internal object FriendingCenterResponseParserFingerprint : Fingerprint(
     classFingerprint = FriendingCenterResponseFingerprint,
-    returnType = "Ljava/lang/Object;",
+    parameters = listOf("L", "Ljava/util/Set;"),
+    returnType = "L",
     filters = listOf(
         // Category parser, which returns null for unknown categories.
         methodCall(parameters = listOf("Ljava/lang/String;"), returnType = "Ljava/lang/Integer;"),
@@ -126,7 +138,7 @@ internal object ActivityFeedDelegatedUsersFingerprint : Fingerprint(
         opcode(Opcode.IF_NEZ, location = MatchAfterImmediately()),
         methodCall(
             definingClass = "this",
-            parameters = listOf(USER_SESSION_CLASS, "L", COLLECTION, LIST, "I", "Z", "Z"),
+            parameters = listOf(USER_SESSION_CLASS, "L", "Ljava/lang/Integer;", COLLECTION, LIST, "I", "Z", "Z", "Z"),
             location = MatchAfterWithin(10),
         ),
     ),
@@ -159,7 +171,7 @@ internal object ActivityFeedRecommendationsFingerprint : Fingerprint(
  */
 internal object ActivityFeedDelegatedRecommendationsFingerprint : Fingerprint(
     classFingerprint = ActivityFeedSectionsFingerprint,
-    parameters = listOf(USER_SESSION_CLASS, "Ljava/lang/Object;", COLLECTION, "I", "Z", "Z"),
+    parameters = listOf(USER_SESSION_CLASS, "Ljava/lang/Integer;", "Ljava/lang/Object;", COLLECTION, "I", "Z", "Z", "Z"),
     filters = listOf(
         fieldAccess(type = "Ljava/lang/Object;", opcode = Opcode.IGET_OBJECT),
         checkCast(LIST, location = MatchAfterImmediately()),
@@ -170,13 +182,16 @@ internal object ReelsHiddenItemsFingerprint : Fingerprint(
     returnType = "Ljava/util/List;",
     parameters = listOf("Ljava/util/List;"),
     filters = listOf(
-        string("android_purge_26_q2_HiddenClipsFilter_transform"),
+        methodCall(smali = "Ljava/util/List;->iterator()Ljava/util/Iterator;"),
         methodCall(smali = "Ljava/util/Iterator;->hasNext()Z"),
         opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
         opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
         methodCall(smali = "Ljava/util/Iterator;->next()Ljava/lang/Object;", location = MatchAfterImmediately()),
         opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
         opcode(Opcode.CHECK_CAST, location = MatchAfterImmediately()),
+        methodCall(name = "getId", parameters = emptyList(), returnType = "Ljava/lang/String;"),
+        methodCall(parameters = listOf("Ljava/lang/String;"), returnType = "Z"),
+        methodCall(smali = "Ljava/util/AbstractCollection;->add(Ljava/lang/Object;)Z"),
     ),
 )
 

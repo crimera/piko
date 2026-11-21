@@ -14,16 +14,38 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.patch
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private const val PEOPLE_CELL_CLASS = "Lcom/instagram/igds/components/peoplecell/IgdsPeopleCell;"
+private const val MENTIONS_CLASS = "$PATCHES_DESCRIPTOR/story/ViewStoryMentionsPatch;"
+private const val PROFILE_CONFIG = "Lcom/instagram/profile/intf/UserDetailLaunchConfig;"
+private const val ACTIVITY = "Landroid/app/Activity;"
+private const val STRING = "Ljava/lang/String;"
+
+private object ProfileConfigByUserIdFingerprint : Fingerprint(
+    isStatic = true,
+    parameters = listOf(USER_SESSION_CLASS, STRING, STRING, STRING),
+    returnType = PROFILE_CONFIG,
+    filters = listOf(methodCall(opcode = Opcode.INVOKE_VIRTUAL, parameters = emptyList(), returnType = PROFILE_CONFIG)),
+)
+
+private object OpenProfileFingerprint : Fingerprint(
+    isStatic = true,
+    parameters = listOf(ACTIVITY, USER_SESSION_CLASS, PROFILE_CONFIG),
+    returnType = "V",
+    filters = listOf(string("profile")),
+)
 
 private object SupportingTextViewFingerprint : Fingerprint(
     definingClass = PEOPLE_CELL_CLASS,
@@ -56,6 +78,22 @@ val viewStoryMentionsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
+            val createConfig = ProfileConfigByUserIdFingerprint.originalMethod
+            val openProfile = OpenProfileFingerprint.originalMethod
+            Fingerprint(
+                definingClass = MENTIONS_CLASS,
+                name = "openProfile",
+                parameters = listOf(ACTIVITY, USER_SESSION_CLASS, STRING, STRING, STRING),
+                returnType = "V",
+            ).method.addInstructions(
+                0,
+                """
+                invoke-static/range {p1 .. p4}, $createConfig
+                move-result-object p2
+                invoke-static/range {p0 .. p2}, $openProfile
+                """,
+            )
+
             val supportingField = SupportingTextViewFingerprint.instructionMatches.first().fieldReference
 
             val setters = mapOf(
@@ -70,7 +108,7 @@ val viewStoryMentionsPatch =
                 ).originalMethod
 
                 Fingerprint(
-                    definingClass = "$PATCHES_DESCRIPTOR/story/ViewStoryMentionsPatch;",
+                    definingClass = MENTIONS_CLASS,
                     name = name,
                     parameters = listOf(PEOPLE_CELL_CLASS) + parameters,
                     returnType = "V",

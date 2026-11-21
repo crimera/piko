@@ -1,3 +1,35 @@
+## [3.12.0-dev.5](https://github.com/crimera/piko/compare/v3.12.0-dev.4...v3.12.0-dev.5) (2026-11-20)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** Download every image from reposts with the inline download button ([e1d3157](https://github.com/crimera/piko/commit/e1d315719c37392648b6ccf681df83f0efdaad95))
+* **Twitter:** Hide iconless Grok rows in customized drawer ([a4ecf18](https://github.com/crimera/piko/commit/a4ecf18d59cfabf7af8c6a4c6232c1926511606d))
+
+### ✨ New Features
+
+* **Twitter:** Add grid view toggle to NewX inline download picker ([8c88f53](https://github.com/crimera/piko/commit/8c88f5355da9926d457b677fc5fdfe484a1c248a))
+
+### 🚀 Updated App Support
+
+* **Instagram:** Add support for 456.0.0.53.78 ([9ae877b](https://github.com/crimera/piko/commit/9ae877b3e3acad985c79f5936419b58e689b4e49))
+
+## [3.12.0-dev.4](https://github.com/crimera/piko/compare/v3.12.0-dev.3...v3.12.0-dev.4) (2026-11-19)
+
+### 🐛 Bug Fixes
+
+* **Disable Play Store updates:** Show original version code in crash logs ([4dc764c](https://github.com/crimera/piko/commit/4dc764cc3068683acd6d27cfec4b84ba50e1c1c7))
+* **Twitter:** Add `Spoof client version` patch to fix XChat "Update Required" ([#2302](https://github.com/crimera/piko/issues/2302)) ([8d265d8](https://github.com/crimera/piko/commit/8d265d819240f0ec48ab52c06dbc17d479f10f1b))
+
+### ✨ New Features
+
+* **Instagram:** Add recommended flags ([38e0976](https://github.com/crimera/piko/commit/38e0976ddf9d60e97a2343382e69b58d9970eee2))
+* **Instagram:** Send GIFs from the keyboard's GIF picker in DMs ([#2303](https://github.com/crimera/piko/issues/2303)) ([a0d905e](https://github.com/crimera/piko/commit/a0d905e013b30dcbd9146c3f6c056b0ca6e1cf4d))
+* **Twitter:** Add `Fix 20 photos support` patch for old X ([a0110b2](https://github.com/crimera/piko/commit/a0110b2c618c0f0d3916e2392158de267f6084db))
+
+### 🔧 Improvements
+
+* **Instagram:** Organize and localize recommended flags ([560db89](https://github.com/crimera/piko/commit/560db897c5fd25acc2b536fb8f6025bc94929bb0))
+
 ## [3.12.0-dev.3](https://github.com/crimera/piko/compare/v3.12.0-dev.2...v3.12.0-dev.3) (2026-11-17)
 
 ### 🐛 Bug Fixes

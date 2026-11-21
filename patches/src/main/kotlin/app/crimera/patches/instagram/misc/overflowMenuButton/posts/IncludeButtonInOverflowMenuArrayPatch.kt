@@ -28,7 +28,7 @@ val includeButtonsInOverflowMenuArrayPatch =
                 it.method.addInstructions(
                     valuesIndex,
                     """
-                    invoke-static {}, $FEED_OVERFLOW_MENU_BUTTON_CLASS->addToMenuOptionArray()[$MEDIA_OPTIONS_CLASS
+                    invoke-static/range {v$arrayRegister .. v$arrayRegister}, $FEED_OVERFLOW_MENU_BUTTON_CLASS->addToMenuOptionArray([$MEDIA_OPTIONS_CLASS)[$MEDIA_OPTIONS_CLASS
                     move-result-object v$arrayRegister
                     """.trimIndent(),
                 )

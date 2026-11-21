@@ -27,8 +27,13 @@ private const val STOCK_CLIPS_COMPOSER_BACKGROUND =
     "piko_stock_clips_composer_background"
 private const val STOCK_CLIPS_COMPOSER_BACKGROUND_COLOR = "#ff25292e"
 private const val STORY_LOADING_BACKGROUND = "piko_story_loading_background"
-// This GM3 elevation color and its consumers were removed in newer Instagram resources.
-private const val LEGACY_SURFACE_TINT = "baseline_neutral_10_with_surface_tint_dark_alpha_14"
+private const val STOCK_STORY_LOADING_BACKGROUND = "#ff25292e"
+// Instagram inlines or drops these aliases in some releases.
+private val optionalStockColors = setOf(
+    "baseline_neutral_10_with_surface_tint_dark_alpha_14",
+    "abc_decor_view_status_guard_light",
+    "igds_primary_background",
+)
 
 internal data class Api31BaseSnapshot(
     val dayColors: Map<String, String>,
@@ -48,6 +53,26 @@ private val onMediaAttrsPointingAtGuardLight =
         "sc_primary_icon_on_media",
         "sc_primary_text_on_media",
         "sc_always_white",
+    )
+
+// Instagram 456 shares CardView white between these previously themed surfaces and foregrounds.
+private val themedWhiteSurfaceAttrs =
+    setOf(
+        "colorSurface",
+        "igds_color_bio_pill_active_background",
+        "igds_color_clips_tab_inverted_background",
+        "igds_color_cta_banner_background",
+        "igds_color_elevated_background",
+        "igds_color_elevated_background_intent_card",
+        "igds_color_meta_ai_card_background",
+        "igds_color_pill_active_background",
+        "igds_color_primary_background",
+        "igds_color_prism_card_background",
+        "igds_color_prism_pill_active_background",
+        "igds_color_sticker_background",
+        "sc_card_background",
+        "sc_popover_background",
+        "sc_surface_background",
     )
 
 private val amoledDayOverrides =
@@ -80,7 +105,7 @@ private val materialYouCreationButtonMappings =
         CREATION_BUTTON_BACKGROUND to "@android:color/system_neutral2_800",
     )
 
-internal fun Document.forceWhiteOnMediaChromeItems() {
+private fun Document.remapSurfaceAndMediaColors() {
     val items = getElementsByTagName("item")
     for (index in 0 until items.length) {
         val item = items.item(index) as? Element ?: continue
@@ -92,6 +117,8 @@ internal fun Document.forceWhiteOnMediaChromeItems() {
             item.textContent == "@color/abc_decor_view_status_guard_light"
         ) {
             item.textContent = "@color/bds_white"
+        } else if (name in themedWhiteSurfaceAttrs && item.textContent == "@color/cardview_light_background") {
+            item.textContent = "@color/background_floating_material_light"
         }
     }
 }
@@ -177,9 +204,12 @@ internal fun preserveCreationButtonContrast() {
     }
 }
 
-internal fun forceBlackStoryBackground() {
-    // Keep story chrome black without remapping colors shared by other surfaces.
-    writeColors("res/values", mapOf(STORY_LOADING_BACKGROUND to "#ff000000"))
+internal fun preserveLightStoryBackground() {
+    // Light surfaces share this color with stories, whose controls stay white.
+    writeColors("res/values", mapOf(STORY_LOADING_BACKGROUND to STOCK_STORY_LOADING_BACKGROUND))
+    listOf("res/values-night", "res/values-v31", "res/values-night-v31").forEach { path ->
+        writeColors(path, mapOf(STORY_LOADING_BACKGROUND to "@color/igds_prism_gray_09"))
+    }
     document("res/values/public.xml").use { document ->
         document.ensurePublicResource("color", STORY_LOADING_BACKGROUND)
     }
@@ -192,7 +222,8 @@ internal fun forceBlackStoryBackground() {
             for (index in 0 until items.length) {
                 val item = items.item(index) as? Element ?: continue
                 if (
-                    item.getAttribute("name") == "igds_color_stories_loading_background"
+                    item.getAttribute("name") == "igds_color_stories_loading_background" &&
+                    item.textContent == "@color/igds_prism_gray_09"
                 ) {
                     item.textContent = "@color/$STORY_LOADING_BACKGROUND"
                     replacements++
@@ -200,7 +231,7 @@ internal fun forceBlackStoryBackground() {
             }
         }
     }
-    check(replacements > 0) { "Unable to set the story background to black" }
+    check(replacements > 0) { "Unable to preserve the light story background" }
 }
 
 internal fun preserveLightClipsComposerContrast() {
@@ -222,7 +253,9 @@ internal fun preserveLightClipsComposerContrast() {
         }
         val solid = solids.item(0) as? Element
             ?: error("Unable to read the clips composer background fill")
-        check(solid.getAttribute("android:color") == "?attr/igds_color_secondary_background") {
+        check(solid.getAttribute("android:color") in setOf(
+            "?attr/igds_color_secondary_background", "?attr/igds_color_background_secondary",
+        )) {
             "Unexpected clips composer background fill"
         }
         // Material You remaps the source token, so keep Instagram's stock light fill.
@@ -233,14 +266,14 @@ internal fun preserveLightClipsComposerContrast() {
     }
 }
 
-internal fun forceWhiteOnMediaChrome() {
+internal fun remapSurfaceAndMediaColors() {
     listOf(
         "res/values/styles.xml",
         "res/values-night/styles.xml",
     ).forEach { path ->
         if (!resourceFile(path).exists()) return@forEach
         document(path).use { document ->
-            document.forceWhiteOnMediaChromeItems()
+            document.remapSurfaceAndMediaColors()
         }
     }
 }
@@ -284,7 +317,8 @@ internal fun restoreApi31Base(
 }
 
 internal fun materialYouOverlayValues(night: Boolean): OverlayValues {
-    val values = dynamicOverlayMappings(night) + materialYouCreationButtonMappings
+    val values = dynamicOverlayMappings(night) + materialYouCreationButtonMappings +
+        if (night) emptyMap() else mapOf(STORY_LOADING_BACKGROUND to STOCK_STORY_LOADING_BACKGROUND)
     val api34Values = values + materialYouSwitchApi34Mappings(night)
     val drawableMappings =
         if (night) emptyMap() else materialYouLightDrawableMappings
@@ -400,11 +434,7 @@ private fun applyLegacyAmoledTheme() {
 }
 
 private fun applyLegacyMaterialYouTheme() {
-    val namedMappings = if (LEGACY_SURFACE_TINT in readColors("res/values/colors.xml")) {
-        materialYouNamedMappings
-    } else {
-        materialYouNamedMappings - LEGACY_SURFACE_TINT
-    }
+    val namedMappings = materialYouNamedMappings - missingOptionalStockColors()
     listOf(
         "res/values" to (materialYouLightFallbackAliases + materialYouNeutralConstantsHex),
         "res/values-night" to (materialYouDarkFallbackAliases + materialYouNeutralConstantsHex),
@@ -437,21 +467,23 @@ private fun resolveBaseColors(
 ): Map<String, String> =
     materialYouNamedMappings.keys.mapNotNull { name ->
         val value = buckets.firstNotNullOfOrNull { it[name] }
-        if (value == null && name == LEGACY_SURFACE_TINT) {
+        if (value == null && name in optionalStockColors) {
             null
         } else {
             name to checkNotNull(value) { "Unable to resolve base color: $name" }
         }
     }.toMap()
 
+private fun missingOptionalStockColors(): Set<String> = optionalStockColors - readColors("res/values/colors.xml").keys
+
 private fun supportedOverlayValues(values: OverlayValues): OverlayValues {
-    if (LEGACY_SURFACE_TINT in readColors("res/values/colors.xml")) return values
+    val missing = missingOptionalStockColors()
 
     return values.copy(
-        day = values.day - LEGACY_SURFACE_TINT,
-        night = values.night - LEGACY_SURFACE_TINT,
-        dayApi34 = values.dayApi34?.minus(LEGACY_SURFACE_TINT),
-        nightApi34 = values.nightApi34?.minus(LEGACY_SURFACE_TINT),
+        day = values.day - missing,
+        night = values.night - missing,
+        dayApi34 = values.dayApi34?.minus(missing),
+        nightApi34 = values.nightApi34?.minus(missing),
     )
 }
 

@@ -10,17 +10,17 @@ import app.crimera.patches.instagram.utils.Constants
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.string
+import app.morphe.patcher.literal
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/ReelResponseItem;"
 
-internal object ReelResponseItemIntfMapperFingerprint : Fingerprint(
-    returnType = "Ljava/util/Map;",
-    parameters = listOf("L", "ReelResponseItemIntf;"),
-    strings = listOf("strong_id__"),
+internal object ReelMediaCountFingerprint : Fingerprint(
+    definingClass = "Lcom/instagram/model/reels/ImmutablePandoReelResponseItem;",
+    returnType = "Ljava/lang/Integer;",
+    parameters = emptyList(),
     filters = listOf(
-        string("media_count"),
-        methodCall(location = MatchAfterImmediately()),
+        literal("media_count".hashCode().toLong()),
+        methodCall(name = "getOptionalIntValueByHashCode", location = MatchAfterImmediately()),
     ),
 )
 

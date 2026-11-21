@@ -6,6 +6,7 @@
 
 package app.morphe.extension.instagram.settings;
 
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import java.util.TreeMap;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
@@ -237,12 +238,18 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || resumeReelsAfterScrolling || followBackIndicator || followListNonFollowerBadge || customFont);}
+    public static boolean miscSection() {
+        return moreOptionsOnPost || changeLikeAnimation || removeEmptyBottomSpace || copyCommentButton
+                || improveImageViewing || resumeReelsAfterScrolling || followBackIndicator || followListNonFollowerBadge
+                || fontSection() || MaterialYouTheme.isAmoledAvailable() || MaterialYouTheme.isMaterialYouAvailable();
+    }
 
     //Font section.
     public static boolean customFont = false;
     public static void customFont() { customFont = true; }
-    public static boolean fontSection(){ return customFont; }
+    public static boolean customEmojiFont = false;
+    public static void customEmojiFont() { customEmojiFont = true; }
+    public static boolean fontSection(){ return customFont || customEmojiFont; }
 
     //Download section.
     public static boolean downloadMedia = false;
@@ -360,6 +367,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);
         FLAGS.put(str("piko_category_rec_flags"),SettingsStatus.recommendedFlags);
         FLAGS.put(str("piko_custom_font"),SettingsStatus.customFont);
+        FLAGS.put(str("piko_emoji_font"),SettingsStatus.customEmojiFont);
 
     }
 

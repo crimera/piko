@@ -35,13 +35,13 @@ val hideSaveButtonsPatch = patch(
         val saveField = feedUfiStateField(", isSaveEnabled=")
 
         // Save-only component factories return null when disabled; view renderers skip their binding branch.
-        val renderers = listOf(Opcode.IF_EQZ, Opcode.IF_NEZ).flatMap { branch ->
+        val renderers = listOf(Opcode.IF_EQZ to 3, Opcode.IF_NEZ to 1).flatMap { (branch, count) ->
             Fingerprint(
                 filters = listOf(
                     fieldAccess(reference = saveField, opcode = Opcode.IGET_BOOLEAN),
                     opcode(branch, location = MatchAfterWithin(2)),
                 ),
-            ).matchAll(2..2)
+            ).matchAll(count..count)
         }
 
         renderers.forEach { match ->

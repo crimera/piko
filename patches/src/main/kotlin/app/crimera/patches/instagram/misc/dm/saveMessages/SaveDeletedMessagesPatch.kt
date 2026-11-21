@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
+import app.crimera.patches.instagram.entity.directItem.DirectItemJsonParserFingerprint
 import app.crimera.patches.instagram.entity.directItem.directItemEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
@@ -15,21 +16,14 @@ import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.changeString
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
-import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.patch.patch
-import app.morphe.patcher.util.getFreeRegisterProvider
+import app.morphe.patcher.util.registersUsed
 import app.morphe.util.addInstructionsAtControlFlowLabel
-import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 private const val HOOK_CLASS = "$PATCHES_DESCRIPTOR/dm/SavedMessagesHook;"
 
@@ -64,7 +58,7 @@ val saveDeletedMessagesPatch =
             // Hook 1: REST/JSON path, inject at the return of the parser.
             DirectItemJsonParserFingerprint.let {
                 val returnObject = it.instructionMatches.last()
-                val itemRegister = returnObject.getInstruction<OneRegisterInstruction>().registerA
+                val itemRegister = returnObject.instruction.registersUsed.single()
 
                 it.method.addInstructionsAtControlFlowLabel(
                     returnObject.index,
@@ -101,46 +95,24 @@ val saveDeletedMessagesPatch =
                 """.trimIndent(),
             )
 
-            // Hook 4: SQLite DAO delete, inject at entry so our DB record is still present when the hook fires.
-            DirectItemDbHideFingerprint.method.apply {
-                val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 2)
-                val serverIdRegister = regs.getFreeRegister()
-                val clientContextRegister = regs.getFreeRegister()
-
-                addInstructions(
-                    0,
-                    """
-                    move-object/from16 v$serverIdRegister, p2
-                    move-object/from16 v$clientContextRegister, p3
-                    invoke-static {v$serverIdRegister, v$clientContextRegister}, $HOOK_CLASS->onMessageHiddenFromDb(Ljava/lang/String;Ljava/lang/String;)V
-                    """.trimIndent(),
+            DirectItemDbHideFingerprint.let {
+                val serverId = it.instructionMatches[1].instruction.registersUsed.first()
+                val clientContext = it.instructionMatches[2]
+                val clientId = clientContext.instruction.registersUsed.first()
+                it.method.addInstructions(
+                    clientContext.index + 1,
+                    "invoke-static {v$serverId, v$clientId}, $HOOK_CLASS->onMessageHiddenFromDb(Ljava/lang/String;Ljava/lang/String;)V",
                 )
             }
 
-            // REST participants supplement the cache used by real-time message delivery.
-            ThreadUsersDispatchFingerprint.matchOrNull()?.let { match ->
-                match.method.apply {
-                    // The list write is out of line, after other JSON fields. Follow the
-                    // array guard to its completion block instead of selecting the next list write.
-                    val arrayGuard = getInstruction<BuilderOffsetInstruction>(match.instructionMatches[1].index)
-                    val putIndex = indexOfFirstInstructionOrThrow(
-                        arrayGuard.target.location.index,
-                        fieldAccess(
-                            definingClass = parameterTypes.first().toString(),
-                            type = "Ljava/util/List;",
-                            opcode = Opcode.IPUT_OBJECT,
-                        ),
-                    )
-                    val parsedUsersRegister = getInstruction<TwoRegisterInstruction>(putIndex).registerA
-                    val usersRegister = getFreeRegisterProvider(putIndex + 1, 1).getFreeRegister()
-                    addInstructions(
-                        putIndex + 1,
-                        """
-                        move-object/from16 v$usersRegister, v$parsedUsersRegister
-                        invoke-static {v$usersRegister}, $HOOK_CLASS->noteThreadUsers(Ljava/util/List;)V
-                        """.trimIndent(),
-                    )
-                }
+            // The recipients array stores wrappers. Capture the User before it is wrapped.
+            ThreadRecipientFingerprint.let {
+                val result = it.instructionMatches[2]
+                val user = result.instruction.registersUsed.single()
+                it.method.addInstructions(
+                    result.index + 1,
+                    "invoke-static/range {v$user .. v$user}, $HOOK_CLASS->noteThreadUser(Ljava/lang/Object;)V",
+                )
             }
 
             enableSettings("saveDeletedMessages")

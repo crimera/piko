@@ -35,8 +35,7 @@ val instantsDownloadPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            val itemType = (InstantItemFingerprint.matchOrNull()
-                ?: InstantMediaItemFingerprint.match()).originalClassDef.type
+            val itemType = InstantItemFingerprint.originalClassDef.type
             val constructor = instantItemConstructorFingerprint(itemType).method
             if (constructor.parameterTypes.firstOrNull() != MEDIA_CLASS_NAME) {
                 throw PatchException("Expected the instant item's first constructor parameter to be Media")

@@ -15,6 +15,7 @@ import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.newInstance
@@ -26,9 +27,7 @@ internal object OverflowMenuButtonEnumInitialiser : Fingerprint(
     definingClass = MEDIA_OPTIONS_CLASS,
     name = "<clinit>",
     filters = listOf(
-        methodCall(definingClass = "this", name = "\$values"),
-        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
-        fieldAccess(definingClass = "this", name = "\$VALUES", opcode = Opcode.SPUT_OBJECT, location = MatchAfterImmediately()),
+        fieldAccess(definingClass = "this", name = "\$VALUES", type = "[$MEDIA_OPTIONS_CLASS", opcode = Opcode.SPUT_OBJECT),
     ),
 )
 
@@ -36,25 +35,14 @@ internal object EnumButtonClassFingerprint : Fingerprint(
     strings = listOf("UNSET_OR_UNRECOGNIZED_ENUM_VALUE", "ACTION", "DESTRUCTIVE"),
 )
 
-internal object AddFeedButtonFingerprint : Fingerprint(
+internal fun feedMenuListFingerprint(creatorType: String, menuModelType: String) = Fingerprint(
     strings = listOf("TEXT_POST_APP_INACTIVE"),
     filters = listOf(
-        newInstance("Ljava/util/ArrayList;"),
-        methodCall(smali = "Ljava/util/ArrayList;-><init>()V", location = MatchAfterImmediately()),
-        fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
-        opcode(Opcode.CHECK_CAST, location = MatchAfterImmediately()),
-    ),
-)
-
-internal object AddFeedButtonFactoryFingerprint : Fingerprint(
-    strings = listOf("TEXT_POST_APP_INACTIVE"),
-    filters = listOf(
-        // Feed overflow menu options.
-        methodCall(returnType = "Ljava/util/ArrayList;", parameters = emptyList(), opcode = Opcode.INVOKE_STATIC),
+        fieldAccess(type = creatorType, opcode = Opcode.IGET_OBJECT),
+        newInstance(menuModelType),
+        methodCall(name = "<init>", location = MatchAfterImmediately()),
+        methodCall(returnType = "Ljava/util/ArrayList;", parameters = emptyList(), opcode = Opcode.INVOKE_STATIC, location = MatchAfterImmediately()),
         opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
-        fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterWithin(1)),
-        // Overflow menu creator.
-        opcode(Opcode.CHECK_CAST, location = MatchAfterImmediately()),
     ),
 )
 
@@ -63,7 +51,7 @@ internal object AddFeedButtonFactoryFingerprint : Fingerprint(
  */
 internal object AddFeedOverflowOptionFingerprint : Fingerprint(
     classFingerprint = MediaOptionsOverflowMenuCreatorConstructorFingerprint,
-    parameters = listOf("L", MEDIA_OPTIONS_CLASS, "L", "Ljava/lang/CharSequence;", "Ljava/util/ArrayList;", "Z"),
+    parameters = listOf("L", MEDIA_OPTIONS_CLASS, "L", "L", "Ljava/lang/CharSequence;", "Ljava/util/ArrayList;", "Z"),
 )
 
 /**
@@ -74,10 +62,10 @@ internal object FeedButtonGetMediaFingerprint : Fingerprint(
     parameters = listOf("L"),
     returnType = MEDIA_CLASS_NAME,
     filters = listOf(
-        // The lazy media is unwrapped by a shared helper.
         fieldAccess(definingClass = "this", opcode = Opcode.IGET_OBJECT),
-        methodCall(parameters = listOf("L"), returnType = MEDIA_CLASS_NAME, opcode = Opcode.INVOKE_STATIC, location = MatchAfterImmediately()),
+        methodCall(name = "getValue", parameters = emptyList(), returnType = "Ljava/lang/Object;", opcode = Opcode.INVOKE_INTERFACE, location = MatchAfterImmediately()),
         opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        checkCast(MEDIA_CLASS_NAME, location = MatchAfterImmediately()),
         opcode(Opcode.RETURN_OBJECT, location = MatchAfterImmediately()),
     ),
 )

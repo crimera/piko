@@ -10,9 +10,12 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.storyComponentType
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -21,6 +24,8 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.patch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -49,13 +54,20 @@ val hideLikesPatch = patch(
 
 private fun hideReelLikes() {
     // Each reel layout omits null children from the action bar.
-    for (component in listOf("createLikeButtonComponent", "createLikeCountComponent")) {
-        val factory = Fingerprint(
-            returnType = "L",
-            filters = listOf(string("android_purge_26_q2_ClipsUfiComponent_$component")),
-        ).method
-        factory.returnHiddenLikeState()
-    }
+    val function = "Lkotlin/jvm/functions/Function1;"
+    val count = Fingerprint(
+        parameters = listOf("L", "L", "L", function, "J", "J"),
+        returnType = "L",
+        filters = listOf(string("ufi_count"), resourceLiteral(ResourceType.ID, "like_count", location = MatchAfterImmediately())),
+    ).method
+    val button = Fingerprint(
+        definingClass = count.definingClass,
+        parameters = listOf(count.parameterTypes[1].toString(), function, function, function, "J", "J", "Z"),
+        returnType = "L",
+        filters = listOf(fieldAccess(type = "Lcom/instagram/clips/intf/ClipsViewerSource;", opcode = Opcode.IGET_OBJECT)),
+    ).method
+    count.returnHiddenLikeState()
+    button.returnHiddenLikeState()
 
     // Reject the liked-by row during selection so Instagram can pick the next
     // social context or display the timestamp on its own.
@@ -70,9 +82,10 @@ private fun hideReelLikes() {
         ),
     ).instructionMatches.last().fieldReference
     val selector = Fingerprint(
+        parameters = listOf(USER_SESSION_CLASS, "Lcom/instagram/feed/media/Media;", "L", "Ljava/lang/String;", "Ljava/lang/String;"),
         returnType = "L",
         filters = listOf(
-            string("android_purge_26_q3_MediaSocialContextViewUtil_getClipsViewerSocialContextModelFromMedia"),
+            string("mutual_follower"),
             fieldAccess(reference = likedBy, opcode = Opcode.SGET_OBJECT),
             opcode(Opcode.IF_NE, location = MatchAfterImmediately()),
             // When the server supplies no candidates, the same selector can synthesize a liked-by row.
@@ -120,23 +133,20 @@ internal fun MutableMethod.returnHiddenLikeState() {
 }
 
 private fun hideStoryLikes() {
-    val component = Fingerprint(
-        returnType = "Ljava/lang/String;",
-        parameters = emptyList(),
-        filters = listOf(string("StoryLikeButtonViewComponent")),
-    ).originalMethod.definingClass
+    val component = storyComponentType("StoryLikeButtonViewComponent")
     val regular = Fingerprint(
-        definingClass = component,
-        parameters = listOf("Ljava/lang/Object;"),
+        parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
         returnType = "V",
         filters = listOf(
+            checkCast(component),
             fieldAccess(type = "Z", opcode = Opcode.IGET_BOOLEAN),
             opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
             fieldAccess(type = "Z", opcode = Opcode.IGET_BOOLEAN, location = MatchAfterImmediately()),
             opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
             methodCall(
-                opcode = Opcode.INVOKE_DIRECT,
-                parameters = listOf("Lcom/instagram/ui/widget/bouncyufibutton/IgBouncyUfiButtonImageView;"),
+                definingClass = component,
+                opcode = Opcode.INVOKE_STATIC,
+                parameters = listOf("Lcom/instagram/ui/widget/bouncyufibutton/IgBouncyUfiButtonImageView;", component),
                 returnType = "V",
                 location = MatchAfterImmediately(),
             ),
@@ -147,22 +157,21 @@ private fun hideStoryLikes() {
         filters = listOf(string("SponsoredStoriesLikeButtonBinder#bindView")),
     ).originalMethod.definingClass
     val sponsored = Fingerprint(
-        definingClass = sponsoredBinder,
-        parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
+        parameters = List(3) { "Ljava/lang/Object;" },
         returnType = "V",
         filters = listOf(
+            checkCast(sponsoredBinder),
             opcode(Opcode.INSTANCE_OF),
-            fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
-            opcode(Opcode.IF_NEZ, location = MatchAfterImmediately()),
-            opcode(Opcode.CONST_16, location = MatchAfterImmediately()),
+            fieldAccess(definingClass = sponsoredBinder, opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+            opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+            opcode(Opcode.CONST_4, location = MatchAfterImmediately()),
             methodCall(name = "setVisibility", parameters = listOf("I"), returnType = "V", location = MatchAfterImmediately()),
-            opcode(Opcode.RETURN_VOID, location = MatchAfterImmediately()),
         ),
     ).match()
 
-    for ((binding, branch) in listOf(regular to regular.instructionMatches[1], sponsored to sponsored.instructionMatches[2])) {
+    for ((binding, branch) in listOf(regular to regular.instructionMatches[2], sponsored to sponsored.instructionMatches[3])) {
         val visible = branch.instruction.registersUsed.single()
-        if (binding.instructionMatches.first().instruction.registersUsed.first() != visible) {
+        if (binding.instructionMatches[1].instruction.registersUsed.first() != visible) {
             throw PatchException("Unexpected story like visibility branch")
         }
         binding.method.addInstructions(

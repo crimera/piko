@@ -7,8 +7,6 @@
 package app.crimera.patches.instagram.links.privacy
 
 import app.crimera.patches.instagram.links.interceptUriPatch
-import app.crimera.patches.instagram.misc.actionBar.chatActionBarButton.chatActionBarButtonPatch
-import app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton.inboxActionBarButtonPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
@@ -16,13 +14,16 @@ import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.classDefBy
-import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.patch
+import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
@@ -32,12 +33,7 @@ val viewStoriesAnonymouslyPatch =
         name = "View stories anonymously",
         default = true,
     ) {
-        dependsOn(
-            settingsPatch,
-            interceptUriPatch,
-            chatActionBarButtonPatch,
-            inboxActionBarButtonPatch,
-        )
+        dependsOn(settingsPatch, interceptUriPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
@@ -61,40 +57,21 @@ val viewStoriesAnonymouslyPatch =
             }
             addStorySeenResultHooks(requestType, RequestSucceededExtensionFingerprint.method)
 
-            PendingStoriesEmptyFingerprint.match(StorySeenUriBuilderFingerprint.originalClassDef).let {
-                val returnIndex = it.instructionMatches.last().index
-                val seenRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
-                it.method.addInstructions(
-                    returnIndex,
-                    """
-                    invoke-static {v$seenRegister}, $LINKS_DESCRIPTOR->setStorySeen(Z)Z
-                    move-result v$seenRegister
-                    """.trimIndent(),
-                )
-            }
-
-            val consumed = ConsumedStoryFingerprint.instructionMatches
-            val reelParentClass = ConsumedStoryFingerprint.originalMethod.parameterTypes[1].toString()
+            val consumption = consumedStoryFingerprint(pendingSeenClass).match()
+            val consumed = consumption.instructionMatches
+            val reelParentClass = consumption.originalMethod.parameterTypes[1].toString()
             val excludedItemPredicate = consumed[0].methodReference
             val reelModelField = consumed[6].fieldReference
             val reelModelClass = reelModelField.type
-            val itemSeenTimestampMethod = consumed[7].methodReference
-            val markLocalSeenMethod = consumed[9].methodReference
-            val regularStoryPredicate = consumed[10].methodReference
-            val excludedReelPredicate = consumed[13].methodReference
-            val reelOwnerIdField = consumed[16].fieldReference
-            val mediaField = consumed[17].fieldReference
-            val mediaConversion = consumed[19].methodReference
-            val aggregate = consumed[24].methodReference
-
-            val aggregateMethod = addStoryAggregateBridge(
-                mutableClassDefBy(aggregate.definingClass),
-                aggregate,
-                mediaConversion.returnType,
-                consumed[21].methodReference,
-                consumed[22].instruction.getReference<TypeReference>()!!.type,
-                consumed[23].methodReference,
-            )
+            val regularStoryPredicate = consumed[7].methodReference
+            val excludedReelPredicate = consumed[10].methodReference
+            val reelOwnerIdField = consumed[13].fieldReference
+            val mediaField = consumed[14].fieldReference
+            val mediaCallerId = consumed[15].getInstruction<NarrowLiteralInstruction>().narrowLiteral
+            val mediaConversion = consumed[17].methodReference
+            val aggregateMethod = consumed[19].methodReference
+            val itemSeenTimestampMethod = consumed[20].methodReference
+            val markLocalSeenMethod = consumed[22].methodReference
 
             val reelTypeClass = ReelTypeFingerprint.originalClassDef.type
             val reelTypeField = classDefBy(reelModelClass).fields.single { it.type == reelTypeClass }
@@ -222,7 +199,7 @@ val viewStoriesAnonymouslyPatch =
                 if-nez p1, :piko_request_unavailable
                 iget-object p2, p2, $reelOwnerIdField
                 const-string p1, "itas-android"
-                const p4, -0x18b1a0fe
+                const p4, $mediaCallerId
                 invoke-virtual {p3, p1, p4}, $mediaConversion
                 move-result-object p3
                 if-eqz p3, :piko_request_unavailable
@@ -238,9 +215,20 @@ val viewStoriesAnonymouslyPatch =
                 """.trimIndent(),
             )
 
-            storySeenScheduleFingerprint(pendingSeenClass, requestBuilder).instructionMatches.let {
-                val managerGetter = it.first().methodReference
-                val scheduleRequest = it.last().methodReference
+            storySeenScheduleFingerprint(pendingSeenClass, requestBuilder).match().let {
+                val managerGetter = it.instructionMatches.first().methodReference
+                val scheduleRequest = it.instructionMatches.last().methodReference
+                val scratch = it.method.findFreeRegister(0)
+                it.method.addInstructionsWithLabels(
+                    0,
+                    """
+                    invoke-static {}, $LINKS_DESCRIPTOR->shouldSkipStorySeenRequest()Z
+                    move-result v$scratch
+                    if-eqz v$scratch, :original
+                    return-void
+                    """.trimIndent(),
+                    ExternalLabel("original", it.method.getInstruction(0)),
+                )
                 ScheduleRequestExtensionFingerprint.method.addInstructions(
                     0,
                     """

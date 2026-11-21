@@ -6,7 +6,6 @@
 
 package app.crimera.patches.instagram.links.distractionFree
 
-import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
@@ -17,10 +16,11 @@ val disableStoriesPatch =
     patch(
         name = "Disable stories",
     ) {
-        dependsOn(settingsPatch, interceptUriPatch)
+        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
+            disableStoryReads()
             enableSettings("disableStories")
         }
     }

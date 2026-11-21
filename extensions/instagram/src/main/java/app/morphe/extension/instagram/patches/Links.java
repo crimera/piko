@@ -12,37 +12,27 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.net.Uri;
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import android.util.Log;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ShareLinkSanitizer;
-import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.PostType;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.story.StorySeenRequestScope;
 import app.morphe.extension.crimera.PikoUtils;
 
-import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.ActivityHook;
-import app.morphe.extension.instagram.settings.Settings;
 
 @SuppressWarnings("unused")
 public class Links {
     private static final Pattern VALID_DOMAIN =
             Pattern.compile("[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:\\d{1,5})?");
-    private static final boolean DISABLE_STORIES;
-    private static final boolean DISABLE_EXPLORE;
-    private static final boolean DISABLE_COMMENTS;
-    private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
-    private static final List<String> META_PACKAGES;
     private static final ShareLinkSanitizer SHARE_LINK_SANITIZER = new ShareLinkSanitizer(
             "instagram.com",
             Arrays.asList("comment_id", "img_index", "open_comments", "story_media_id"),
@@ -50,35 +40,11 @@ public class Links {
     );
 
     static {
-        DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
-        DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
-        DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
-        DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
-
-        META_PACKAGES = Arrays.asList(
-                "com.instagram.android",      // Instagram
-                "com.instagram.lite",         // Instagram Lite
-                "com.instagram.barcelona",    // Threads
-                "com.instagram.basel",        // Edits
-                "com.instagram.moonshot",     // Instants
-                "com.whatsapp",               // WhatsApp
-                "com.whatsapp.w4b",           // WhatsApp Business
-                "com.facebook.katana",        // Facebook
-                "com.facebook.lite",          // Facebook Lite
-                "com.facebook.orca",          // Messenger
-                "com.facebook.mlite",         // Messenger Lite
-                "com.facebook.pages.app",     // Meta Business Suite
-                "com.facebook.adsmanager",    // Meta Ads Manager
-                "com.facebook.messengerkids"  // Messenger Kids
-        );
     }
 
-    public static boolean setStorySeen(boolean seenStatus){
-        return StorySeenRequestScope.resolveSeenStatus(
-                seenStatus,
-                Pref.viewStoriesAnonymously()
-        );
+    public static boolean shouldSkipStorySeenRequest() {
+        return Pref.viewStoriesAnonymously() && !StorySeenRequestScope.isActive();
     }
 
     public static boolean shouldBlockOnboardingScreen(String appId) {
@@ -117,33 +83,13 @@ public class Links {
        boolean shouldBlockUri = false;
         try {
             if (uri != null && uri.getPath() != null) {
-                String host = uri.getHost() != null ? uri.getHost() : "";
                 String path = uri.getPath();
 
                 if (path.contains("/api/v2/media/seen/")) {
-                    shouldBlockUri = Pref.viewStoriesAnonymously()
-                            && !StorySeenRequestScope.isActive();
+                    shouldBlockUri = shouldSkipStorySeenRequest();
                     StorySeenRequestScope.onStorySeenRequest(shouldBlockUri);
                 } else if (path.contains("/heartbeat_and_get_viewer_count/")) {
                     shouldBlockUri = Pref.viewLiveAnonymously();
-                } else if (path.contains("/feed/reels_tray/")
-                        || path.contains("feed/get_latest_reel_media/")
-                        || path.contains("direct_v2/pending_inbox/?visual_message")
-                        || path.contains("stories/hallpass/")
-                        || path.contains("/api/v1/feed/reels_media_stream/")) {
-                    shouldBlockUri = DISABLE_STORIES || FocusLock.isForced(Settings.DISABLE_STORIES);
-                } else if (path.contains("/discover/topical_explore")
-                        || path.contains("/discover/topical_explore_stream")
-                        || (host.contains("i.instagram.com") && path.contains("/fbsearch/recent_searches/"))
-                        || (host.contains("i.instagram.com") && path.contains("/fbsearch/top_serp/"))) {
-                    // Focus Lock is read per request, not from the cached fields above: a lock
-                    // that expires while the process is alive has to release the setting without
-                    // waiting for a restart.
-                    shouldBlockUri = DISABLE_EXPLORE || FocusLock.isForced(Settings.DISABLE_EXPLORE);
-                } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
-                    shouldBlockUri = DISABLE_COMMENTS || FocusLock.isForced(Settings.DISABLE_COMMENTS);
-                } else if (path.contains("/discover/ayml") || path.contains("/discover/chaining")) { // Thanks to  @brosssh
-                    shouldBlockUri = DISABLE_DISCOVER_PEOPLE;
                 } else if (path.contains("profile_ads/get_profile_ads/")
                         || path.contains("/async_ads/")
                         || path.contains("/feed/injected_reels_media/")
@@ -225,28 +171,6 @@ public class Links {
 
         domain = host + port;
         return VALID_DOMAIN.matcher(domain).matches() ? domain : "";
-    }
-
-    public static boolean signatureCheck(Object appIdentityObject){
-        try{
-            Entity entity = new Entity(appIdentityObject);
-            List<String> packageNames = (List) entity.getField("A02");
-            if(packageNames!=null && packageNames.size() == 1){
-                // Just in case the packagename is changed by the user.
-                String currentAppPackageName = Utils.getContext().getPackageName();
-
-                // The idea behind here is when the package name lists of app identity object
-                // contains only one package name and that is similar to the application's package name (or any of meta app's),
-                // we need to return true else false
-                String appIdentifierPackageName = packageNames.get(0);
-                if(appIdentifierPackageName.equals(currentAppPackageName) || META_PACKAGES.contains(appIdentifierPackageName)){
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            Logger.printException(() -> "Handle signature failed: ", e);
-        }
-        return false;
     }
 
     public static String generatePostLink(Object mediaObject, int position) throws Exception {

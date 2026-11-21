@@ -6,8 +6,8 @@
 
 package app.crimera.patches.instagram.misc.directMessage.markChatAsReadPatch
 
-import app.crimera.patches.instagram.entity.messageInfoEntity.messageInfoEntity
 import app.crimera.patches.instagram.misc.ghostMode.DMSeenFingerprint
+import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
@@ -32,7 +32,7 @@ val markChatAsReadPatch =
         description = "Adds option to mark a thread aka message as read manually",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(messageInfoEntity)
+        dependsOn(settingsPatch)
         execute {
 
             DMSeenFingerprint.apply {

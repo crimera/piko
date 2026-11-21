@@ -22,7 +22,11 @@ public class IconView extends View {
         COPY_LINK,
         RESOLUTION,
         CHECKBOX_CHECKED,
-        CHECKBOX_UNCHECKED
+        CHECKBOX_UNCHECKED,
+        PLAY,
+        GRID_VIEW,
+        STAGGERED_VIEW,
+        LIST_VIEW
     }
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -96,6 +100,18 @@ public class IconView extends View {
                 break;
             case CHECKBOX_UNCHECKED:
                 drawCheckboxUnchecked(canvas, cx, cy, size, strokeWidth);
+                break;
+            case PLAY:
+                drawPlayIcon(canvas, cx, cy, size);
+                break;
+            case GRID_VIEW:
+                drawGridViewIcon(canvas, cx, cy, size, strokeWidth);
+                break;
+            case STAGGERED_VIEW:
+                drawStaggeredViewIcon(canvas, cx, cy, size, strokeWidth);
+                break;
+            case LIST_VIEW:
+                drawListViewIcon(canvas, cx, cy, size, strokeWidth);
                 break;
         }
     }
@@ -296,6 +312,97 @@ public class IconView extends View {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setColor(iconColor);
         canvas.drawCircle(cx, cy, radius, paint);
+    }
+
+    private void drawPlayIcon(Canvas canvas, float cx, float cy, float size) {
+        float triH = size * 0.56f;
+        float triW = size * 0.48f;
+        // Shift slightly right so the triangle is optically centered.
+        float left = cx - triW * 0.38f;
+        float right = left + triW;
+
+        path.reset();
+        path.moveTo(left, cy - triH / 2f);
+        path.lineTo(right, cy);
+        path.lineTo(left, cy + triH / 2f);
+        path.close();
+
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setStrokeWidth(Theme.dpToPx(getContext(), 1.5f));
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        canvas.drawPath(path, paint);
+    }
+
+    private void drawGridViewIcon(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
+        float span = size * 0.68f;
+        float gap = size * 0.14f;
+        float cell = (span - gap) / 2f;
+        float rx = Theme.dpToPx(getContext(), 2f);
+        float startX = cx - span / 2f;
+        float startY = cy - span / 2f;
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(strokeWidth);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+
+        for (int row = 0; row < 2; row++) {
+            float top = startY + row * (cell + gap);
+            for (int col = 0; col < 2; col++) {
+                float left = startX + col * (cell + gap);
+                rectF.set(left, top, left + cell, top + cell);
+                canvas.drawRoundRect(rectF, rx, rx, paint);
+            }
+        }
+    }
+
+    private void drawStaggeredViewIcon(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
+        float span = size * 0.68f;
+        float gap = size * 0.14f;
+        float colW = (span - gap) / 2f;
+        float tallH = (span - gap) * 0.62f;
+        float shortH = (span - gap) - tallH;
+        float rx = Theme.dpToPx(getContext(), 2f);
+        float leftCol = cx - span / 2f;
+        float rightCol = leftCol + colW + gap;
+        float topY = cy - span / 2f;
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(strokeWidth);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+
+        // Left column: tall top, short bottom
+        rectF.set(leftCol, topY, leftCol + colW, topY + tallH);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
+        rectF.set(leftCol, topY + tallH + gap, leftCol + colW, topY + span);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
+
+        // Right column: short top, tall bottom
+        rectF.set(rightCol, topY, rightCol + colW, topY + shortH);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
+        rectF.set(rightCol, topY + shortH + gap, rightCol + colW, topY + span);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
+    }
+
+    private void drawListViewIcon(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
+        float step = size * 0.24f;
+        float dotX = cx - size * 0.30f;
+        float dotRadius = Math.max(strokeWidth * 0.6f, Theme.dpToPx(getContext(), 1.2f));
+        float lineStart = cx - size * 0.12f;
+        float lineEnd = cx + size * 0.34f;
+
+        for (int i = -1; i <= 1; i++) {
+            float y = cy + i * step;
+            paint.setStyle(Paint.Style.FILL);
+            canvas.drawCircle(dotX, y, dotRadius, paint);
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(strokeWidth);
+            paint.setStrokeCap(Paint.Cap.ROUND);
+            canvas.drawLine(lineStart, y, lineEnd, y, paint);
+        }
     }
 
     private static boolean isColorLight(int color) {

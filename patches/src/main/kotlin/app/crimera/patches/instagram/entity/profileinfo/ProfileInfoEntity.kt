@@ -6,15 +6,15 @@
 
 package app.crimera.patches.instagram.entity.profileinfo
 
-import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.utils.changeFirstString
-import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.patch.patch
-import com.android.tools.smali.dexlib2.AccessFlags
 
 @Suppress("unused")
 val profileInfoEntity =
@@ -41,12 +41,6 @@ val profileInfoEntity =
                     val viewModel = classDefBy(USER_DETAIL_VIEW_MODEL_CLASS)
                     val session = viewModel.instanceFields.single { it.type == USER_SESSION_CLASS }
                     GetProfileSessionExtensionFingerprint.changeFirstString(session.name)
-                    val userFields = viewModel.fields.filter {
-                        it.type == USER_MODEL_CLASS_NAME && !AccessFlags.STATIC.isSet(it.accessFlags)
-                    }
-                    val userObjectFieldName = userFields.singleOrNull()?.name
-                        ?: throw PatchException("Expected one profile user field, found ${userFields.size}")
-                    GetUserDataExtensionFingerprint.changeFirstString(userObjectFieldName)
 
                     val isSelfProfileFieldName =
                         profileRelatedDetailsClass.fields
@@ -54,6 +48,29 @@ val profileInfoEntity =
                             .name
                     IsSelfProfileExtensionFingerprint.changeFirstString(isSelfProfileFieldName)
                 }
+            }
+
+            val profileRead = ProfileUserIdFingerprint.instructionMatches
+            val state = profileRead[0].fieldReference
+            val getValue = profileRead[1].methodReference
+            val user = profileRead[5].fieldReference
+            GetProfileUserExtensionFingerprint.method.apply {
+                removeInstructions(0, instructions.size)
+                addInstructions(
+                    0,
+                    """
+                    if-eqz p0, :done
+                    check-cast p0, $USER_DETAIL_VIEW_MODEL_CLASS
+                    iget-object p0, p0, $state
+                    invoke-interface {p0}, $getValue
+                    move-result-object p0
+                    if-eqz p0, :done
+                    check-cast p0, ${user.definingClass}
+                    iget-object p0, p0, $user
+                    :done
+                    return-object p0
+                    """.trimIndent(),
+                )
             }
         }
     }

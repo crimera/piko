@@ -6,8 +6,8 @@
 
 package app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton
 
-import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
-import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.entity.profileinfo.GetProfileUserExtensionFingerprint
+import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
@@ -22,6 +22,7 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.classDefByOrNull
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.getFreeRegisterProvider
@@ -33,12 +34,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 private const val ACTIVITY_CLASS = "Landroid/app/Activity;"
 private const val IG_LINEAR_LAYOUT_CLASS = "Lcom/instagram/common/ui/base/IgLinearLayout;"
-
-internal object ProfileHeaderRelatedFingerprint : Fingerprint(
-    strings = listOf("profile_user_id", "click_point", "user_profile_header"),
-    returnType = "V",
-    parameters = listOf("L", "L", "L"),
-)
 
 /**
  * Builds the profile action bar buttons, after removing the previous ones from both layouts.
@@ -88,23 +83,19 @@ val userProfileActionBarButtonPatch =
         description = "This patch is adds support for adding buttons on user profile action bar.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(decoderEntity)
+        dependsOn(profileInfoEntity)
 
         execute {
             val actionBarRelatedClass = classDefBy(
                 ProfileActionBarBuilderFingerprint.originalMethod.parameterTypes[BUILDER_ACTION_BAR_RELATED_PARAMETER].toString(),
             )
-            val profileHeaderClass = ProfileHeaderRelatedFingerprint.matchAll()
-                .map { it.originalClassDef }
-                .distinctBy { it.type }
-                .singleOrNull { candidate -> actionBarRelatedClass.fields.any { it.type == candidate.type } }
+            val profileHeaderFieldInActionBarRelatedClass = actionBarRelatedClass.instanceFields.singleOrNull { field ->
+                classDefByOrNull(field.type)?.instanceFields?.any { it.type == USER_DETAIL_VIEW_MODEL_CLASS } == true
+            }
                 ?: throw PatchException("Expected one profile header referenced by the action bar")
-            val profileHeaderFieldInActionBarRelatedClass =
-                actionBarRelatedClass.fields.single { it.type == profileHeaderClass.type }
             val userDetailViewModelFieldInProfileHeaderRelatedClass =
-                profileHeaderClass.fields.single { it.type == USER_DETAIL_VIEW_MODEL_CLASS }
-            val userDataFieldInUserDetailClass =
-                classDefBy(USER_DETAIL_VIEW_MODEL_CLASS).fields.single { it.type == USER_MODEL_CLASS_NAME }
+                classDefBy(profileHeaderFieldInActionBarRelatedClass.type).instanceFields.single { it.type == USER_DETAIL_VIEW_MODEL_CLASS }
+            val getProfileUser = GetProfileUserExtensionFingerprint.originalMethod
 
             ProfileActionIconFactoryFingerprint.let {
                 val drawableRead = it.instructionMatches.first().getInstruction<TwoRegisterInstruction>()
@@ -154,9 +145,9 @@ val userProfileActionBarButtonPatch =
 
                     if-eqz v$userObjectRegister, :piko
                     iget-object v$userObjectRegister, v$userObjectRegister, $userDetailViewModelFieldInProfileHeaderRelatedClass
-
+                    invoke-static {v$userObjectRegister}, $getProfileUser
+                    move-result-object v$userObjectRegister
                     if-eqz v$userObjectRegister, :piko
-                    iget-object v$userObjectRegister, v$userObjectRegister, $userDataFieldInUserDetailClass
                     move-object/from16 v$userSessionCopyRegister, v$userSessionRegister
                     move-object/from16 v$layoutCopyRegister, v$layoutRegister
                     move-object/from16 v$activityCopyRegister, v$activityRegister

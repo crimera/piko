@@ -10,10 +10,8 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.instagram.utils.typeReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
@@ -24,12 +22,10 @@ import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.patch.classDefByOrNull
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
@@ -45,15 +41,11 @@ private fun storyProgressCompletedFingerprint(photoTimerField: String) = Fingerp
         // Photo story restart block.
         fieldAccess(name = photoTimerField, opcode = Opcode.IGET_OBJECT),
         opcode(Opcode.CONST_4, MatchAfterImmediately()),
-        opcode(Opcode.IF_NE, MatchAfterWithin(4)),
-    ),
-)
-
-private object StoryVideoPlayerCastFingerprint : Fingerprint(
-    definingClass = REEL_VIEWER_FRAGMENT,
-    filters = listOf(
-        fieldAccess(definingClass = "this", name = "mVideoPlayer", opcode = Opcode.IGET_OBJECT),
-        opcode(Opcode.CHECK_CAST, MatchAfterWithin(1)),
+        opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
+        fieldAccess(type = "Ljava/lang/Object;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        methodCall(smali = "Ljava/lang/Object;->equals(Ljava/lang/Object;)Z", location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
+        opcode(Opcode.IF_NE, MatchAfterImmediately()),
     ),
 )
 
@@ -61,7 +53,10 @@ private object StoryVideoPlayerInitFingerprint : Fingerprint(
     definingClass = REEL_VIEWER_FRAGMENT,
     name = "onViewCreated",
     filters = listOf(
-        fieldAccess(definingClass = "this", name = "mVideoPlayer", opcode = Opcode.IPUT_OBJECT),
+        methodCall(opcode = Opcode.INVOKE_STATIC, parameters = listOf("Landroid/content/Context;", "Lcom/instagram/common/session/UserSession;", "L", "L", "L"), returnType = "L"),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        opcode(Opcode.MOVE_OBJECT_FROM16, MatchAfterImmediately()),
+        fieldAccess(definingClass = "this", name = "mVideoPlayer", opcode = Opcode.IPUT_OBJECT, location = MatchAfterImmediately()),
     ),
 )
 
@@ -113,12 +108,11 @@ val loopStoryPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            val playerCast = StoryVideoPlayerCastFingerprint.matchOrNull()
-            val playerInit = if (playerCast == null) StoryVideoPlayerInitFingerprint else null
-            val playerField = playerCast?.instructionMatches?.first()?.fieldReference
-                ?: playerInit!!.instructionMatches.single().fieldReference
-            val playerTypes = playerCast?.let { listOf(it.instructionMatches.last().typeReference) }
-                ?: playerInit!!.originalMethod.implementation!!.instructions
+            val init = StoryVideoPlayerInitFingerprint.instructionMatches
+            val playerField = init.last().fieldReference
+            val factory = init.first().methodReference
+            if (factory.returnType != playerField.type) throw PatchException("Unexpected story player factory result")
+            val playerTypes = classDefBy(factory.definingClass).methods.single { it == factory }.implementation!!.instructions
                     .mapNotNull { it.getReference<MethodReference>() }
                     .filter { it.name == "<init>" }
                     .map { it.definingClass }
@@ -128,7 +122,9 @@ val loopStoryPatch =
 
             (storyProgressCompletedFingerprint("mPhotoTimerController").matchOrNull()
                 ?: storyProgressCompletedFingerprint("photoTimerController").match()).let {
-                val reelItemRegister = it.method.p0Register + 1
+                val fragmentRegister = it.instructionMatches[0].getInstruction<TwoRegisterInstruction>().registerB
+                val reelItemRegister = it.instructionMatches[4].instruction.registersUsed.first()
+                val expectedTrue = it.instructionMatches[6].getInstruction<TwoRegisterInstruction>().registerB
                 val reelItemType = REEL_ITEM
 
                 val resume = classDefBy(playerField.type).methods.singleOrNull {
@@ -150,7 +146,8 @@ val loopStoryPatch =
                         val relativeSeek = storyRelativeDirectSeekFingerprint(playerType)
                         val seekHelper = relativeSeek.instructionMatches.last().methodReference
                         // Some players reject special story types before seeking.
-                        val seekRestrictions = relativeSeek.originalMethod.implementation!!.instructions
+                        val helper = classDefBy(playerType).methods.single { it == seekHelper }
+                        val seekRestrictions = (relativeSeek.originalMethod.implementation!!.instructions + helper.implementation!!.instructions)
                             .filter { instruction -> instruction.opcode == Opcode.INVOKE_VIRTUAL }
                             .mapNotNull { instruction -> instruction.getReference<MethodReference>() }
                             .filter { method ->
@@ -196,12 +193,9 @@ val loopStoryPatch =
                 }.joinToString("\n")
 
                 val photoRestart = it.instructionMatches[0]
-                val photoRegister = photoRestart.getInstruction<TwoRegisterInstruction>().registerA
                 it.method.apply {
-                    if (p0Register !in 4..15 || reelItemRegister != p0Register + 1 ||
-                        reelItemRegister > 15 || photoRegister != 2 ||
-                        it.instructionMatches[1].getInstruction<OneRegisterInstruction>().registerA != 1 ||
-                        it.instructionMatches[2].instruction.registersUsed != listOf(0, 3)
+                    if (fragmentRegister !in 4..15 || reelItemRegister !in 4..15 ||
+                        fragmentRegister == reelItemRegister || expectedTrue !in 0..1
                     ) throw PatchException("Unexpected story photo restart registers")
 
                     addInstructionsWithLabels(
@@ -210,13 +204,14 @@ val loopStoryPatch =
                         ${PREF_CALL_DESCRIPTOR}->loopStory()Z
                         move-result v0
                         if-eqz v0, :piko
-                        check-cast v$reelItemRegister, $reelItemType
-                        iget-object v0, p0, $playerField
+                        move-object/from16 v$fragmentRegister, p0
+                        move-object/from16 v$reelItemRegister, p1
+                        iget-object v0, v$fragmentRegister, $playerField
                         if-eqz v0, :piko_photo
                         $videoRestart
                         goto :piko
                         :piko_photo
-                        const/4 v3, 0x1
+                        const/4 v$expectedTrue, 0x1
                         goto :piko_loop
                         """.trimIndent(),
                         ExternalLabel("piko", getInstruction(0)),

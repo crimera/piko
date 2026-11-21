@@ -141,7 +141,7 @@ private fun hideLithoLikeButton() {
         filters = listOf(
             string("onUfiVisible"),
             methodCall(definingClass = likeComponent, name = "<init>"),
-            methodCall(parameters = listOf("L", "L", "L", "L", "Lcom/instagram/common/session/UserSession;", "Z", "Z"), returnType = "L"),
+            methodCall(parameters = listOf("L", "L", "L", "L", "Lcom/instagram/common/session/UserSession;", "Ljava/lang/Integer;", "Z", "Z"), returnType = "L"),
             opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
             opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
             methodCall(smali = "Ljava/util/AbstractCollection;->add(Ljava/lang/Object;)Z", location = MatchAfterImmediately()),
@@ -162,17 +162,26 @@ private fun hideLithoLikeButton() {
 }
 
 private fun hideComposeLikeButton() {
-    val row = Fingerprint(
+    val layout = Fingerprint(
         returnType = "V",
         filters = listOf(
-            string("instagram.features.feed.adapter.row.ufi.compose.IconRow (ComposeMediaUFIComponent.kt:92)"),
+            fieldAccess(reference = feedUfiStateField(", isSaveEnabled="), opcode = Opcode.IGET_BOOLEAN),
+            methodCall(opcode = Opcode.INVOKE_STATIC_RANGE, parameters = listOf("L", "L", "L", "L", "L", "L", "L", "I", "I"), returnType = "V"),
+        ),
+    ).instructionMatches.last().methodReference
+    val iconType = layout.parameterTypes[2].toString()
+    val row = Fingerprint(
+        definingClass = layout.definingClass,
+        parameters = listOf(layout.parameterTypes[0].toString(), "L") + List(5) { iconType } + listOf("I", "I"),
+        returnType = "V",
+        filters = listOf(
             opcode(Opcode.FILLED_NEW_ARRAY),
             opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
             methodCall(parameters = listOf("[Ljava/lang/Object;"), returnType = "Ljava/util/List;", location = MatchAfterImmediately()),
         ),
     ).match()
     // IconRow drops null entries. Its four slots are like, comment, share and repost.
-    val icons = row.instructionMatches[1]
+    val icons = row.instructionMatches.first()
     val slots = icons.instruction.registersUsed
     if (slots.size != 4 || slots.distinct().size != 4) throw PatchException("Unexpected feed icon slots")
     val scratch = row.method.findFreeRegister(icons.index, slots)

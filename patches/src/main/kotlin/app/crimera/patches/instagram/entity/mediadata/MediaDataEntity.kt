@@ -12,6 +12,7 @@ import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundD
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.entity.videoData.videoDataEntity
+import app.crimera.patches.instagram.utils.typeReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeString
 import app.crimera.utils.changeStringAt
@@ -78,7 +79,8 @@ val mediaDataEntity =
 
             // Extracting method is video used in media class.
             IsVideoExtensionFingerprint.changeFirstString(
-                MediaIsVideoFingerprint.instructionMatches.first().methodReference.name,
+                mediaVideoGetterFingerprint(MediaIsVideoFingerprint.instructionMatches.first().methodReference)
+                    .originalMethod.name,
             )
 
             // Extraction of the media list.
@@ -97,14 +99,10 @@ val mediaDataEntity =
             GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(MediaGetUserFingerprint.originalMethod.name)
 
             // Extraction of description.
-            CommentToStringFingerprint.let {
-                GetDescriptionTextExtensionFingerprint.changeStringAt(1, it.instructionMatches.first().fieldReference.name)
-                GetDescriptionTextExtensionFingerprint.changeFirstString(
-                    mediaCommentGetterFingerprint(
-                        it.originalClassDef.type,
-                        MediaCaptionGetterFingerprint.originalMethod,
-                    ).originalMethod.name,
-                )
+            MediaCaptionGetterFingerprint.let {
+                val text = captionTextGetterFingerprint(it.instructionMatches.last().typeReference)
+                GetDescriptionTextExtensionFingerprint.changeString("captionMethod", it.originalMethod.name)
+                GetDescriptionTextExtensionFingerprint.changeString("textMethod", text.originalMethod.name)
             }
 
             // Both metadata interfaces expose MusicInfo without requiring a user session.

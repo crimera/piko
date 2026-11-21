@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-17T18:36:56",
-  "description": "## [3.12.0-dev.3](https://github.com/crimera/piko/compare/v3.12.0-dev.2...v3.12.0-dev.3) (2026-11-17)\n\n### 🐛 Bug Fixes\n\n* Declare NewX compatibility for \"Disable Play Store updates\" patch ([1feef65](https://github.com/crimera/piko/commit/1feef65e2e69ac9f331c09aacf3c263cbd3ce9bb))\n* **Twitter:** \"Custom sharing domain\" for old X fails ([ddb8d86](https://github.com/crimera/piko/commit/ddb8d8684325d15923b14374ed96c02bb3e186d3))\n\n### ✨ New Features\n\n* **Twitter:** Show a clear error message when attempting to apply old patches to NewX ([07709b2](https://github.com/crimera/piko/commit/07709b248bc6d2f461b70b9595a18b519624be98))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.12.0-dev.3/patches-3.12.0-dev.3.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.12.0-dev.3/patches-3.12.0-dev.3.mpp.asc",
-  "version": "3.12.0-dev.3"
+  "created_at": "2026-11-20T23:26:49",
+  "description": "## [3.12.0-dev.5](https://github.com/crimera/piko/compare/v3.12.0-dev.4...v3.12.0-dev.5) (2026-11-20)\n\n### 🐛 Bug Fixes\n\n* **Twitter:** Download every image from reposts with the inline download button ([e1d3157](https://github.com/crimera/piko/commit/e1d315719c37392648b6ccf681df83f0efdaad95))\n* **Twitter:** Hide iconless Grok rows in customized drawer ([a4ecf18](https://github.com/crimera/piko/commit/a4ecf18d59cfabf7af8c6a4c6232c1926511606d))\n\n### ✨ New Features\n\n* **Twitter:** Add grid view toggle to NewX inline download picker ([8c88f53](https://github.com/crimera/piko/commit/8c88f5355da9926d457b677fc5fdfe484a1c248a))\n\n### 🚀 Updated App Support\n\n* **Instagram:** Add support for 456.0.0.53.78 ([9ae877b](https://github.com/crimera/piko/commit/9ae877b3e3acad985c79f5936419b58e689b4e49))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.12.0-dev.5/patches-3.12.0-dev.5.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.12.0-dev.5/patches-3.12.0-dev.5.mpp.asc",
+  "version": "3.12.0-dev.5"
 }

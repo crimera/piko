@@ -34,8 +34,8 @@ internal object AddCommentButtonFingerprint : Fingerprint(
     filters = listOf(
         newInstance("Ljava/util/ArrayList;"),
         methodCall(smali = "Ljava/util/ArrayList;-><init>()V", location = MatchAfterImmediately()),
-        // Comment author, read from the comment.
-        fieldAccess(type = "Lcom/instagram/user/model/User;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        // The active user's ID can be read before the author of the selected comment.
+        fieldAccess(type = "Lcom/instagram/user/model/User;", opcode = Opcode.IGET_OBJECT, location = MatchAfterWithin(3)),
     ),
 )
 

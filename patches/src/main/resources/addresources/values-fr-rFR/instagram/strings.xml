@@ -487,4 +487,5 @@
     <string name="piko_media_activity">activité</string>
     <string name="piko_patch_theme">Thème</string>
     <string name="piko_patch_settings">Ajouter des paramètres</string>
+    <!-- Recommended flags -->
 </resources>

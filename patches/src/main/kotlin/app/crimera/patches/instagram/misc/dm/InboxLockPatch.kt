@@ -22,6 +22,20 @@ import com.android.tools.smali.dexlib2.Opcode
 
 private const val EXTENSION_CLASS = "$PATCHES_DESCRIPTOR/dm/InboxLock;"
 
+private object DirectInboxFragmentFingerprint : Fingerprint(
+    name = "onCreate",
+    parameters = listOf("Landroid/os/Bundle;"),
+    returnType = "V",
+    filters = listOf(string("DirectInboxFragment.onCreate")),
+)
+
+private object DirectInboxViewCreatedFingerprint : Fingerprint(
+    classFingerprint = DirectInboxFragmentFingerprint,
+    name = "onViewCreated",
+    parameters = listOf("Landroid/view/View;", "Landroid/os/Bundle;"),
+    returnType = "V",
+)
+
 // NotificationManagerCompat.notify(tag, id, notification), which Instagram posts its notifications through.
 private object NotifyFingerprint : Fingerprint(
     returnType = "V",
@@ -64,8 +78,13 @@ val inboxLockPatch =
         execute {
             instagramInitHook.fingerprint.method.apply {
                 val superIndex = indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER)
-                addInstruction(superIndex + 1, "invoke-static {}, $EXTENSION_CLASS->init()V")
+                addInstruction(superIndex + 1, "invoke-static/range {p0 .. p0}, $EXTENSION_CLASS->init(Landroid/app/Application;)V")
             }
+
+            DirectInboxViewCreatedFingerprint.method.addInstruction(
+                0,
+                "invoke-static/range {p1 .. p1}, $EXTENSION_CLASS->registerInboxView(Landroid/view/View;)V",
+            )
 
             NotifyFingerprint.method.apply {
                 // Parameter positions are found by type because Meta reorders them between builds.

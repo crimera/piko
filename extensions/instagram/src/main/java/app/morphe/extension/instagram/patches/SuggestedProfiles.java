@@ -14,13 +14,19 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 
 public final class SuggestedProfiles {
-    private static final boolean DISABLED =
-            SettingsStatus.disableDiscoverPeople && Pref.disableDiscoverPeople();
+    // Unrelated API requests can reach the path check before settings initialization.
+    private static final class Preference {
+        static final boolean DISABLED = SettingsStatus.disableDiscoverPeople && Pref.disableDiscoverPeople();
+    }
 
     private SuggestedProfiles() {}
 
+    public static boolean hideAdditionalAccounts(String path) {
+        return ("discover/ayml/".equals(path) || "discover/chaining/".equals(path)) && Preference.DISABLED;
+    }
+
     public static String filterSuggestedSection(String key) {
-        if (DISABLED && ("suggested_users".equals(key)
+        if (Preference.DISABLED && ("suggested_users".equals(key)
                 || "more_suggestions".equals(key)
                 || "follow_back".equals(key)
                 || "from_your_school".equals(key))) {
@@ -31,24 +37,24 @@ public final class SuggestedProfiles {
     }
 
     public static boolean showSuggestedUsers(boolean original) {
-        return original && !DISABLED;
+        return original && !Preference.DISABLED;
     }
 
     public static boolean hideReelsSuggestedUsers(boolean suggested) {
-        return DISABLED && suggested;
+        return Preference.DISABLED && suggested;
     }
 
     public static boolean hideReelsSuggestedUsers(Enum<?> itemType) {
-        if (!DISABLED || itemType == null) return false;
+        if (!Preference.DISABLED || itemType == null) return false;
         String type = itemType.name();
         return "SUGGESTED_USERS".equals(type) || "NETEGO_SUGGESTED_USERS".equals(type);
     }
 
     public static boolean hideActivityFeedSuggestions(String category) {
-        return DISABLED && !"FOLLOW_REQUEST".equals(category);
+        return Preference.DISABLED && !"FOLLOW_REQUEST".equals(category);
     }
 
     public static <T> List<T> filterActivityFeedUsers(List<T> users) {
-        return DISABLED ? Collections.emptyList() : users;
+        return Preference.DISABLED ? Collections.emptyList() : users;
     }
 }

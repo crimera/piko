@@ -32,6 +32,37 @@ import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 
+internal val directMessageDownloadPatch = patch {
+    dependsOn(settingsPatch, saveAllMessagesPatch)
+
+    execute {
+        val saverClass = GetDirectThreadMediaSaverModuleNameFingerprint.originalClassDef
+        val activity = saverClass.fields.singleOrNull {
+            it.type == "Landroid/app/Activity;" && !AccessFlags.STATIC.isSet(it.accessFlags)
+        } ?: throw PatchException("Expected one DM saver activity field")
+        val save = DirectThreadMediaSaveFingerprint.matchOrNull(saverClass)
+            ?: DirectThreadMediaPermissionCheckFingerprint.match(saverClass)
+        save.method.apply {
+            if (p0Register < 2 || parameterTypes[1].toString() != activity.definingClass) {
+                throw PatchException("Unexpected DM media saver parameters or local registers")
+            }
+            addInstructionsWithLabels(
+                0,
+                """
+                move-object/from16 v0, p1
+                iget-object v0, v0, $activity
+                move-object/from16 v1, p2
+                invoke-static {v0, v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Landroid/content/Context;Ljava/lang/Object;)Z
+                move-result v1
+                if-nez v1, :native_save
+                return-void
+                """.trimIndent(),
+                ExternalLabel("native_save", getInstruction(0)),
+            )
+        }
+    }
+}
+
 @Suppress("unused")
 val downloadMediaPatch =
     patch(
@@ -48,7 +79,7 @@ val downloadMediaPatch =
             decoderEntity,
             handleStoryButtonPatch,
             hookFlagsPatch,
-            saveAllMessagesPatch,
+            directMessageDownloadPatch,
             hookOverflowMenuButton,
             debugOverflowMenuButtonPatch,
             hookReelOverflowMenuButton,
@@ -62,31 +93,6 @@ val downloadMediaPatch =
         execute {
 
             addOverflowMenuButtonAttributes("PIKO_DOWNLOAD", "downloadOverflowButton")
-
-            // DM media downloader.
-            val appActivityField =
-                GetDirectThreadMediaSaverModuleNameFingerprint.originalClassDef.fields.singleOrNull {
-                    it.type == "Landroid/app/Activity;" && !AccessFlags.STATIC.isSet(it.accessFlags)
-                } ?: throw PatchException("Expected one DM saver activity field")
-            (DirectThreadMediaSaveFingerprint.matchOrNull(GetDirectThreadMediaSaverModuleNameFingerprint.originalClassDef)
-                ?: DirectThreadMediaPermissionCheckFingerprint.match()).method.apply {
-                if (p0Register < 2 || parameterTypes[1].toString() != appActivityField.definingClass) {
-                    throw PatchException("Unexpected DM media saver parameters or local registers")
-                }
-                addInstructionsWithLabels(
-                    0,
-                    """
-                    move-object/from16 v0, p1
-                    iget-object v0, v0, $appActivityField
-                    move-object/from16 v1, p2
-                    invoke-static {v0, v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Landroid/content/Context;Ljava/lang/Object;)Z
-                    move-result v1
-                    if-nez v1, :piko
-                    return-void
-                    """.trimIndent(),
-                    ExternalLabel("piko", getInstruction(0)),
-                )
-            }
 
             enableSettings("downloadMedia")
             addFlags("simpleOverflowMenuFlags")

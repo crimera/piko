@@ -38,7 +38,7 @@ public class MessageUtils {
                 return false;
             }
 
-            if("media".equals(messageType) || "raven_media".equals(messageType)){
+            if ("media".equals(messageType) || "raven_media".equals(messageType) || "xma_collage".equals(messageType)) {
                 return true;
 
             } else if ("voice_media".equals(messageType) && SettingsStatus.downloadVoiceMessage) {

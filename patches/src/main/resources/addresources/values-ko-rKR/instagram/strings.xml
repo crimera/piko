@@ -487,4 +487,5 @@
     <string name="piko_media_activity">활동</string>
     <string name="piko_patch_theme">테마</string>
     <string name="piko_patch_settings">설정 추가</string>
+    <!-- Recommended flags -->
 </resources>

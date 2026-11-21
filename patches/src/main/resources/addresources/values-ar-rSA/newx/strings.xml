@@ -482,7 +482,7 @@
     <string name="piko_newx_translation_force_button_title">فرض عرض زر الترجمة</string>
     <string name="piko_newx_translation_force_button_summary">يعرض زر الترجمة المباشرة الخاص بـ X في كل منشور، حتى المنشورات التي يحددها X بأنها غير قابلة للترجمة.</string>
     <string name="piko_newx_translation_inline_title">استخدام المترجم المحدد مباشرة</string>
-    <string name="piko_newx_translation_inline_summary">زر الترجمة المضمّن الخاص بـ X يستخدم المترجم الذي تختاره بدلاً من Grok. أما FxTwitter فيلجأ هنا إلى Google.</string>
+    <string name="piko_newx_translation_inline_summary">زر الترجمة المضمّن الخاص بـ X يستخدم المترجم الذي تختاره بدلًا من Grok. أما FxTwitter فيلجأ هنا إلى Google.</string>
     <string name="piko_newx_translation_translator_title">المترجم</string>
     <string name="piko_newx_translation_translator_summary">اختر مترجم مجاني أو مخصص واللغة المستهدفة</string>
 </resources>

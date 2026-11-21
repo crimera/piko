@@ -10,12 +10,13 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.patch
+import app.morphe.patcher.string
 
 internal object ReelOnDoubleTapFingerprint : Fingerprint(
     parameters = listOf("Landroid/view/MotionEvent;"),
     returnType = "Z",
     name = "onDoubleTap",
-    strings = listOf("android_purge_26_q3_ClipsItemGestureDetector_onDoubleTap"),
+    filters = listOf(string("double_tap")),
 )
 
 @Suppress("unused")
