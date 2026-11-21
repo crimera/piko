@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.xmlpull.v1.XmlPullParser;
 
+import app.morphe.extension.instagram.patches.customise.emoji.EmojiFontStorage;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.dm.InboxLock;
@@ -59,6 +60,7 @@ public class RestorePrefFragment extends Fragment {
     private File destinationFile;
     private Context context;
     private boolean isFontImport;
+    private boolean isEmojiFontImport;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +85,9 @@ public class RestorePrefFragment extends Fragment {
             } else if (args.containsKey("piko_pref_add_font")) {
                 // FontStorage decides where the font goes, and validates it first.
                 isFontImport = true;
+            } else if (args.containsKey("piko_pref_add_emoji")) {
+                isFontImport = true;
+                isEmojiFontImport = true;
             }
         }
         if (savedInstanceState == null) {
@@ -119,12 +124,13 @@ public class RestorePrefFragment extends Fragment {
     }
 
     /**
-     * Imports a picked font through {@link FontStorage}, off the main thread: a font can be several
+     * Imports a picked font off the main thread: a font can be several
      * megabytes and often comes from a cloud-backed provider, which could otherwise cause an ANR.
      */
     private void receiveFont(Context ctx, Uri uri) {
         new Thread(() -> {
-            FontStorage.ImportResult result = FontStorage.importFrom(ctx, uri);
+            FontStorage.ImportResult result = isEmojiFontImport
+                    ? EmojiFontStorage.importFrom(ctx, uri) : FontStorage.importFrom(ctx, uri);
 
             mainHandler.post(() -> {
                 switch (result) {
