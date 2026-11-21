@@ -167,6 +167,35 @@ public class TimelineEntry {
         return data != null && hideAds;
     }
 
+    private static final java.util.regex.Pattern VARIANT_SIZE = java.util.regex.Pattern.compile("/(\\d{2,5})x(\\d{2,5})/");
+    private static java.util.List<android.media.MediaCodecInfo.VideoCapabilities> avcDecoders;
+
+    /** Whether an H.264 decoder on this device supports the variant's size (from its URL); true when unknown. */
+    static boolean decodable(String url) {
+        try {
+            java.util.regex.Matcher m = url == null ? null : VARIANT_SIZE.matcher(url);
+            if (m == null || !m.find()) return true;
+            int w = Integer.parseInt(m.group(1)), h = Integer.parseInt(m.group(2));
+            if (avcDecoders == null) {
+                java.util.List<android.media.MediaCodecInfo.VideoCapabilities> caps = new java.util.ArrayList<>();
+                for (android.media.MediaCodecInfo info : new android.media.MediaCodecList(android.media.MediaCodecList.REGULAR_CODECS).getCodecInfos()) {
+                    if (info.isEncoder()) continue;
+                    for (String type : info.getSupportedTypes()) {
+                        if (type.equalsIgnoreCase("video/avc")) caps.add(info.getCapabilitiesForType(type).getVideoCapabilities());
+                    }
+                }
+                avcDecoders = caps;
+            }
+            if (avcDecoders.isEmpty()) return true;
+            for (android.media.MediaCodecInfo.VideoCapabilities c : avcDecoders) {
+                if (c != null && (c.isSizeSupported(w, h) || c.isSizeSupported(h, w))) return true;
+            }
+            return false;
+        } catch (Throwable t) {
+            return true;
+        }
+    }
+
     public static List<Object> timelineVideos(List<Object> videoEntities){
         int maxBitrate = 0;
         Object maxVideoObject = null;
@@ -179,6 +208,8 @@ public class TimelineEntry {
 
                     int bitrate = vid.getBitrate();
                     if(bitrate<maxBitrate) continue;
+                    // Not a size this device's video decoders can play (e.g. 4K on many phones): #1669.
+                    if (!decodable(vid.getMediaUrl())) continue;
                     maxBitrate = bitrate;
                     maxVideoObject = vidObj;
                 }
