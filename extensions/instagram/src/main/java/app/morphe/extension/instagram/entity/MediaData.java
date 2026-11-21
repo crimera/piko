@@ -19,7 +19,7 @@ import android.net.Uri;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 import app.morphe.extension.instagram.constants.PostType;
 
 import com.instagram.api.schemas.MusicInfo;
@@ -153,7 +153,7 @@ public class MediaData extends Entity {
     private String getMediaExtension(MediaType mediaType) throws Exception {
         String imageExtension = ".jpg";
         String videoExtension = ".mp4";
-        String audioExtension = ".mp3";
+        String audioExtension = ".m4a";
 
         if (mediaType.equals(MediaType.ANY)) {
             if (this.isVideo()) {
@@ -487,9 +487,8 @@ public class MediaData extends Entity {
     }
 
     public String getDescriptionText() throws Exception {
-        Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "A0J", this.obj);
-        return result != null ? (String) super.getField(result, "A0Z") : null;
+        Object caption = super.getMethod("captionMethod");
+        return caption != null ? (String) super.getMethod(caption, "textMethod") : null;
     }
 
     public String getMessageAudioUrl() throws Exception {

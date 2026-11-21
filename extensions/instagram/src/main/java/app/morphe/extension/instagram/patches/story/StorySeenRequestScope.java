@@ -67,10 +67,6 @@ public final class StorySeenRequestScope {
         return REGISTRY.isActive();
     }
 
-    public static boolean resolveSeenStatus(boolean seenStatus, boolean anonymousStories) {
-        return anonymousStories && !isActive() ? true : seenStatus;
-    }
-
     public interface Listener {
         void onComplete();
 

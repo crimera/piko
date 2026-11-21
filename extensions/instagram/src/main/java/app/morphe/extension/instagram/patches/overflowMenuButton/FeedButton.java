@@ -43,8 +43,7 @@ public class FeedButton {
         return new MediaOption$Option(tag, randomIndex, drawableIconId);
     }
 
-    public static MediaOption$Option[] addToMenuOptionArray() {
-        MediaOption$Option[] originalArray = MediaOption$Option.$values();
+    public static MediaOption$Option[] addToMenuOptionArray(MediaOption$Option[] originalArray) {
         List<MediaOption$Option> additionalButtonsList = new ArrayList<>();
 
         if(SettingsStatus.downloadMedia){
@@ -85,7 +84,7 @@ public class FeedButton {
         return (Object) new Entity().getMethod(getEnumButtonClass(),"valueOf","NORMAL");
     }
 
-    private static void addButton(MediaOption$Option overflowButton, String overflowButtonText, Object buttonAdderObject, ArrayList buttonlist) throws Exception {
+    private static void addButton(MediaOption$Option overflowButton, String overflowButtonText, Object buttonAdderObject, Object menuModel, ArrayList buttonlist) throws Exception {
         Class<?> clazz = buttonAdderObject.getClass();
 
         Method method = clazz.getDeclaredMethod(
@@ -93,13 +92,14 @@ public class FeedButton {
                 getEnumButtonClass(),
                 MediaOption$Option.class,
                 clazz,
+                menuModel.getClass(),
                 CharSequence.class,
                 ArrayList.class,
                 boolean.class
         );
 
         method.setAccessible(true);
-        method.invoke(null, enumNormalButton(), overflowButton, buttonAdderObject, overflowButtonText, buttonlist, false);
+        method.invoke(null, enumNormalButton(), overflowButton, buttonAdderObject, menuModel, overflowButtonText, buttonlist, false);
     }
 
     public static MediaOption$Option downloadOverflowButton(){
@@ -119,24 +119,24 @@ public class FeedButton {
     }
 
 
-    private static void addDownloadButton(Object buttonAdderObject, ArrayList buttonlist) throws Exception {
+    private static void addDownloadButton(Object buttonAdderObject, Object menuModel, ArrayList buttonlist) throws Exception {
         String DOWNLOAD_BUTTON_TEXT = str("piko_download_options");
-        addButton(MediaOption$Option.PIKO_DOWNLOAD, DOWNLOAD_BUTTON_TEXT, buttonAdderObject, buttonlist);
+        addButton(MediaOption$Option.PIKO_DOWNLOAD, DOWNLOAD_BUTTON_TEXT, buttonAdderObject, menuModel, buttonlist);
     }
 
-    public static void addFeedOverflowButton(Object buttonAdderObject, ArrayList buttonlist){
+    public static void addFeedOverflowButton(Object buttonAdderObject, Object menuModel, ArrayList buttonlist){
         try {
             if(Pref.pikoDebug()){
-                addButton(MediaOption$Option.PIKO_DEBUG, str("piko_debug"), buttonAdderObject, buttonlist);
+                addButton(MediaOption$Option.PIKO_DEBUG, str("piko_debug"), buttonAdderObject, menuModel, buttonlist);
             }
             if(Pref.enableDownload()) {
-                addDownloadButton(buttonAdderObject, buttonlist);
+                addDownloadButton(buttonAdderObject, menuModel, buttonlist);
             }
             if(Pref.downloadWithExternalDownloader()) {
-                addButton(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER, str("piko_download_with_external_downloader"), buttonAdderObject, buttonlist);
+                addButton(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER, str("piko_download_with_external_downloader"), buttonAdderObject, menuModel, buttonlist);
             }
             if(Pref.moreOptionsOnPost()) {
-                addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, str("piko_more_options"), buttonAdderObject, buttonlist);
+                addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, str("piko_more_options"), buttonAdderObject, menuModel, buttonlist);
             }
         } catch (Exception e) {
             Logger.printException(() -> "Error at addReelButton",e);

@@ -14,6 +14,8 @@ public class ExtensionStrings {
 
     public static String DOWNLOAD_ONGOING = "Downloading: ";
     public static String DOWNLOAD_COMPLETED = "Downloaded: ";
+    public static String DOWNLOAD_MEDIA_EXISTS = "Media already exists";
+    public static String DOWNLOAD_MEDIA_IN_PROGRESS = "Media is already downloading";
     public static String DOWNLOAD_ERROR = "Download Error: ";
 
     public static String DOWNLOAD_SET_PATH_FAILED = "Failed to save download folder";

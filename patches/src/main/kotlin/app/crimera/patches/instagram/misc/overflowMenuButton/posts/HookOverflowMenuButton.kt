@@ -25,17 +25,19 @@ val hookOverflowMenuButton =
             val enumBtnClass = classNameToExtension(EnumButtonClassFingerprint.originalClassDef.type)
             GetEnumButtonClassExtensionFingerprint.changeFirstString(enumBtnClass)
 
-            AddFeedButtonExtensionFingerprint.changeFirstString(AddFeedOverflowOptionFingerprint.originalMethod.name)
+            val addOption = AddFeedOverflowOptionFingerprint.originalMethod
+            AddFeedButtonExtensionFingerprint.changeFirstString(addOption.name)
 
-            (AddFeedButtonFingerprint.matchOrNull() ?: AddFeedButtonFactoryFingerprint.match()).let {
-                val arrayListRegister = it.instructionMatches[1].instruction.registersUsed.single()
-                val checkCastIndex = it.instructionMatches.last().index
-                val checkCastRegister = it.instructionMatches.last().instruction.registersUsed.single()
+            feedMenuListFingerprint(addOption.definingClass, addOption.parameterTypes[3].toString()).match().let {
+                val creatorRegister = it.instructionMatches.first().instruction.registersUsed.first()
+                val modelRegister = it.instructionMatches[1].instruction.registersUsed.single()
+                val list = it.instructionMatches.last()
+                val listRegister = list.instruction.registersUsed.single()
 
                 it.method.addInstructions(
-                    checkCastIndex + 1,
+                    list.index + 1,
                     """
-                    invoke-static {v$checkCastRegister,v$arrayListRegister},$FEED_OVERFLOW_MENU_BUTTON_CLASS->addFeedOverflowButton(Ljava/lang/Object;Ljava/util/ArrayList;)V
+                    invoke-static {v$creatorRegister,v$modelRegister,v$listRegister},$FEED_OVERFLOW_MENU_BUTTON_CLASS->addFeedOverflowButton(Ljava/lang/Object;Ljava/lang/Object;Ljava/util/ArrayList;)V
                     """.trimIndent(),
                 )
             }

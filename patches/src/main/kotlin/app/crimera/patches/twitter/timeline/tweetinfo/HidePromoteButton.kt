@@ -18,6 +18,7 @@ val hidePromoteButton =
         description = "Hides promote button under self posts",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {

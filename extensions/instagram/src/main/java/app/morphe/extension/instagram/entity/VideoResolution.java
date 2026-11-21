@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 /** One resolution in the chooser, retaining its other renditions for download retries. */
 public final class VideoResolution implements MediaInterface {

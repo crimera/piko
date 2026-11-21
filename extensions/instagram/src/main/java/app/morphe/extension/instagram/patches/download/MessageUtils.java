@@ -8,6 +8,8 @@
 package app.morphe.extension.instagram.patches.download;
 
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.content.Context;
 
 import app.morphe.extension.instagram.entity.MessageInfo;
@@ -18,7 +20,7 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 
 import app.morphe.extension.crimera.ObjectBrowser;
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 public class MessageUtils {
     private static boolean DEBUG;
@@ -36,10 +38,10 @@ public class MessageUtils {
                 return false;
             }
 
-            if(messageType == "media" || messageType == "raven_media"){
+            if ("media".equals(messageType) || "raven_media".equals(messageType) || "xma_collage".equals(messageType)) {
                 return true;
 
-            } else if (messageType == "voice_media" && SettingsStatus.downloadVoiceMessage) {
+            } else if ("voice_media".equals(messageType) && SettingsStatus.downloadVoiceMessage) {
                 MediaData audioData = messageInfo.getAudioMedia();
                 String audioUrl = audioData.getMessageAudioUrl();
                 String fileName = audioData.getDownloadFilename(MediaType.AUDIO);
@@ -54,6 +56,7 @@ public class MessageUtils {
 
         } catch (Exception e) {
             app.morphe.extension.crimera.PikoUtils.logger(e);
+            Utils.showToastShort(str("piko_download_failed_media"));
         }
         return false;
     }

@@ -257,7 +257,7 @@ public final class HiddenChats {
             refresh(modeUser);
         };
         // The hidden chats are as private as the inbox, so they ask for the same lock.
-        if (Pref.inboxLock()) InboxLock.confirm(activity, open);
+        if (InboxLock.isEnabled()) InboxLock.confirm(activity, open);
         else open.run();
     }
 

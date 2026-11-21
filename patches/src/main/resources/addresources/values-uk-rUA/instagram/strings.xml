@@ -162,6 +162,8 @@
     <string name="piko_category_dm">Повідомлення DM</string>
     <string name="piko_disable_disappearing_messages_gesture">Вимкнути змахування для зникаючих повідомлень</string>
     <string name="piko_disable_disappearing_messages_gesture_desc">Запобігає увімкненню зникаючих повідомлень під час змахування вгору в чаті</string>
+    <string name="piko_send_keyboard_gifs">Надсилати GIF-файли з клавіатури</string>
+    <string name="piko_send_keyboard_gifs_desc">Надсилає GIF-файли, вибрані в засобі вибору GIF клавіатури, як анімовані зображення замість показу підказки «Торкніться значка наліпки, щоб знайти та надіслати GIF»</string>
     <string name="piko_unlimited_replays">Робить медіа з одноразовим переглядом доступними постійно</string>
     <string name="piko_unlimited_replays_desc">Змінює разові медіафайли на постійні для необмеженого перегляду</string>
     <string name="piko_ephemeral_caption">Показувати спосіб отримання зникаючих медіа</string>
@@ -219,6 +221,13 @@
     <string name="piko_dash_audio_aac_lc_desc">Перекодовує звук xHE-AAC із завантажень DASH у формат AAC-LC зі швидкістю 192 кбіт/с, який може відтворити будь-який плеєр</string>
     <string name="piko_embed_download_metadata">Вбудовувати метадані відео</string>
     <string name="piko_embed_download_metadata_desc">Додає підпис, посилання на допис, автора та дату вивантаження до завантажених файлів MP4</string>
+    <string name="piko_download_conflict_policy">Коли медіа вже існує</string>
+    <string name="piko_download_conflict_policy_desc">Застосовується до файлів із такою самою назвою у вибраній папці завантажень</string>
+    <string name="piko_download_conflict_rename">Зберегти під новою назвою</string>
+    <string name="piko_download_conflict_skip">Пропускати вже завантажене медіа</string>
+    <string name="piko_download_conflict_overwrite">Перезаписати наявний файл</string>
+    <string name="piko_download_media_exists">Медіа вже існує</string>
+    <string name="piko_download_media_in_progress">Медіа вже завантажується</string>
     <string name="piko_download_file_name_template">Формат імені файлу</string>
     <string name="piko_download_file_name_template_invalid">Недійсне ім\'я файлу</string>
     <string name="piko_download_file_name_insert_token">Вставити %1$s</string>
@@ -372,6 +381,16 @@
     <string name="piko_category_rec_flags">Рекомендовані прапорці</string>
     <string name="piko_category_rec_flags_desc">Прапорці розробника, рекомендовані спільнотою</string>
     <string name="piko_rec_flags_read_error">Не вдалося прочитати кешований файл прапорців</string>
+    <string name="piko_rec_flags_modified">Змінені прапорці</string>
+    <string name="piko_rec_flags_category_stories">Історії та актуальне</string>
+    <string name="piko_rec_flags_category_reels">Reels і відео</string>
+    <string name="piko_rec_flags_category_feed">Стрічка та «Цікаве»</string>
+    <string name="piko_rec_flags_category_messages">Повідомлення (Direct) та нотатки</string>
+    <string name="piko_rec_flags_category_profile">Профіль і навігація</string>
+    <string name="piko_rec_flags_category_quality">Якість і завантаження</string>
+    <string name="piko_rec_flags_category_other">Інше</string>
+    <string name="piko_rec_flags_download_hint">Завантажте рекомендовані прапорці, щоб переглядати та налаштовувати їх. Торкніться «Оновити прапорці», щоб розпочати.</string>
+    <string name="piko_rec_flags_invalid_number">Введіть ціле число від -9223372036854775808 до 9223372036854775807</string>
     <string name="piko_rec_flags_no_file">Файл рекомендованих прапорців не знайдено</string>
     <string name="piko_rec_flags_refresh_file">Оновити прапорці</string>
     <string name="piko_rec_flags_last_modified_at">Останні зміни: %s</string>
@@ -480,4 +499,116 @@
     <string name="piko_media_activity">активність</string>
     <string name="piko_patch_theme">Тема</string>
     <string name="piko_patch_settings">Додати налаштування</string>
+    <!-- Recommended flags -->
+    <string name="piko_rec_flag_73245_name" formatted="false">"Кнопка з чорним макетом, яка з'являється при натисканні на щось в історіях"</string>
+    <string name="piko_rec_flag_118413_name" formatted="false">"Редагувати історії після публікації"</string>
+    <string name="piko_rec_flag_118413_desc" formatted="false">"Обмеження у 15 хвилин для внесення змін."</string>
+    <string name="piko_rec_flag_85030_name" formatted="false">"Нові шрифти й анімації для історій"</string>
+    <string name="piko_rec_flag_125004_name" formatted="false">"Нові шрифти Instagram Plus для історій"</string>
+    <string name="piko_rec_flag_125004_desc" formatted="false">"Переконайтеся, що параметр увімкнено, щоб отримати доступ до функцій Instagram Plus."</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_name" formatted="false">"Показувати пропозиції Instagram Plus"</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_desc" formatted="false">"Вимкніть, щоб приховати підказки оновлення до Instagram Plus та ознайомчі поради"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_name" formatted="false">"Вибрані функції та точки входу Instagram Plus"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_desc" formatted="false">"Вимкніть вибрані точки входу Instagram Plus, безкоштовний попередній перегляд, безкоштовні суперлайки та відображення шрифтів у чаті. Це не вимикає всі функції Plus"</string>
+    <string name="piko_rec_flag_126445_name" formatted="false">"Новий стиль часової позначки в опублікованих історіях"</string>
+    <string name="piko_rec_flag_93316_name" formatted="false">"Публікувати історії безпосередньо в актуальне"</string>
+    <string name="piko_rec_flag_93316_desc" formatted="false">"і додавати наліпку, що перенаправляє до вибраного актуального"</string>
+    <string name="piko_rec_flag_105130_name" formatted="false">"Видалити себе зі списку близьких друзів в історіях іншого користувача"</string>
+    <string name="piko_rec_flag_105130_desc" formatted="false">"Натисніть значок близьких друзів, і ви побачите кнопку виходу."</string>
+    <string name="piko_rec_flag_119043_name" formatted="false">"Надсилати історії утриманням кнопки паперового літачка"</string>
+    <string name="piko_rec_flag_119728_name" formatted="false">"Оновлений дизайн списку переглядів історій"</string>
+    <string name="piko_rec_flag_58803_name" formatted="false">"Замінити логотип Instagram на «Для вас» у стрічці."</string>
+    <string name="piko_rec_flag_103957_name" formatted="false">"Перегляд Reels і відео у стрічці зі швидкістю 2x"</string>
+    <string name="piko_rec_flag_103957_desc" formatted="false">"Натисніть і утримуйте кути екрана для відтворення у стрічці."</string>
+    <string name="piko_rec_flag_109947_name" formatted="false">"Швидкість відтворення в додатковому меню Reels"</string>
+    <string name="piko_rec_flag_121815_name" formatted="false">"Меню швидкого відтворення в Reels"</string>
+    <string name="piko_rec_flag_121815_desc" formatted="false">"При натисканні та утриманні відкривається меню швидкого відтворення."</string>
+    <string name="piko_rec_flag_82799_16_name" formatted="false">"Приховувати смугу перемотування на коротких Reels"</string>
+    <string name="piko_rec_flag_82799_16_desc" formatted="false">"Вимкніть і встановіть для «Мінімальна тривалість Reel для смуги перемотування» значення 1, щоб показувати смугу перемотування на всіх Reels"</string>
+    <string name="piko_rec_flag_82799_41_name" formatted="false">"Мінімальна тривалість Reel для смуги перемотування"</string>
+    <string name="piko_rec_flag_82799_41_desc" formatted="false">"Встановіть значення 1 і вимкніть «Приховувати смугу перемотування на коротких Reels», щоб показувати смугу перемотування на всіх Reels"</string>
+    <string name="piko_rec_flag_98405_name" formatted="false">"Показувати спойлер тимчасового фото/відео в Direct"</string>
+    <string name="piko_rec_flag_46551_name" formatted="false">"Дозволити розгортання фото профілю"</string>
+    <string name="piko_rec_flag_46551_desc" formatted="false">"Відображає нову кнопку в розділі налаштувань «Конфіденційність облікового запису», яка дозволяє користувачам вмикати або вимикати масштабування фото профілю."</string>
+    <string name="piko_rec_flag_93842_name" formatted="false">"Анімація масштабування у вкладці «Цікаве»"</string>
+    <string name="piko_rec_flag_group_5a4e2edc04c51be62a40ece694ccdd82_name" formatted="false">"Кнопка «Збережене» у вкладці «Цікаве»"</string>
+    <string name="piko_rec_flag_124823_name" formatted="false">"Оновлений дизайн вкладки «Цікаве»"</string>
+    <string name="piko_rec_flag_77064_name" formatted="false">"Відображати ім'я користувача (username) замість нікнейма"</string>
+    <string name="piko_rec_flag_77064_desc" formatted="false">"для сповіщень і в Direct"</string>
+    <string name="piko_rec_flag_91066_name" formatted="false">"Оновлений дизайн налаштувань сповіщень"</string>
+    <string name="piko_rec_flag_127260_name" formatted="false">"Надсилати швидкі реакції емодзі тривалим натисканням кнопки вподобання історії"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_name" formatted="false">"Показувати точки входу та підказки Meta AI"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_desc" formatted="false">"Вимкніть, щоб приховати точки входу та підказки Meta AI"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_name" formatted="false">"Приховати додаткові підказки та точки входу Meta AI"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_desc" formatted="false">"Увімкніть, щоб приховати додаткові спливаючі вікна Meta AI, значки пошуку, пропозиції та цілі для поширення"</string>
+    <string name="piko_rec_flag_136724_7_name" formatted="false">"Приховати ярлик поширення в Muse"</string>
+    <string name="piko_rec_flag_136724_7_desc" formatted="false">"Не приховує ярлик, якщо встановлено підтримувану версію додатка Muse"</string>
+    <string name="piko_rec_flag_66222_6_name" formatted="false">"Приховати кнопки інтересів під Reels"</string>
+    <string name="piko_rec_flag_66222_6_desc" formatted="false">"Застосовується до кнопок «Цікавить» і «Не цікавить» під Reels, які не є рекламою, не впливаючи на додаткове меню"</string>
+    <string name="piko_rec_flag_55922_2_name" formatted="false">"Пункт «Цікавить» у меню Reels"</string>
+    <string name="piko_rec_flag_55922_2_desc" formatted="false">"Вимкніть і встановіть для макета параметрів інтересів Reels значення 1, щоб приховати пункти «Цікавить» і «Не цікавить» в оновленому додатковому меню"</string>
+    <string name="piko_rec_flag_84236_0_name" formatted="false">"Макет параметрів інтересів Reels"</string>
+    <string name="piko_rec_flag_84236_0_desc" formatted="false">"Встановіть значення 1 і вимкніть пункт «Цікавить» у меню Reels, щоб приховати обидва параметри відгуку в оновленому додатковому меню"</string>
+    <string name="piko_rec_flag_45023_0_name" formatted="false">"Поширення за допомогою QR-коду"</string>
+    <string name="piko_rec_flag_45023_0_desc" formatted="false">"Також керує параметром QR-коду в меню допису"</string>
+    <string name="piko_rec_flag_97046_1_name" formatted="false">"Приховати пункт «Переглянути всі ремікси»"</string>
+    <string name="piko_rec_flag_97046_1_desc" formatted="false">"Також може приховувати згруповані параметри реміксів на відповідних оригінальних дописах"</string>
+    <string name="piko_rec_flag_31983_10_name" formatted="false">"Приховати пункт «Відписатися» в меню допису"</string>
+    <string name="piko_rec_flag_40597_31_name" formatted="false">"Пункт «Уподобане» (Favorites) у меню допису"</string>
+    <string name="piko_rec_flag_72006_9_name" formatted="false">"Пункт «Повноекранний режим» в оновленому меню Reels"</string>
+    <string name="piko_rec_flag_83371_0_name" formatted="false">"Автопрокручування Reels"</string>
+    <string name="piko_rec_flag_83371_0_desc" formatted="false">"Вимкнення також приховує пункт меню, якщо для clips_tab в ig_android_long_press не встановлено значення auto_scroll"</string>
+    <string name="piko_rec_flag_94528_0_name" formatted="false">"Спрощена навігація у вхідних повідомленнях Direct"</string>
+    <string name="piko_rec_flag_94528_0_desc" formatted="false">"Замінює панель пошуку значком пошуку в заголовку"</string>
+    <string name="piko_rec_flag_75196_8_name" formatted="false">"Пропозиції у вхідних повідомленнях Direct"</string>
+    <string name="piko_rec_flag_75196_8_desc" formatted="false">"Встановіть значення 9000000000, щоб приховати пропозиції у вхідних повідомленнях Direct"</string>
+    <string name="piko_rec_flag_126024_12_name" formatted="false">"Плаваюча панель вкладок"</string>
+    <string name="piko_rec_flag_126024_12_desc" formatted="false">"Недоступно з макетом навігації Homecoming"</string>
+    <string name="piko_rec_flag_126411_0_name" formatted="false">"Овальний фон для вибраної вкладки"</string>
+    <string name="piko_rec_flag_33903_2_name" formatted="false">"Рекомендовані облікові записи у вашому профілі"</string>
+    <string name="piko_rec_flag_78393_3_name" formatted="false">"Приховати стрілку сортування в Reels профілю"</string>
+    <string name="piko_rec_flag_group_3ea1d8e866d3fdcf760c8dcb56c0876b_name" formatted="false">"Повноекранний макет (Edge-to-edge)"</string>
+    <string name="piko_rec_flag_group_3ea1d8e866d3fdcf760c8dcb56c0876b_desc" formatted="false">"Розширює головний екран на області рядка стану та системної панелі навігації в Android 15 або новішої версії"</string>
+    <string name="piko_rec_flag_109730_name" formatted="false">"Додати Meta AI у додаткове меню Reels"</string>
+    <string name="piko_rec_flag_80654_name" formatted="false">"Додати капсули опису Meta AI у Reels"</string>
+    <string name="piko_rec_flag_111509_3_name" formatted="false">"Підказки Meta AI у пошуку"</string>
+    <string name="piko_rec_flag_111509_3_desc" formatted="false">"Вимкніть, щоб натомість показувати нещодавні пошуки профілів."</string>
+    <string name="piko_rec_flag_111509_9_name" formatted="false">"Згортання списку нещодавніх пошуків"</string>
+    <string name="piko_rec_flag_111509_9_desc" formatted="false">"Вимкніть, щоб список нещодавніх пошуків не згортався."</string>
+    <string name="piko_rec_flag_111509_21_name" formatted="false">"Горизонтальне прокручування для нещодавніх пошуків"</string>
+    <string name="piko_rec_flag_111509_21_desc" formatted="false">"Вимкніть, щоб натомість показувати нещодавні пошуки у вигляді вертикального списку."</string>
+    <string name="piko_rec_flag_111509_25_name" formatted="false">"Карусель підказок у рядку пошуку"</string>
+    <string name="piko_rec_flag_111509_26_name" formatted="false">"Карусель підказок у рядку пошуку (динамічна)"</string>
+    <string name="piko_rec_flag_group_cb40d6eb2313fdb53365bfcf626bd4ab_name" formatted="false">"Рекомендовані користувачі в порожньому стані пошуку"</string>
+    <string name="piko_rec_flag_group_cb40d6eb2313fdb53365bfcf626bd4ab_desc" formatted="false">"Вимкніть, щоб приховати рекомендовані облікові записи з екрана пошуку."</string>
+    <string name="piko_rec_flag_111509_17_name" formatted="false">"Макс. кількість відображуваних нещодавніх пошуків (Android)"</string>
+    <string name="piko_rec_flag_111509_17_desc" formatted="false">"Кількість нещодавніх профілів, що зберігаються в історії пошуку. Класичне значення — 25."</string>
+    <string name="piko_rec_flag_111509_1_name" formatted="false">"Макс. кількість відображуваних нещодавніх пошуків"</string>
+    <string name="piko_rec_flag_111509_1_desc" formatted="false">"Кількість нещодавніх профілів, що зберігаються в історії пошуку. Класичне значення — 25."</string>
+    <string name="piko_rec_flag_109125_name" formatted="false">"Ultra HDR завжди ввімкнено"</string>
+    <string name="piko_rec_flag_109125_desc" formatted="false">"Вимкніть, щоб запобігти відображенню фотографій Ultra HDR на повній яскравості."</string>
+    <string name="piko_rec_flag_68885_name" formatted="false">"Супербілий SDR на HDR-вмісті"</string>
+    <string name="piko_rec_flag_68885_desc" formatted="false">"Вимкніть, щоб прибрати підвищення яскравості в Reels і відео на екранах із підтримкою HDR."</string>
+    <string name="piko_rec_flag_65057_0_name" formatted="false">"Нотатки на карті"</string>
+    <string name="piko_rec_flag_65057_0_desc" formatted="false">"Вимкніть, щоб прибрати функцію нотаток на карті (також прибирає карти друзів)."</string>
+    <string name="piko_rec_flag_75711_0_name" formatted="false">"GIF-нотатки"</string>
+    <string name="piko_rec_flag_75711_0_desc" formatted="false">"Вимкніть, щоб прибрати функцію GIF у нотатках."</string>
+    <string name="piko_rec_flag_121655_0_name" formatted="false">"Нотатки з опитуваннями"</string>
+    <string name="piko_rec_flag_121655_0_desc" formatted="false">"Увімкніть, щоб отримати функцію опитувань у нотатках (робота не гарантується)."</string>
+    <string name="piko_rec_flag_76757_0_name" formatted="false">"Мікси (Blends)"</string>
+    <string name="piko_rec_flag_76757_0_desc" formatted="false">"Вимкніть, щоб приховати кнопку «Мікси» (Blends) у заголовку відповідних чатів."</string>
+    <string name="piko_rec_flag_140592_0_name" formatted="false">"Кнопка Muse у профілі"</string>
+    <string name="piko_rec_flag_140592_0_desc" formatted="false">"Вимкніть, щоб приховати кнопку Muse на панелі навігації вашого профілю"</string>
+    <string name="piko_rec_flag_58467_20_name" formatted="false">"Кнопка Threads у профілі"</string>
+    <string name="piko_rec_flag_58467_20_desc" formatted="false">"Вимкніть, щоб прибрати кнопку Threads у профілях."</string>
+    <string name="piko_rec_flag_83371_10_name" formatted="false">"Автопрокручування в межах сеансу"</string>
+    <string name="piko_rec_flag_83371_10_desc" formatted="false">"Вимкніть, щоб зберігати стан автопрокручування таким, яким ви його залишили, замість скидання при кожному закритті Instagram."</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_name" formatted="false">"Завантаження у високій якості"</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_desc" formatted="false">"Увімкніть, щоб покращити якість завантажень."</string>
+    <string name="piko_rec_flag_group_d635982bb65ea560b908003df98afb8c_name" formatted="false">"Надвисока роздільна здатність відео (машинне навчання) під час завантаження"</string>
+    <string name="piko_rec_flag_group_d635982bb65ea560b908003df98afb8c_desc" formatted="false">"Увімкніть, щоб масштабувати всі відео до 1080p (якщо роздільна здатність нижча за 1080p) за допомогою машинного навчання на пристрої."</string>
+    <string name="piko_rec_flag_80122_1_name" formatted="false">"Стиснення WebP із галереї"</string>
+    <string name="piko_rec_flag_80122_1_desc" formatted="false">"Встановіть значення 100 для найвищої якості WebP, коли Instagram створює тимчасову копію фотографії з галереї для особистого повідомлення. Це налаштування застосовується, лише якщо ввімкнено igd_webp_device_gallery."</string>
+    <string name="piko_rec_flag_55416_1_name" formatted="false">"Стиснення завантажень HEIC"</string>
+    <string name="piko_rec_flag_55416_1_desc" formatted="false">"Встановіть значення 100 для найвищої якості звичайних завантажень HEIC."</string>
 </resources>

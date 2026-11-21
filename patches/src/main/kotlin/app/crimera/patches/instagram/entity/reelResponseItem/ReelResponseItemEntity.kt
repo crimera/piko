@@ -27,7 +27,7 @@ val reelResponseItemEntity =
             GetUserDataExtensionFingerprint.changeFirstString(userFieldName)
 
             GetMediaCountExtensionFingerprint.changeFirstString(
-                ReelResponseItemIntfMapperFingerprint.instructionMatches.last().methodReference.name,
+                ReelMediaCountFingerprint.originalMethod.name,
             )
         }
     }

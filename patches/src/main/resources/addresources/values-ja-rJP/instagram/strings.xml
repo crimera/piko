@@ -480,4 +480,5 @@
     <string name="piko_media_activity">アクティビティ</string>
     <string name="piko_patch_theme">テーマ</string>
     <string name="piko_patch_settings">設定を追加</string>
+    <!-- Recommended flags -->
 </resources>

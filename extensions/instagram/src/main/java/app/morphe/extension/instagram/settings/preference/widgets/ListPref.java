@@ -63,6 +63,9 @@ public class ListPref extends ListPreference {
             } else if (key == Settings.HIDDEN_CHATS_TAPS.key) {
                 entries = ResourceUtils.getStringArray("piko_array_hidden_chats_taps");
                 entriesValues = entries;
+            } else if (Settings.DOWNLOAD_CONFLICT_POLICY.key.equals(key)) {
+                entries = ResourceUtils.getStringArray("piko_array_download_conflict_policy");
+                entriesValues = ResourceUtils.getStringArray("piko_array_download_conflict_policy_val");
             } else if (key == Settings.CHANGE_LIKE_ANIMATION.key) {
                 entries = ResourceUtils.getStringArray("piko_array_change_like_animation");
                 entriesValues = ResourceUtils.getStringArray("piko_array_change_like_animation_val");

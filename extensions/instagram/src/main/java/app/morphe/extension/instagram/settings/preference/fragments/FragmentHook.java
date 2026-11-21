@@ -12,6 +12,7 @@ import android.content.Context;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.settings.preference.RecommendedFlagsScreen;
 
 @SuppressWarnings("deprecation")
 public class FragmentHook {
@@ -47,8 +48,8 @@ public class FragmentHook {
             actionBarTitleKey = "piko_category_dm";
         }else if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
             actionBarTitleKey = "piko_category_filter_content";
-        }else if(key.equals(Constants.PIKO_FRAGMENT_REC_FLAGS)){
-            actionBarTitleKey = "piko_category_rec_flags";
+        }else if(RecommendedFlagsScreen.isFlagsScreen(key)){
+            actionBarTitleKey = RecommendedFlagsScreen.titleKey(key);
         }else if(key.equals(Constants.PIKO_FRAGMENT_INSTANTS)){
             actionBarTitleKey = "piko_instants_title";
         }else if(key.equals(Constants.PIKO_FRAGMENT_FONT)){

@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.ads
 
+import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants
@@ -13,15 +14,14 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchFirst
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
+import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -36,8 +36,10 @@ internal object ContextualFeedFilterFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/Object;"),
     filters = listOf(
         opcode(Opcode.CHECK_CAST, location = MatchFirst()),
-        string("feed_contextual_self_profile", location = MatchAfterImmediately()),
+        methodCall(smali = "Ljava/lang/String;->equals(Ljava/lang/Object;)Z"),
         methodCall(parameters = listOf(), returnType = MEDIA_CLASS),
+        string("ig4a-instagram-schema"),
+        string("itas-android"),
     ),
 )
 
@@ -60,17 +62,21 @@ val disableAdsPatch =
         dependsOn(
             settingsPatch,
             hookFlagsPatch,
+            interceptUriPatch,
         )
         execute {
 
             DisableAdsFingerprint.method.apply {
-                addInstructions(
+                val scratch = findFreeRegister(0)
+                addInstructionsWithLabels(
                     0,
                     """
                     ${Constants.PREF_CALL_DESCRIPTOR}->disableAds()Z
-                    move-result v0
-                    return v0
+                    move-result v$scratch
+                    if-eqz v$scratch, :piko_original
+                    return v$scratch
                     """.trimIndent(),
+                    ExternalLabel("piko_original", getInstruction(0)),
                 )
             }
 
@@ -78,7 +84,7 @@ val disableAdsPatch =
 
             // Following can receive ads in the response itself, bypassing the injection hook above.
             ContextualFeedFilterFingerprint.let {
-                val getMedia = it.instructionMatches.last().methodReference
+                val getMedia = it.instructionMatches[2].methodReference
 
                 it.method.addInstructionsWithLabels(
                     1,

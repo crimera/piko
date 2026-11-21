@@ -7,7 +7,11 @@
 package app.crimera.patches.instagram.entity.profileinfo
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
+import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
@@ -34,9 +38,24 @@ internal object GetProfileSessionExtensionFingerprint : Fingerprint(
     name = "getUserSession",
 )
 
-internal object GetUserDataExtensionFingerprint : Fingerprint(
+internal object GetProfileUserExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS,
-    name = "getUserData",
+    name = "getProfileUser",
+)
+
+internal object ProfileUserIdFingerprint : Fingerprint(
+    definingClass = USER_DETAIL_VIEW_MODEL_CLASS,
+    parameters = emptyList(),
+    returnType = "Ljava/lang/String;",
+    filters = listOf(
+        fieldAccess(definingClass = USER_DETAIL_VIEW_MODEL_CLASS, opcode = Opcode.IGET_OBJECT),
+        methodCall(name = "getValue", returnType = "Ljava/lang/Object;", location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        opcode(Opcode.CHECK_CAST, location = MatchAfterImmediately()),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        string("INVALID_USER_ID"),
+    ),
 )
 
 // This fingerprint will also be using for follow back indicator patch && settings button && profile more options

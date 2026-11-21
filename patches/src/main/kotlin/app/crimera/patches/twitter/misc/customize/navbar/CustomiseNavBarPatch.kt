@@ -113,6 +113,7 @@ val customiseNavBarPatch =
         name = "Customize Navigation Bar items",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
 
         dependsOn(
             settingsPatch,

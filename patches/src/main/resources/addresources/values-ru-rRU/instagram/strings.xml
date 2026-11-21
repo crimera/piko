@@ -341,4 +341,5 @@
     <string name="piko_media_like">лайк</string>
     <string name="piko_media_link">ссылка</string>
     <string name="piko_media_activity">активность</string>
+    <!-- Recommended flags -->
 </resources>

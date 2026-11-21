@@ -323,4 +323,5 @@
     <string name="piko_media_like">suka</string>
     <string name="piko_media_link">tautan</string>
     <string name="piko_media_activity">aktivitas</string>
+    <!-- Recommended flags -->
 </resources>

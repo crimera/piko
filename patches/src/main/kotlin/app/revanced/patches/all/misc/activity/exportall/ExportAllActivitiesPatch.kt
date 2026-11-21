@@ -12,6 +12,7 @@ val exportAllActivitiesPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
 
         execute {
             val exportedFlag = "android:exported"

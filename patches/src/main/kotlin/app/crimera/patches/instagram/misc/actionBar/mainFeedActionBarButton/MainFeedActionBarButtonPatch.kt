@@ -11,14 +11,21 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.addFlags
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.patch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
@@ -29,14 +36,32 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
+private const val MAIN_FEED_ACTION_BAR = "Linstagram/features/feed/mainfeed/actionbar/MainFeedActionBar;"
+
 object BindMainFeedActionBarFingerprint : Fingerprint(
     filters = listOf(string("BindMainFeedActionBar")),
     returnType = "Ljava/lang/Object;",
 )
 
+private object ActionButtonsContainerFingerprint : Fingerprint(
+    definingClass = MAIN_FEED_ACTION_BAR,
+    name = "<init>",
+    filters = listOf(
+        resourceLiteral(ResourceType.ID, "action_bar_action_buttons"),
+        methodCall(smali = "Landroid/view/View;->findViewById(I)Landroid/view/View;", location = MatchAfterImmediately()),
+        checkCast("Landroid/widget/LinearLayout;", location = MatchAfterWithin(3)),
+        fieldAccess(
+            definingClass = MAIN_FEED_ACTION_BAR,
+            type = "Landroid/widget/LinearLayout;",
+            opcode = Opcode.IPUT_OBJECT,
+            location = MatchAfterImmediately(),
+        ),
+    ),
+)
+
 private object HomeActionModelFingerprint : Fingerprint(
     name = "<init>",
-    strings = listOf("share", "news", "quick_snap", "manage_feeds"),
+    filters = listOf(string("news"), string("share")),
 )
 
 val hideHomeActionButtonsPatch = patch {
@@ -96,35 +121,28 @@ val mainFeedActionBarButtonPatch =
         execute {
 
             val binding = BindMainFeedActionBarFingerprint.method
-            val actionBar = "Linstagram/features/feed/mainfeed/actionbar/MainFeedActionBar;"
+            val container = ActionButtonsContainerFingerprint.instructionMatches.last()
+                .instruction.getReference<FieldReference>()!!
             val candidates = mutableListOf(binding)
             // Newer versions move the layout update into a method on the action bar itself.
             val calls = binding.instructions.mapNotNull {
                 it.getReference<MethodReference>()?.takeIf { reference ->
-                    reference.definingClass == actionBar && reference.returnType == "V" &&
+                    reference.definingClass == MAIN_FEED_ACTION_BAR && reference.returnType == "V" &&
                         USER_SESSION_CLASS in reference.parameterTypes
                 }
             }.distinctBy { it.toString() }
             for (call in calls) {
-                candidates += mutableClassDefBy(actionBar).methods.single { method ->
+                candidates += mutableClassDefBy(MAIN_FEED_ACTION_BAR).methods.single { method ->
                     method.name == call.name && method.parameterTypes == call.parameterTypes &&
                         method.returnType == call.returnType
                 }
             }
             val containers = candidates.flatMap { method ->
-                val code = method.instructions.toList()
-                (0 until code.size - 2).mapNotNull { index ->
-                    val read = code[index]
-                    val field = read.getReference<FieldReference>()
-                    val visibility = code[index + 2].getReference<MethodReference>()
-                    if (read.opcode == Opcode.IGET_OBJECT &&
-                        field?.definingClass == actionBar && field.type == "Landroid/widget/LinearLayout;" &&
-                        code[index + 1].opcode == Opcode.IF_EQZ &&
-                        visibility?.name == "setVisibility" && visibility.parameterTypes == listOf("I") &&
-                        visibility.returnType == "V" &&
-                        code[index + 2].registersUsed.firstOrNull() == read.registersUsed.firstOrNull()
-                    ) method to index else null
-                }
+                method.instructions.withIndex()
+                    .filter { (_, read) ->
+                        read.opcode == Opcode.IGET_OBJECT && read.getReference<FieldReference>() == container
+                    }
+                    .map { (index, _) -> method to index }
             }
             val (method, index) = containers.singleOrNull()
                 ?: throw PatchException("Expected one main feed action button container")

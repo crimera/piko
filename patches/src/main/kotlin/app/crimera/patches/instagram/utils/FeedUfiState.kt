@@ -71,7 +71,9 @@ internal fun hideFeedUfiStates(preferenceCall: String, vararg labels: String) {
     labels.forEach { label ->
         val field = feedUfiStateField(label)
         val stateBuilderMatch = Fingerprint(
-            returnType = field.definingClass,
+            definingClass = field.definingClass,
+            name = "<init>",
+            returnType = "V",
             filters = listOf(fieldAccess(reference = field, opcode = Opcode.IPUT_BOOLEAN)),
         ).match()
         val stateBuilder = stateBuilderMatch.method

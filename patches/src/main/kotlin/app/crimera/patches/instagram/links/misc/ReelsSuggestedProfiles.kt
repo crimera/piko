@@ -10,7 +10,6 @@ import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.typeReference
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.util.registersUsed
@@ -24,7 +23,7 @@ internal fun hideReelsSuggestions() {
         val method = it.method
         val loopIndex = it.instructionMatches[1].index
         val scratch = it.instructionMatches[2].instruction.registersUsed.single()
-        val castMatch = it.instructionMatches.last()
+        val castMatch = it.instructionMatches[6]
         val castIndex = castMatch.index
         val cast = castMatch.instruction
         val itemRegister = cast.registersUsed.single()

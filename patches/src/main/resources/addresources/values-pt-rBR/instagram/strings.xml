@@ -162,6 +162,8 @@
     <string name="piko_category_dm">Direct</string>
     <string name="piko_disable_disappearing_messages_gesture">Desative o recurso de mensagens que desaparecem deslizando o dedo sobre as mensagens</string>
     <string name="piko_disable_disappearing_messages_gesture_desc">Impede que deslizar para cima em uma conversa ative mensagens que desaparecem</string>
+    <string name="piko_send_keyboard_gifs">Enviar GIFs do teclado</string>
+    <string name="piko_send_keyboard_gifs_desc">Envia GIFs selecionados no seletor de GIFs do teclado como imagens animadas, em vez de exibir \"Toque no ícone de adesivo para encontrar e enviar GIFs\"</string>
     <string name="piko_unlimited_replays">Tornar permanentes as mídias efêmeras</string>
     <string name="piko_unlimited_replays_desc">Transforma mídias de visualização única ou dupla em visualização permanente.</string>
     <string name="piko_ephemeral_caption">Mostre como a mídia efêmera foi recebida</string>
@@ -219,6 +221,13 @@
     <string name="piko_dash_audio_aac_lc_desc">Recodifica o áudio xHE-AAC dos downloads do DASH para AAC-LC a 192 kbps, formato compatível com todos os reprodutores</string>
     <string name="piko_embed_download_metadata">Incorporar metadados do vídeo</string>
     <string name="piko_embed_download_metadata_desc">Adiciona a legenda, o link da publicação, o autor e a data de envio aos arquivos MP4 baixados</string>
+    <string name="piko_download_conflict_policy">Quando a mídia já existe</string>
+    <string name="piko_download_conflict_policy_desc">Aplica-se a arquivos com o mesmo nome na pasta de downloads selecionada</string>
+    <string name="piko_download_conflict_rename">Salvar com um novo nome</string>
+    <string name="piko_download_conflict_skip">Ignorar mídia já baixada</string>
+    <string name="piko_download_conflict_overwrite">Sobrescrever o arquivo existente</string>
+    <string name="piko_download_media_exists">A mídia já existe</string>
+    <string name="piko_download_media_in_progress">A mídia já está baixando</string>
     <string name="piko_download_file_name_template">Formato do nome do arquivo</string>
     <string name="piko_download_file_name_template_invalid">Nome inválido</string>
     <string name="piko_download_file_name_insert_token">Inserir %1$s</string>
@@ -372,6 +381,16 @@
     <string name="piko_category_rec_flags">Flags recomendados</string>
     <string name="piko_category_rec_flags_desc">Flags de desenvolvedor sugeridos pela comunidade</string>
     <string name="piko_rec_flags_read_error">Falha ao ler o arquivo de flags em cache</string>
+    <string name="piko_rec_flags_modified">Flags modificadas</string>
+    <string name="piko_rec_flags_category_stories">Stories e destaques</string>
+    <string name="piko_rec_flags_category_reels">Reels e vídeos</string>
+    <string name="piko_rec_flags_category_feed">Alimente e explorar</string>
+    <string name="piko_rec_flags_category_messages">Dms e notas</string>
+    <string name="piko_rec_flags_category_profile">Perfil e navegação</string>
+    <string name="piko_rec_flags_category_quality">Qualidade e uploads</string>
+    <string name="piko_rec_flags_category_other">Outro</string>
+    <string name="piko_rec_flags_download_hint">Baixe as opções recomendadas para navegar e configurá-las. Toque em Atualizar opções para começar.</string>
+    <string name="piko_rec_flags_invalid_number">Digite um número inteiro entre -9223372036854775808 e 9223372036854775807</string>
     <string name="piko_rec_flags_no_file">Arquivo de flags recomendados não encontrado</string>
     <string name="piko_rec_flags_refresh_file">Atualizar flags</string>
     <string name="piko_rec_flags_last_modified_at">Última modificação: %s</string>
@@ -480,4 +499,116 @@
     <string name="piko_media_activity">atividade</string>
     <string name="piko_patch_theme">Tema</string>
     <string name="piko_patch_settings">Adicionar configurações</string>
+    <!-- Recommended flags -->
+    <string name="piko_rec_flag_73245_name" formatted="false">"Botão com layout preto que aparece ao clicar em algo nos Stories"</string>
+    <string name="piko_rec_flag_118413_name" formatted="false">"Edite as histórias depois de elas terem sido publicadas"</string>
+    <string name="piko_rec_flag_118413_desc" formatted="false">"Prazo de 15 minutos para alterações."</string>
+    <string name="piko_rec_flag_85030_name" formatted="false">"Novas fontes e animações para Stories"</string>
+    <string name="piko_rec_flag_125004_name" formatted="false">"Novas fontes do Instagram Plus para Stories"</string>
+    <string name="piko_rec_flag_125004_desc" formatted="false">"Certifique-se de ativar a opção para acessar os recursos do Instagram Plus."</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_name" formatted="false">"Mostrar ofertas adicionais do Instagram Plus"</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_desc" formatted="false">"Desative para ocultar os avisos de atualização do Instagram Plus e as dicas introdutórias"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_name" formatted="false">"Recursos selecionados do Instagram Plus e pontos de acesso"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_desc" formatted="false">"Desative pontos de entrada selecionados do Instagram Plus, pré-visualizações gratuitas, Super Likes gratuitos e renderização de fontes no chat. Isso não desativa todos os recursos do Plus"</string>
+    <string name="piko_rec_flag_126445_name" formatted="false">"Novo estilo para o carimbo de data/hora nas Histórias publicadas"</string>
+    <string name="piko_rec_flag_93316_name" formatted="false">"Publique Stories diretamente nos Destaques"</string>
+    <string name="piko_rec_flag_93316_desc" formatted="false">"e adicione um adesivo redirecionando para o destaque selecionado"</string>
+    <string name="piko_rec_flag_105130_name" formatted="false">"Remova seu nome da lista de Amigos Próximos dos Stories de alguém"</string>
+    <string name="piko_rec_flag_105130_desc" formatted="false">"Clique no ícone Amigos Próximos e você verá um botão para sair."</string>
+    <string name="piko_rec_flag_119043_name" formatted="false">"Envie Stories pressionando e segurando o botão de avião do Stories"</string>
+    <string name="piko_rec_flag_119728_name" formatted="false">"Redesign da lista de visualizadores de Stories"</string>
+    <string name="piko_rec_flag_58803_name" formatted="false">"Substitua o logotipo do Instagram por \"Para você\" no feed."</string>
+    <string name="piko_rec_flag_103957_name" formatted="false">"Assistir a Reels e vídeos no feed em velocidade de reprodução 2x"</string>
+    <string name="piko_rec_flag_103957_desc" formatted="false">"Pressione e segure os cantos para iniciar a jogada."</string>
+    <string name="piko_rec_flag_109947_name" formatted="false">"Velocidade de reprodução do menu de estouro em Reels"</string>
+    <string name="piko_rec_flag_121815_name" formatted="false">"Menu de reprodução rápida em Reels"</string>
+    <string name="piko_rec_flag_121815_desc" formatted="false">"Ao pressionar e segurar, um menu de reprodução rápida será aberto."</string>
+    <string name="piko_rec_flag_82799_16_name" formatted="false">"Ocultar a barra de busca em rolos curtos"</string>
+    <string name="piko_rec_flag_82799_16_desc" formatted="false">"Desativar e definir \"Duração mínima da Reel para a Barra de Busca\" como 1 para mostrar a Barra de Busca em todos os Reels"</string>
+    <string name="piko_rec_flag_82799_41_name" formatted="false">"Duração mínima do rolo para a barra de busca"</string>
+    <string name="piko_rec_flag_82799_41_desc" formatted="false">"Defina como 1 e desative \"Ocultar a barra de busca em rolos curtos\" para exibir a barra de busca em todos os Reels"</string>
+    <string name="piko_rec_flag_98405_name" formatted="false">"Mostrar um spoiler da foto/vídeo temporário no Direct"</string>
+    <string name="piko_rec_flag_46551_name" formatted="false">"Permitir expansão da foto de perfil"</string>
+    <string name="piko_rec_flag_46551_desc" formatted="false">"Exibir um novo botão na seção de configurações \"Privacidade da conta\" que permita aos usuários ativar ou desativar o zoom em sua foto de perfil."</string>
+    <string name="piko_rec_flag_93842_name" formatted="false">"Explore a animação de zoom"</string>
+    <string name="piko_rec_flag_group_5a4e2edc04c51be62a40ece694ccdd82_name" formatted="false">"Botão Salvar em Explorar"</string>
+    <string name="piko_rec_flag_124823_name" formatted="false">"Redesenho na aba Explorar"</string>
+    <string name="piko_rec_flag_77064_name" formatted="false">"Exibir o nome de usuário em vez do apelido"</string>
+    <string name="piko_rec_flag_77064_desc" formatted="false">"para notificações e em direto"</string>
+    <string name="piko_rec_flag_91066_name" formatted="false">"Redesign das configurações de notificação"</string>
+    <string name="piko_rec_flag_127260_name" formatted="false">"Envie reações rápidas com emojis pressionando e segurando o botão Curtir de Story"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_name" formatted="false">"Exibir pontos de entrada e instruções da Meta AI"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_desc" formatted="false">"Desative para ocultar os pontos de entrada e avisos da Meta AI"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_name" formatted="false">"Ocultar avisos e pontos de entrada adicionais da Meta AI"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_desc" formatted="false">"Ative para ocultar pop-ups adicionais do Meta AI, ícones de pesquisa, sugestões e destinos de compartilhamento"</string>
+    <string name="piko_rec_flag_136724_7_name" formatted="false">"Ocultar atalho de compartilhamento do Muse"</string>
+    <string name="piko_rec_flag_136724_7_desc" formatted="false">"Não oculta o atalho quando uma versão compatível do aplicativo Muse está instalada"</string>
+    <string name="piko_rec_flag_66222_6_name" formatted="false">"Ocultar botões de interesse abaixo dos reels"</string>
+    <string name="piko_rec_flag_66222_6_desc" formatted="false">"Aplica-se aos botões \"Tenho interesse\" e \"Não tenho interesse\" abaixo dos vídeos que não são anúncios, sem afetar o menu suspenso"</string>
+    <string name="piko_rec_flag_55922_2_name" formatted="false">"Opção de interesse no menu de reels"</string>
+    <string name="piko_rec_flag_55922_2_desc" formatted="false">"Desative e defina o layout da opção de interesse do Reels para 1 para ocultar as opções \"Interessado\" e \"Não interessado\" no menu de opções redesenhado"</string>
+    <string name="piko_rec_flag_84236_0_name" formatted="false">"Layout da opção de interesse dos Reels"</string>
+    <string name="piko_rec_flag_84236_0_desc" formatted="false">"Defina como 1 e desative a opção \"Interessado\" no menu de reels para ocultar ambas as opções de feedback no menu de opções adicionais redesenhado"</string>
+    <string name="piko_rec_flag_45023_0_name" formatted="false">"Compartilhamento de código QR"</string>
+    <string name="piko_rec_flag_45023_0_desc" formatted="false">"Também controla a opção de código QR no menu de postagens"</string>
+    <string name="piko_rec_flag_97046_1_name" formatted="false">"Ocultar a opção Ver todos os remixes"</string>
+    <string name="piko_rec_flag_97046_1_desc" formatted="false">"Também pode ocultar opções de remixagem agrupadas em publicações originais elegíveis"</string>
+    <string name="piko_rec_flag_31983_10_name" formatted="false">"Ocultar a opção \"deixar de seguir\" no menu da publicação"</string>
+    <string name="piko_rec_flag_40597_31_name" formatted="false">"Opção Favoritos no menu de postagens"</string>
+    <string name="piko_rec_flag_72006_9_name" formatted="false">"Opção de tela cheia no menu Reels redesenhado"</string>
+    <string name="piko_rec_flag_83371_0_name" formatted="false">"Rolagem automática de Reels"</string>
+    <string name="piko_rec_flag_83371_0_desc" formatted="false">"Desativar também oculta a opção de menu, a menos que clips_tab em ig_android_long_press esteja definido como auto_scroll"</string>
+    <string name="piko_rec_flag_94528_0_name" formatted="false">"Navegação simplificada da caixa de entrada de mensagens diretas"</string>
+    <string name="piko_rec_flag_94528_0_desc" formatted="false">"Substitui a barra de pesquisa por um ícone de pesquisa no cabeçalho"</string>
+    <string name="piko_rec_flag_75196_8_name" formatted="false">"Sugestões do DM inbox"</string>
+    <string name="piko_rec_flag_75196_8_desc" formatted="false">"Defina para 9000000000 para ocultar sugestões na caixa de entrada de mensagens diretas"</string>
+    <string name="piko_rec_flag_126024_12_name" formatted="false">"Barra de abas flutuante"</string>
+    <string name="piko_rec_flag_126024_12_desc" formatted="false">"Não disponível com o layout de navegação Homecoming"</string>
+    <string name="piko_rec_flag_126411_0_name" formatted="false">"Fundo em forma de pílula para a aba selecionada"</string>
+    <string name="piko_rec_flag_33903_2_name" formatted="false">"Contas sugeridas no seu perfil"</string>
+    <string name="piko_rec_flag_78393_3_name" formatted="false">"Ocultar a seta de ordenação nos Reels do perfil"</string>
+    <string name="piko_rec_flag_group_3ea1d8e866d3fdcf760c8dcb56c0876b_name" formatted="false">"Layout de ponta a ponta"</string>
+    <string name="piko_rec_flag_group_3ea1d8e866d3fdcf760c8dcb56c0876b_desc" formatted="false">"Estende a tela principal para as áreas da barra de status e da barra de navegação do sistema no Android 15 ou posterior"</string>
+    <string name="piko_rec_flag_109730_name" formatted="false">"Adicione Meta AI no menu de opções do Reels"</string>
+    <string name="piko_rec_flag_80654_name" formatted="false">"Adicionar pílulas de descrição do reels Meta AI"</string>
+    <string name="piko_rec_flag_111509_3_name" formatted="false">"Sugestões de Meta IA em buscas"</string>
+    <string name="piko_rec_flag_111509_3_desc" formatted="false">"Desative para exibir as pesquisas de perfil recentes."</string>
+    <string name="piko_rec_flag_111509_9_name" formatted="false">"Pesquisas recentes recolhíveis"</string>
+    <string name="piko_rec_flag_111509_9_desc" formatted="false">"Desative para impedir que a lista de pesquisas recentes seja recolhida."</string>
+    <string name="piko_rec_flag_111509_21_name" formatted="false">"Rolagem horizontal para ver as pesquisas recentes"</string>
+    <string name="piko_rec_flag_111509_21_desc" formatted="false">"Desative para exibir as pesquisas recentes em uma lista vertical."</string>
+    <string name="piko_rec_flag_111509_25_name" formatted="false">"Carrossel de dicas da barra de pesquisa"</string>
+    <string name="piko_rec_flag_111509_26_name" formatted="false">"Carrossel de dicas da barra de pesquisa (dinâmico)"</string>
+    <string name="piko_rec_flag_group_cb40d6eb2313fdb53365bfcf626bd4ab_name" formatted="false">"Usuários sugeridos na pesquisa estado nulo"</string>
+    <string name="piko_rec_flag_group_cb40d6eb2313fdb53365bfcf626bd4ab_desc" formatted="false">"Desative para ocultar as contas sugeridas na tela de pesquisa."</string>
+    <string name="piko_rec_flag_111509_17_name" formatted="false">"Número máximo de pesquisas recentes exibidas (Android)"</string>
+    <string name="piko_rec_flag_111509_17_desc" formatted="false">"Número de perfis recentes mantidos no histórico de pesquisa. O valor clássico era 25."</string>
+    <string name="piko_rec_flag_111509_1_name" formatted="false">"Exibição do número máximo de pesquisas recentes"</string>
+    <string name="piko_rec_flag_111509_1_desc" formatted="false">"Número de perfis recentes mantidos no histórico de pesquisa. O valor clássico era 25."</string>
+    <string name="piko_rec_flag_109125_name" formatted="false">"Ultra HDR sempre ligado"</string>
+    <string name="piko_rec_flag_109125_desc" formatted="false">"Desative para impedir a renderização de fotos Ultra HDR com brilho máximo."</string>
+    <string name="piko_rec_flag_68885_name" formatted="false">"SDR super branco em conteúdo HDR"</string>
+    <string name="piko_rec_flag_68885_desc" formatted="false">"Desative para remover o aumento de brilho em Reels e vídeos em telas compatíveis com HDR."</string>
+    <string name="piko_rec_flag_65057_0_name" formatted="false">"Notas sobre mapas"</string>
+    <string name="piko_rec_flag_65057_0_desc" formatted="false">"Desative para remover o recurso de mapas de notas (e também os mapas de amigos)."</string>
+    <string name="piko_rec_flag_75711_0_name" formatted="false">"Notas em GIF"</string>
+    <string name="piko_rec_flag_75711_0_desc" formatted="false">"Desative para remover o recurso de GIFs de notas."</string>
+    <string name="piko_rec_flag_121655_0_name" formatted="false">"Notas de enquete"</string>
+    <string name="piko_rec_flag_121655_0_desc" formatted="false">"Ative a funcionalidade de enquete para anotações (funcionamento não garantido)."</string>
+    <string name="piko_rec_flag_76757_0_name" formatted="false">"Mescla"</string>
+    <string name="piko_rec_flag_76757_0_desc" formatted="false">"Desative para ocultar o botão Misturas no cabeçalho dos chats elegíveis."</string>
+    <string name="piko_rec_flag_140592_0_name" formatted="false">"Botão de perfil Muse"</string>
+    <string name="piko_rec_flag_140592_0_desc" formatted="false">"Desative para ocultar o botão Muse na barra de navegação do seu perfil"</string>
+    <string name="piko_rec_flag_58467_20_name" formatted="false">"Botão de perfil do Threads"</string>
+    <string name="piko_rec_flag_58467_20_desc" formatted="false">"Desative o botão para remover tópicos nos perfis."</string>
+    <string name="piko_rec_flag_83371_10_name" formatted="false">"Rolagem automática por sessão"</string>
+    <string name="piko_rec_flag_83371_10_desc" formatted="false">"Desative para manter a rolagem automática no estado em que você a deixou, em vez de desativá-la sempre que o Instagram for fechado."</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_name" formatted="false">"Uploads de alta qualidade"</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_desc" formatted="false">"Ative para melhorar a qualidade dos uploads."</string>
+    <string name="piko_rec_flag_group_d635982bb65ea560b908003df98afb8c_name" formatted="false">"Uploads de vídeo com super-resolução (aprendizado de máquina)"</string>
+    <string name="piko_rec_flag_group_d635982bb65ea560b908003df98afb8c_desc" formatted="false">"Ative esta opção para aumentar a resolução de todos os vídeos para 1080p (se a resolução for inferior a 1080p) usando aprendizado de máquina no dispositivo."</string>
+    <string name="piko_rec_flag_80122_1_name" formatted="false">"Compressão de galeria Webp"</string>
+    <string name="piko_rec_flag_80122_1_desc" formatted="false">"Defina este valor para 100 para obter a qualidade WebP mais alta quando o Instagram criar uma cópia temporária de uma foto da galeria para uma mensagem direta. Essa configuração só se aplica quando igd_webp_device_gallery estiver ativado."</string>
+    <string name="piko_rec_flag_55416_1_name" formatted="false">"Heic carrega compressão"</string>
+    <string name="piko_rec_flag_55416_1_desc" formatted="false">"Defina este valor para 100 para obter a mais alta qualidade em uploads regulares de arquivos Heic."</string>
 </resources>

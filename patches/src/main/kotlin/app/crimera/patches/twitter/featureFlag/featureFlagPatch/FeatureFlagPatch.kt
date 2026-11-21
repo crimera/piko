@@ -32,6 +32,7 @@ val featureFlagPatch =
         name = "Hook feature flag",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(featureFlagResourcePatch, settingsPatch)
         execute {
 

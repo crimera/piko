@@ -10,9 +10,14 @@ import app.crimera.patches.instagram.misc.settings.HookFlagsLoadFingerprint
 import app.crimera.patches.instagram.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -36,3 +41,13 @@ fun addFlags(functionName: String) {
  */
 internal val Match.InstructionMatch.typeReference: String
     get() = instruction.getReference<TypeReference>()!!.type
+
+internal fun storyComponentType(label: String) = Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    filters = listOf(
+        opcode(Opcode.INSTANCE_OF),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        string(label, location = MatchAfterImmediately()),
+    ),
+).instructionMatches.first().typeReference

@@ -33,6 +33,7 @@ val hideCommunityBadge =
         name = "Hide community badges",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

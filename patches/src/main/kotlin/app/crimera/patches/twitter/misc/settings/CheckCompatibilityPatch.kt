@@ -6,8 +6,9 @@
 
 package app.crimera.patches.twitter.misc.settings
 
-import app.crimera.patches.twitter.utils.is_11_82_or_greater
 import app.crimera.patches.twitter.utils.versionCheckPatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.packageMetadata
 import app.morphe.patcher.patch.patch
 
 internal val checkCompatibilityPatch = patch(
@@ -16,16 +17,22 @@ internal val checkCompatibilityPatch = patch(
     dependsOn(versionCheckPatch)
 
     execute {
-        if (!is_11_82_or_greater) {
-            return@execute
-        }
+        if (packageMetadata.versionName != "12.19.1-release.0") {
+            throw PatchException(
+                """
 
-        ApplicationFingerprint.matchOrNull()?.let {
-            throw RuntimeException(
-                "\n\n#####################################\n\n" +
-                        "Unsupported APK is used." +
-                        "\n\nPlease use a ripped APK or a compatibility shim layer patch.\n\n" +
-                        "#####################################\n\n"
+#####################################
+
+Do not select the old X patches for NewX.
+
+Only version 12.19.1-release.0 is compatible with "Old patches". Version ${packageMetadata.versionName} is a NewX.
+
+Please deselect all "Old patches". Select only "NewX:" patches.
+
+Morphe Manager remembers the selection of old patches. Reset to default from "Selections" (🔖) > "Recommended patches".
+
+#####################################
+"""
             )
         }
     }

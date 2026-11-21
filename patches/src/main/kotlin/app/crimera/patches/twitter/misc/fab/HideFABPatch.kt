@@ -32,6 +32,7 @@ val hideFABPatch =
         description = "Adds an option to hide Floating action button",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

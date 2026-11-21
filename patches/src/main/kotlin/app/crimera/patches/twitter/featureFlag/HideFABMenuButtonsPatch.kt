@@ -19,6 +19,7 @@ val hideFABMenuButtonsPatch =
         name = "Hide FAB Menu Buttons",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 

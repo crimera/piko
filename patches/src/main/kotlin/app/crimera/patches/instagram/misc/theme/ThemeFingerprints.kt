@@ -9,7 +9,6 @@ package app.crimera.patches.instagram.misc.theme
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
-import app.morphe.patcher.StringComparisonType
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
@@ -134,16 +133,13 @@ internal object DarkModeSectionFingerprint : Fingerprint(
     parameters = listOf("L", FUNCTION1_DESCRIPTOR, "I"),
     strings = listOf("dark", "light", "system"),
     filters = listOf(
-        string(
-            "com.instagram.settings.impl.accessibility.DarkModeSection (AccessibilityOptionsComposeFragment.kt:",
-            StringComparisonType.STARTS_WITH,
-        ),
         // Native theme setting read.
         literal(-1),
         methodCall(
             name = "getInt",
             parameters = listOf(STRING_DESCRIPTOR, "I"),
             returnType = "I",
+            opcode = Opcode.INVOKE_INTERFACE,
             location = MatchAfterImmediately(),
         ),
         opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),

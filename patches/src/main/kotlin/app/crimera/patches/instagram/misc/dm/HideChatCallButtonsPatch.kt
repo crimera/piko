@@ -13,6 +13,7 @@ import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
@@ -35,17 +36,6 @@ private object CallingButtonsReferenceFingerprint : Fingerprint(
 val hideChatCallButtonsPatch = patch {
     execute {
         val builderType = CallingButtonsReferenceFingerprint.instructionMatches.first().typeReference
-        val regular = Fingerprint(
-            definingClass = builderType,
-            returnType = "Ljava/util/List;",
-            parameters = listOf("Landroid/content/Context;", "L"),
-            filters = listOf(
-                opcode(Opcode.IGET_BOOLEAN),
-                opcode(Opcode.IGET_BOOLEAN, location = MatchAfterImmediately()),
-                opcode(Opcode.IGET_BOOLEAN, location = MatchAfterImmediately()),
-                opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
-            ),
-        )
         val ongoing = Fingerprint(
             definingClass = builderType,
             isStatic = true,
@@ -60,14 +50,26 @@ val hideChatCallButtonsPatch = patch {
                 opcode(Opcode.SGET_OBJECT),
                 opcode(Opcode.GOTO, location = MatchAfterImmediately()),
             ),
-        )
+        ).match()
 
-        // Narrow Instagram's own availability flags before it chooses a combined or individual action.
-        val (audio, video) = regular.instructionMatches
-        for ((read, hook) in listOf(video to "showChatVideoCallButton", audio to "showChatAudioCallButton")) {
-            val register = read.instruction.registersUsed.first()
-            regular.method.addInstructions(read.index + 1, visibilityCheck(register, hook))
-        }
+        val regular = Fingerprint(
+            filters = listOf(
+                opcode(Opcode.IF_EQZ),
+                opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+                opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+                opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+                opcode(Opcode.SGET_OBJECT, location = MatchAfterImmediately()),
+                methodCall(smali = "Ljava/util/Collections;->singletonList(Ljava/lang/Object;)Ljava/util/List;", location = MatchAfterImmediately()),
+            ),
+        ).match(ongoing.originalMethod)
+
+        // The combined button tests both capabilities. Its fallback reuses them for the individual buttons.
+        val (combined, audio, video) = regular.instructionMatches
+        regular.method.addInstructions(
+            combined.index,
+            visibilityCheck(audio.instruction.registersUsed.single(), "showChatAudioCallButton") + "\n" +
+                visibilityCheck(video.instruction.registersUsed.single(), "showChatVideoCallButton"),
+        )
 
         // At either ongoing action, the condition register is true and can be reused for the visibility check.
         val matches = ongoing.instructionMatches

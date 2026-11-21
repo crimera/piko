@@ -26,6 +26,7 @@ val bringBackTwitterPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
 
         dependsOn(addResourcesPatch)
 

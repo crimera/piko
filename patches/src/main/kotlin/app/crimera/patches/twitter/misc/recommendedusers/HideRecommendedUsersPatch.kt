@@ -34,6 +34,7 @@ val hideRecommendedUsers =
         description = "Hide recommended users that pops up when you follow someone",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

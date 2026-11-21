@@ -107,6 +107,7 @@
     <string name="piko_inbox_lock_unlock">Sblocca</string>
     <string name="piko_inbox_lock_prompt">Sblocca i tuoi messaggi</string>
     <string name="piko_inbox_lock_no_lock">Imposta un blocco schermo sul tuo dispositivo per usare il blocco Posta in arrivo</string>
+    <string name="piko_hidden_chats_taps">Clicca per aprire le chat nascoste</string>
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">Rendi permanenti i contenuti temporanei</string>
@@ -342,4 +343,5 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">attività</string>
+    <!-- Recommended flags -->
 </resources>

@@ -96,11 +96,13 @@ public class Pref {
     }
 
     public static boolean viewStoriesAnonymously() {
-        return (SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY) && SettingsStatus.viewStoriesAnonymously) || Pref.getTurnOnAllGhostModes();
+        return SettingsStatus.viewStoriesAnonymously
+                && (SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY) || getTurnOnAllGhostModes());
     }
 
     public static boolean viewLiveAnonymously() {
-        return (SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY) && SettingsStatus.viewLiveAnonymously) || Pref.getTurnOnAllGhostModes();
+        return SettingsStatus.viewLiveAnonymously
+                && (SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY) || getTurnOnAllGhostModes());
     }
 
     public static boolean disableScreenshotDetection() {
@@ -148,9 +150,8 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);
     }
 
-    public
-    static boolean disableStories() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_STORIES);
+    public static boolean disableStories() {
+        return lockable(Settings.DISABLE_STORIES);
     }
 
     public static boolean disableHighlights() {
@@ -158,7 +159,11 @@ public class Pref {
     }
 
     public static boolean disableExplore() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_EXPLORE);
+        return SettingsStatus.disableExplore && lockable(Settings.DISABLE_EXPLORE);
+    }
+
+    public static boolean disableExplorePath(String path) {
+        return "discover/topical_explore/".equals(path) && disableExplore();
     }
 
     public static boolean disableComments() {
@@ -263,6 +268,10 @@ public class Pref {
 
     public static boolean disableDisappearingMessagesGesture() {
         return SharedPref.getBooleanPref(Settings.DISABLE_DISAPPEARING_MESSAGES_GESTURE) && SettingsStatus.disableDisappearingMessagesGesture;
+    }
+
+    public static boolean sendKeyboardGifs() {
+        return SharedPref.getBooleanPref(Settings.SEND_KEYBOARD_GIFS) && SettingsStatus.sendKeyboardGifs;
     }
 
     public static boolean makeEphemeralMediaPermanent() {
@@ -587,12 +596,17 @@ public class Pref {
         return SharedPref.getSetPref(Settings.FILTER_STORY_BY_USER_TYPE);
     }
 
-    public static Integer filterStoryByMinStoryItems() {
-        return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MIN_STORY_ITEMS));
+    public static int parseStoryItemCount(String value, int fallback) {
+        try {
+            int count = Integer.parseInt(value);
+            return count > 0 ? count : fallback;
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
     }
 
-    public static Integer filterStoryByMaxStoryItems() {
-        return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MAX_STORY_ITEMS));
+    public static int storyItemCount(StringSetting setting) {
+        return parseStoryItemCount(SharedPref.getStringPref(setting), Integer.parseInt(setting.defaultValue));
     }
 
     public static boolean inboxLock() {

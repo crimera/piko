@@ -27,6 +27,7 @@
 package app.morphe.patches.all.misc.updates
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -34,13 +35,14 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.patch.InstallerType
+import app.morphe.patcher.patch.PatchAvailability
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.resourceXml
 import app.morphe.patcher.util.getFreeRegisterProvider
 import app.morphe.patcher.util.matchAllMethodIndicesForEach
 import app.morphe.patcher.util.returnEarly
 import com.android.tools.smali.dexlib2.Opcode
-
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import java.util.logging.Logger
@@ -50,11 +52,35 @@ private const val EXTENSION_CLASS = "Lapp/morphe/extension/all/versioncode/Disab
 private var originalVersionCode: Int = 0
 
 @Suppress("unused")
-private val disablePlayStoreUpdatesResourcePatch = patch {
+internal val disablePlayStoreUpdatesPatch = patch(
+    name = "Disable Play Store updates",
+    description = "Prevents the patched app from being listed in Play Store updates " +
+            "by setting the version code to the maximum allowed. " +
+            "This also allows downgrading an existing app install to an older app version.",
+    default = true
+) {
+
+    compatibleWith(COMPATIBILITY_X, COMPATIBILITY_NEW_X, COMPATIBILITY_INSTAGRAM)
+
+    extendWith("extensions/all/versioncode/change-version-code.mpe")
+
+    // This patch does not work if the app is installed by root mounting.
+    availability { installer, _ ->
+        when (installer) {
+            InstallerType.MOUNT -> PatchAvailability.UNAVAILABLE
+            else -> PatchAvailability.ENABLED
+        }
+    }
+
     execute {
         resourceXml("AndroidManifest.xml").use { manifest ->
             originalVersionCode = manifest.root.attribute("android:versionCode")!!.toInt()
         }
+
+        Fingerprint(
+            definingClass = EXTENSION_CLASS,
+            name = "originalVersionCode"
+        ).method.returnEarly(originalVersionCode)
     }
 
     finalize {
@@ -62,31 +88,13 @@ private val disablePlayStoreUpdatesResourcePatch = patch {
             //  Max allowed by Play Store is 2100000000, but Android allows max int value.
             manifest.root.setAttribute("android:versionCode", Int.MAX_VALUE.toString())
         }
-    }
-}
-
-@Suppress("unused")
-internal val disablePlayStoreUpdatesPatch = patch(
-    name = "Disable Play Store updates",
-    description = "Disables Play Store updates by setting the version code to the maximum allowed. " +
-            "This patch may cause unexpected issues with some apps and does not work if the " +
-            "app is installed by root mounting",
-    default = true
-) {
-
-    dependsOn(disablePlayStoreUpdatesResourcePatch)
-
-    compatibleWith(COMPATIBILITY_X, COMPATIBILITY_INSTAGRAM)
-
-    extendWith("extensions/all/versioncode/change-version-code.mpe")
-
-    finalize {
-        Fingerprint(
-            definingClass = EXTENSION_CLASS,
-            name = "originalVersionCode"
-        ).method.returnEarly(originalVersionCode)
 
         val logger by lazy { Logger.getLogger(this::class.java.name) }
+
+        // The extension class must read the real version code, otherwise the hooks call themselves.
+        // R8 can move the reads into synthetic classes (such as
+        // DisablePlayStoreUpdatesPatch$$ExternalSyntheticApiModelOutline0), so exclude those too.
+        val extensionClassPrefix = EXTENSION_CLASS.removeSuffix(";")
 
         Fingerprint(
             filters = listOf(
@@ -96,7 +104,7 @@ internal val disablePlayStoreUpdatesPatch = patch(
                 )
             ),
             custom = { _, classDef ->
-                !classDef.type.startsWith("Lapp/morphe/extension")
+                !classDef.type.startsWith(extensionClassPrefix)
             }
         ).matchAllMethodIndicesForEach(requireMatches = false) { index ->
             val instruction = this.getInstruction<TwoRegisterInstruction>(index)
@@ -151,7 +159,7 @@ internal val disablePlayStoreUpdatesPatch = patch(
                 )
             ),
             custom = { _, classDef ->
-                !classDef.type.startsWith("Lapp/morphe/extension")
+                !classDef.type.startsWith(extensionClassPrefix)
             }
         ).matchAllMethodIndicesForEach(requireMatches = false) { index ->
             if (getInstruction(index + 1).opcode != Opcode.MOVE_RESULT_WIDE) {

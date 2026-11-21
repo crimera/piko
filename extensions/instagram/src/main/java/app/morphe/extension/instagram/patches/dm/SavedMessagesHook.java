@@ -48,28 +48,16 @@ public class SavedMessagesHook {
         }
     }
 
-    /** Harvest participant id-to-username mappings from the thread user list. */
-    public static void noteThreadUsers(final java.util.List<?> users) {
-        if (users == null || users.isEmpty() || !Pref.saveDeletedMessages()) return;
-        final java.util.ArrayList<Object> copy;
-        try {
-            copy = new java.util.ArrayList<Object>(users);
-        } catch (Throwable ignored) {
-            return;
-        }
+    public static void noteThreadUser(Object user) {
+        if (user == null || !Pref.saveDeletedMessages()) return;
         getWorker().post(() -> {
             try {
-                PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
-                for (Object user : copy) {
-                    if (user == null) continue;
-                    try {
-                        UserData data = new UserData(user);
-                        String id = data.getUserId();
-                        if (id == null || !id.matches("\\d{6,14}")) continue;
-                        String name = data.getUsername();
-                        if (name != null && !name.isEmpty()) db.putUsername(id, name);
-                    } catch (Throwable ignored) {
-                    }
+                UserData data = new UserData(user);
+                String id = data.getUserId();
+                if (id == null || !id.matches("\\d{6,14}")) return;
+                String name = data.getUsername();
+                if (name != null && !name.isEmpty()) {
+                    PikoMessageDb.getInstance(PikoUtils.getContext()).putUsername(id, name);
                 }
             } catch (Throwable ignored) {
             }

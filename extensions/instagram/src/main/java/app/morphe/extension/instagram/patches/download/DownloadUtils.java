@@ -64,11 +64,11 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.crimera.ObjectBrowser;
-import app.morphe.extension.crimera.downloader.MediaDownloader;
-import app.morphe.extension.crimera.downloader.DownloadMetadata;
-import app.morphe.extension.crimera.downloader.DownloadRequest;
-import app.morphe.extension.crimera.downloader.MediaType;
-import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.crimera.legacydownloader.MediaDownloader;
+import app.morphe.extension.crimera.legacydownloader.DownloadMetadata;
+import app.morphe.extension.crimera.legacydownloader.DownloadRequest;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.crimera.PikoUtils;
 
 import com.instagram.common.session.UserSession;
@@ -269,6 +269,7 @@ public class DownloadUtils {
         } catch (Exception e) {
             PikoUtils.logger(e);
             Logger.printException(() -> "Error at downloadPost", e);
+            Utils.showToastShort(str("piko_download_failed_media"));
         }
     }
 
@@ -370,8 +371,8 @@ public class DownloadUtils {
         if (mediaType.equals(MediaType.AUDIO)) {
             AudioMediaInterface audioMedia = mediaInfo.getMediaAt(position).getAudioMedia();
             String audioUrl = audioMedia.getAudioUrl();
-            String fileName = audioMedia.getDownloadName() + ".mp3";
-            downloader.enqueue(new DownloadRequest(audioUrl, Constants.DEFAULT_AUDIO_FOLDER, fileName));
+            String fileName = DownloadFileNameFormatter.safeFilename(audioMedia.getDownloadName(), ".m4a");
+            downloader.enqueue(createDownloadRequest(audioUrl, Constants.DEFAULT_AUDIO_FOLDER, fileName));
 
         } else if (position != -1) {
             MediaData mediaData = mediaInfo.getMediaAt(position);
@@ -573,7 +574,7 @@ public class DownloadUtils {
             );
         }
 
-        DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
+        DownloadRequest request = createDownloadRequest(mediaUrl, subFolder, fileName);
         if (variant instanceof VideoResolution) {
             List<VideoVariant> candidates = ((VideoResolution) variant).getCandidates();
             for (int i = 1; i < candidates.size(); i++) {
@@ -726,7 +727,7 @@ public class DownloadUtils {
 
 
     public static void downloadMediaUrl(Context context, String mediaUrl, String subFolder, String fileName) throws Exception {
-        enqueueDownload(context, new DownloadRequest(mediaUrl, subFolder, fileName));
+        enqueueDownload(context, createDownloadRequest(mediaUrl, subFolder, fileName));
     }
 
     private static final Object FEED_DOWNLOAD_BUTTON_TAG = new Object();
@@ -870,7 +871,7 @@ public class DownloadUtils {
             ViewGroup row = (ViewGroup) buttonsContainer;
             ImageView button = row.findViewWithTag(STORY_DOWNLOAD_BUTTON_TAG);
             if (media == null || !SettingsStatus.storyDownloadButton || !Pref.enableDownload()
-                    || !SharedPref.getBooleanPref(Settings.STORY_DOWNLOAD_BUTTON)) {
+                    || !SharedPref.getBooleanPref(Settings.STORY_DOWNLOAD_BUTTON) || isOwnStory(media, userSession)) {
                 if (button != null) row.removeView(button);
                 return;
             }
@@ -888,6 +889,19 @@ public class DownloadUtils {
             });
         } catch (Exception e) {
             Logger.printException(() -> "addStoryDownloadButton failure", e);
+        }
+    }
+
+    private static boolean isOwnStory(Object media, UserSession userSession) {
+        if (userSession == null) return false;
+        try {
+            String viewerId = userSession.getUserId();
+            if (viewerId == null || viewerId.isEmpty()) return false;
+            UserData owner = new MediaData(media, userSession).getUserData();
+            return owner != null && viewerId.equals(owner.getUserId());
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not determine story ownership", e);
+            return false;
         }
     }
 
@@ -950,6 +964,17 @@ public class DownloadUtils {
             current = parent instanceof View ? (View) parent : null;
         }
         throw new IllegalStateException("No activity found above the story download button");
+    }
+
+    private static DownloadRequest createDownloadRequest(String url, String subFolder, String fileName) {
+        DownloadRequest request = new DownloadRequest(url, subFolder, fileName);
+        String policy = SharedPref.getStringPref(Settings.DOWNLOAD_CONFLICT_POLICY);
+        if ("skip".equals(policy)) {
+            request.conflictPolicy = DownloadRequest.ConflictPolicy.SKIP;
+        } else if ("overwrite".equals(policy)) {
+            request.conflictPolicy = DownloadRequest.ConflictPolicy.OVERWRITE;
+        }
+        return request;
     }
 
     private static void enqueueDownload(Context context, DownloadRequest request) {

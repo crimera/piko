@@ -138,6 +138,7 @@ val sensitiveMediaPatch =
         name = "Show sensitive media",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

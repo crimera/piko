@@ -1,5 +1,6 @@
 package app.crimera.patches.instagram.misc.reels
 
+import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
@@ -24,6 +25,7 @@ val disableReelsScrollingPatch = patch(
             "Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds."
 ) {
     compatibleWith(COMPATIBILITY_INSTAGRAM)
+    dependsOn(settingsPatch)
 
     execute {
         val viewPagerField = ClipsViewPagerImplGetViewAtIndexFingerprint.classDef.fields.first {

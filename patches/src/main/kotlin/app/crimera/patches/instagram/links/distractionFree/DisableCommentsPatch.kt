@@ -6,7 +6,6 @@
 
 package app.crimera.patches.instagram.links.distractionFree
 
-import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
@@ -20,6 +19,7 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
+import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -28,13 +28,10 @@ private const val HIDE_COMMENT_BUTTONS = "$PREF_CALL_DESCRIPTOR->hideCommentButt
 private object ReelsCommentStateFingerprint : Fingerprint(
     returnType = "L",
     filters = listOf(
-        string("android_purge_26_q3_UfiUseCase_getCommentButtonAndCount"),
         string("ReelsCommentButton"),
         methodCall(location = MatchAfterImmediately()),
         // Hidden comment state, a static instance of its own class.
         fieldAccess(opcode = Opcode.SGET_OBJECT, location = MatchAfterImmediately()),
-        // Button, button-with-count and hidden paths all join here.
-        opcode(Opcode.CONST_4, location = MatchAfterImmediately()),
     ),
 )
 
@@ -44,7 +41,7 @@ val disableCommentsPatch =
         name = "Disable comments",
         description = "Disables comments and hides comment buttons on posts, reels and stories",
     ) {
-        dependsOn(settingsPatch, interceptUriPatch)
+        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
@@ -56,12 +53,12 @@ val disableCommentsPatch =
 
             val reelsMatch = ReelsCommentStateFingerprint.match()
             val reelsMethod = reelsMatch.method
-            val hiddenField = reelsMatch.instructionMatches[3].fieldReference
-            val stateRegister = reelsMatch.instructionMatches[3].getInstruction<OneRegisterInstruction>().registerA
-            val mergeIndex = reelsMatch.instructionMatches[4].index
-            val scratch = reelsMatch.instructionMatches[4].getInstruction<OneRegisterInstruction>().registerA
-            // Button, button-with-count and hidden paths all join here. Retarget their
-            // branches to the hook, then let Instagram initialize the scratch register.
+            val hidden = reelsMatch.instructionMatches.last()
+            val hiddenField = hidden.fieldReference
+            val stateRegister = hidden.getInstruction<OneRegisterInstruction>().registerA
+            val mergeIndex = hidden.index + 1
+            val scratch = reelsMethod.findFreeRegister(mergeIndex, stateRegister)
+            // The button, button-with-count and hidden branches converge after the hidden state read.
             reelsMethod.addInstructionsAtControlFlowLabel(
                 mergeIndex,
                 """
@@ -75,6 +72,7 @@ val disableCommentsPatch =
             )
 
             hideStoryComments(HIDE_COMMENT_BUTTONS)
+            disableCommentReads(HIDE_COMMENT_BUTTONS)
             enableSettings("disableComments")
         }
     }

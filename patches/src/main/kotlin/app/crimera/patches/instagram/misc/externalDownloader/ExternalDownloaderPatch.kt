@@ -12,6 +12,7 @@ import app.crimera.patches.instagram.misc.overflowMenuButton.posts.debugOverflow
 import app.crimera.patches.instagram.misc.overflowMenuButton.posts.hookOverflowMenuButton
 import app.crimera.patches.instagram.misc.overflowMenuButton.reels.hookReelOverflowMenuButton
 import app.crimera.patches.instagram.misc.settings.settingsPatch
+import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.patch
@@ -24,7 +25,14 @@ val externalDownloaderPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(settingsPatch, mediaDataEntity, hookOverflowMenuButton, debugOverflowMenuButtonPatch, hookReelOverflowMenuButton)
+        dependsOn(
+            settingsPatch,
+            mediaDataEntity,
+            hookOverflowMenuButton,
+            debugOverflowMenuButtonPatch,
+            hookReelOverflowMenuButton,
+            handleStoryButtonPatch,
+        )
         execute {
 
             addOverflowMenuButtonAttributes("PIKO_EXTERNAL_DOWNLOADER", "externalDownloaderOverflowButton")

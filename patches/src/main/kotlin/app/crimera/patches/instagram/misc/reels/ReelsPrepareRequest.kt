@@ -72,7 +72,7 @@ private fun patchShortReelPrepare() = Fingerprint(
 }
 
 internal fun markShortReelPrepare(
-    controller: MutableMethod, explicit: MethodReference, stop: FieldReference, pausePredicate: MethodReference,
+    controller: MutableMethod, explicit: MethodReference, stop: FieldReference, paused: FieldReference,
 ) {
     val requestMark = patchShortReelPrepare()
     val prepare = ReelPlayerPrepare.method
@@ -85,8 +85,7 @@ internal fun markShortReelPrepare(
         controller.definingClass, "pikoMarkReelPrepare",
         listOf(explicit.parameterTypes.single().toString(), stateType, configType), "V", registers = 6,
         instructions = """
-            invoke-virtual {p2}, $pausePredicate
-            move-result v0
+            iget-object v0, p2, $paused
             if-nez v0, :done
             iget-object v1, p2, $stop
             if-eqz v1, :done
@@ -115,9 +114,11 @@ internal fun markShortReelPrepare(
     fun source(argument: Int) = setup.single { it.opcode == Opcode.MOVE_OBJECT_FROM16 &&
         it.registersUsed.first() == args[argument] }.registersUsed.last()
     val temp = setup.first().registersUsed.first()
-    val owner = calls[factory - 2].registersUsed.last()
-    require(calls[factory - 2].opcode == Opcode.IGET_OBJECT &&
-        calls[factory - 2].getReference<FieldReference>()?.definingClass == controller.definingClass &&
+    val factoryField = calls[factory - 1]
+    val owner = factoryField.registersUsed.last()
+    require(factoryField.opcode == Opcode.IGET_OBJECT &&
+        factoryField.getReference<FieldReference>()?.definingClass == controller.definingClass &&
+        factoryField.registersUsed.first() == calls[factory].registersUsed.first() &&
         setup.first().opcode == Opcode.MOVE_FROM16 && temp != setup.first().registersUsed.last() &&
         listOf(owner, source(2), source(3), temp).distinct().size == 4)
     controller.addInstructions(factory + 2, """
@@ -133,7 +134,11 @@ internal fun markShortReelPrepare(
         start[it - 1].getReference<MethodReference>()?.name == "<init>" }
     val request = start[invoke].registersUsed.last()
     val ctorArgs = start[invoke - 1].registersUsed
-    require(start[invoke - 2].registersUsed == listOf(ctorArgs[0], request) && ctorArgs[1] == ctorArgs[0] + 1)
+    val receiverMove = start.subList(0, invoke - 1).last { instruction ->
+        instruction.opcode.setsRegister() && instruction.registersUsed.firstOrNull() == ctorArgs[0]
+    }
+    require(receiverMove.opcode == Opcode.MOVE_OBJECT_FROM16 &&
+        receiverMove.registersUsed == listOf(ctorArgs[0], request) && ctorArgs[1] == ctorArgs[0] + 1)
     val copy = addReelMethod(
         requestMark.definingClass, "pikoCopyReelStart", listOf(configType), "V", registers = 3,
         flags = AccessFlags.PUBLIC.value or AccessFlags.SYNTHETIC.value,

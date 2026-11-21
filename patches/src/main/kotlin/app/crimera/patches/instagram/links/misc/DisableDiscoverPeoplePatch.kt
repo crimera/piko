@@ -6,11 +6,11 @@
 
 package app.crimera.patches.instagram.links.misc
 
-import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.returnOfflineRequestIf
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -50,10 +50,19 @@ val disableDiscoverPeoplePatch =
         name = "Disable discover people",
         description = "Hides suggested accounts",
     ) {
-        dependsOn(settingsPatch, interceptUriPatch)
+        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
+            // Reject these requests before the HTTP cache can return saved recommendations.
+            ApiRequestBuilderFingerprint.let {
+                val pathCheck = it.instructionMatches[1]
+                val path = pathCheck.instruction.registersUsed.single()
+                it.method.returnOfflineRequestIf(
+                    pathCheck.index + 1,
+                    "invoke-static/range {v$path .. v$path}, $SUGGESTED_PROFILES->hideAdditionalAccounts(Ljava/lang/String;)Z",
+                )
+            }
             hideActivityFeedSuggestions()
             hideReelsSuggestions()
 

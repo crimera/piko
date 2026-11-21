@@ -21,6 +21,7 @@ import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val REMIND_ME_ACTION = "direct_remind_me"
 
@@ -49,6 +50,12 @@ val fixDirectNotificationActionCrashPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
+            // 456 removed the remind-me action from the notification builder.
+            val builder = Fingerprint(filters = listOf(string("notification_builder_start"))).originalMethod
+            val hasRemindMeAction = builder.implementation!!.instructions.any {
+                ((it as? ReferenceInstruction)?.reference as? StringReference)?.string == REMIND_ME_ACTION
+            }
+            if (!hasRemindMeAction) return@execute
             val match = DirectNotificationBuilderFingerprint.match()
             match.method.apply {
                 val implementation = implementation!!

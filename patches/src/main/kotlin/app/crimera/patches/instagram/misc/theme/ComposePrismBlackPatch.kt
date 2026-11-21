@@ -9,7 +9,6 @@ package app.crimera.patches.instagram.misc.theme
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -19,9 +18,11 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.string
+import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.util.findInstructionIndicesReversed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -79,9 +80,8 @@ internal object ComposeSearchRowFingerprint : Fingerprint(
         // Palette surface color.
         fieldAccess(type = "J", opcode = Opcode.IGET_WIDE),
         string(SEARCH_ROW_SEMANTICS_ID),
-        // Alternate surface color.
-        methodCall(returnType = "J", opcode = Opcode.INVOKE_STATIC),
-        opcode(Opcode.MOVE_RESULT_WIDE, InstructionLocation.MatchAfterImmediately()),
+        // Both native color branches feed the background modifier on this row.
+        methodCall(parameters = listOf("L", "J"), returnType = "L", opcode = Opcode.INVOKE_STATIC),
     ),
 )
 
@@ -224,15 +224,13 @@ internal fun installComposePrismBlackRuntime(legacyAmoled: Boolean) {
 
 private fun installComposeSearchRowBackgroundOverride() {
     ComposeSearchRowFingerprint.matchAll(2..2).forEach {
-        val paletteRead = it.instructionMatches.first()
-        val alternateResult = it.instructionMatches.last()
-        val register = paletteRead.getInstruction<OneRegisterInstruction>().registerA
-        if (alternateResult.getInstruction<OneRegisterInstruction>().registerA != register) {
-            throw PatchException("Compose search-row surface colors use different registers")
+        val background = it.instructionMatches.last()
+        val registers = background.instruction.registersUsed
+        if (registers.size != 3 || registers[2] != registers[1] + 1 ||
+            background.methodReference.returnType != background.methodReference.parameterTypes[0].toString()) {
+            throw PatchException("Expected a Compose background modifier with a packed color")
         }
-        listOf(alternateResult.index, paletteRead.index).forEach { index ->
-            it.method.addInstructions(index + 1, composeSearchRowOverrideInstructions(register))
-        }
+        it.method.addInstructionsAtControlFlowLabel(background.index, composeSearchRowOverrideInstructions(registers[1]))
     }
 }
 
@@ -254,7 +252,7 @@ private fun installComposePrismPaletteRuntime(
     // Other Compose caches also read GRAY_1600 without constructing a Prism palette.
     val holderMatches = ComposePrismPaletteHolderFingerprint.matchAll().filter { match ->
         val constructor = match.instructionMatches[1].methodReference
-        constructor.parameterTypes.isNotEmpty() && constructor.parameterTypes.all { it.toString() == "J" } &&
+        constructor.isPrismPaletteConstructor() &&
             match.instructionMatches[2].fieldReference.type == constructor.definingClass
     }
     if (holderMatches.size != EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS) {
@@ -347,15 +345,10 @@ private fun installComposePrismPaletteRuntime(
         )
     }
     val paletteClass = mutableClassDefBy(paletteTypes.single())
-    val paletteConstructors =
-        paletteClass.methods.filter { method ->
-            method.name == "<init>" &&
-                method.parameterTypes.isNotEmpty() &&
-                method.parameterTypes.all { it.toString() == "J" }
-        }
+    val paletteConstructors = paletteClass.methods.filter { it.isPrismPaletteConstructor() }
     val primaryBackgroundField =
         paletteConstructors
-            .mapNotNull { method -> composePrismBackgroundField(method, parameterOrdinal = 0) }
+            .mapNotNull { method -> composePrismBackgroundField(method, method.firstPrismColorIndex()) }
             .distinct()
             .singleOrNull()
             ?: throw PatchException(
@@ -364,7 +357,7 @@ private fun installComposePrismPaletteRuntime(
     val bdsBackgroundField =
         paletteConstructors
             .mapNotNull { method ->
-                composePrismBackgroundField(method, parameterOrdinal = rootBackgroundParameterOrdinal)
+                composePrismBackgroundField(method, method.firstPrismColorIndex() + rootBackgroundParameterOrdinal)
             }
             .distinct()
             .singleOrNull()
@@ -409,6 +402,15 @@ private data class ComposePrismHolderColorOrdinals(
     val gray0100: Set<Int>,
 )
 
+// Newer palettes take a delegate before the packed color arguments.
+private fun MethodReference.firstPrismColorIndex() = if (parameterTypes.firstOrNull()?.startsWith("L") == true) 1 else 0
+
+private fun MethodReference.isPrismPaletteConstructor(): Boolean {
+    val firstColor = firstPrismColorIndex()
+    return name == "<init>" && parameterTypes.size > firstColor &&
+        parameterTypes.drop(firstColor).all { it.toString() == "J" }
+}
+
 /**
  * Constructor parameter of the root background, which the dark palette sets from GRAY_1600 and
  * the light palette from GRAY_0100.
@@ -418,9 +420,10 @@ private fun composePrismRootBackgroundParameterOrdinal(holderMatches: List<Match
         holderMatches.map { match ->
             val method = match.originalMethod
             val constructorCall = match.instructionMatches[1]
-            val constructorParameterCount = constructorCall.methodReference.parameterTypes.size
+            val firstColor = constructorCall.methodReference.firstPrismColorIndex()
+            val constructorParameterCount = constructorCall.methodReference.parameterTypes.size - firstColor
             val firstParameterRegister =
-                constructorCall.getInstruction<RegisterRangeInstruction>().startRegister + 1
+                constructorCall.getInstruction<RegisterRangeInstruction>().startRegister + 1 + firstColor
 
             fun sourceOrdinals(fieldName: String): Set<Int> =
                 method.findInstructionIndicesReversed(

@@ -10,23 +10,18 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.storyComponentType
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.patch
-import app.morphe.patcher.string
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-
-private object StoryFollowButtonComponentFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    parameters = emptyList(),
-    filters = listOf(string("StoryFollowButtonViewComponent")),
-)
 
 @Suppress("unused")
 val hideStoryFollowButtonPatch = patch(
@@ -37,22 +32,21 @@ val hideStoryFollowButtonPatch = patch(
     dependsOn(settingsPatch)
 
     execute {
-        val componentClass = StoryFollowButtonComponentFingerprint.originalMethod.definingClass
         val binding = Fingerprint(
-            definingClass = componentClass,
             returnType = "V",
-            parameters = listOf("Ljava/lang/Object;"),
+            parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
             filters = listOf(
+                checkCast(storyComponentType("StoryFollowButtonViewComponent")),
                 methodCall(smali = "Ljava/lang/Number;->intValue()I"),
                 opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
                 literal(8, location = MatchAfterImmediately()),
                 opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
             ),
         )
-        val state = binding.instructionMatches[1]
+        val state = binding.instructionMatches[2]
         val register = state.instruction.registersUsed.singleOrNull()
             ?: throw PatchException("Expected one story follow button state register")
-        if (binding.instructionMatches[3].instruction.registersUsed != listOf(register)) {
+        if (binding.instructionMatches[4].instruction.registersUsed != listOf(register)) {
             throw PatchException("Unexpected story follow button visibility branch")
         }
 

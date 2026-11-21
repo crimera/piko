@@ -10,7 +10,7 @@ package app.morphe.extension.instagram.constants;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
-import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.instagram.settings.ActivityHook;
 
 public class Constants {
@@ -68,6 +68,8 @@ public class Constants {
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);
         ExtensionStrings.setDownloadOngoing(str("piko_downloading_media"));
         ExtensionStrings.setDownloadCompleted(str("piko_downloaded_media"));
+        ExtensionStrings.DOWNLOAD_MEDIA_EXISTS = str("piko_download_media_exists");
+        ExtensionStrings.DOWNLOAD_MEDIA_IN_PROGRESS = str("piko_download_media_in_progress");
         ExtensionStrings.setDownloadError(str("piko_download_failed_media"));
         ExtensionStrings.setDownloadSetPathFailed(str("piko_download_set_path_failed"));
         ExtensionStrings.setDownloadSetPathSuccess(str("piko_download_set_path_success"));

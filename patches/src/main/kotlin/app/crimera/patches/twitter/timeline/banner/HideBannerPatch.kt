@@ -33,6 +33,7 @@ val hideBannerPatch =
         description = "Hide new post banner",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {
