@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -95,9 +96,9 @@ public final class MediaPickerDialog {
         }
 
         static LayoutMode fromKey(String key) {
+            if (LIST.key.equals(key)) return LIST;
             if (GRID.key.equals(key)) return GRID;
-            if (STAGGERED.key.equals(key)) return STAGGERED;
-            return LIST;
+            return STAGGERED;
         }
     }
 
@@ -338,13 +339,26 @@ public final class MediaPickerDialog {
             }
         };
 
-        // Helper to build and attach the active body layout (list, grid, or staggered)
+        // Helper to build and attach the active body layout (list, grid, staggered, or panorama strip)
         final boolean[] hasAttachedBody = new boolean[]{false};
         final Runnable bindBodyLayout = () -> {
             listItems.clear();
             gridTiles.clear();
             View bodyView;
-            switch (layoutMode[0]) {
+            if (layoutMode[0].isGridBased() && isSplitPanorama(downloads, loadedThumbnails)) {
+                bodyView = buildPanoramaStripBody(
+                        current,
+                        downloads,
+                        loadedThumbnails,
+                        themeSettings,
+                        isSelectionMode,
+                        selectedIndices,
+                        gridTiles,
+                        updateUiHolder,
+                        dialog,
+                        listener
+                );
+            } else switch (layoutMode[0]) {
                 case GRID:
                     bodyView = buildGridBody(
                             current,
@@ -746,6 +760,90 @@ public final class MediaPickerDialog {
         return lanesRow;
     }
 
+    private static View buildPanoramaStripBody(
+            Activity activity,
+            List<InlineDownloadButton.DownloadItem> downloads,
+            List<Bitmap> loadedThumbnails,
+            Theme.SettingsSnapshot themeSettings,
+            boolean[] isSelectionMode,
+            Set<Integer> selectedIndices,
+            List<GridTile> gridTiles,
+            Runnable[] updateUiHolder,
+            BottomSheetView dialog,
+            OnMediaSelectedListener listener
+    ) {
+        HorizontalScrollView scroll = new HorizontalScrollView(activity);
+        scroll.setHorizontalScrollBarEnabled(false);
+        scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+
+        LinearLayout strip = new LinearLayout(activity);
+        strip.setOrientation(LinearLayout.HORIZONTAL);
+        int padHoriz = Theme.dpToPx(activity, 16f);
+        int padTop = Theme.dpToPx(activity, 8f);
+        int padBottom = Theme.dpToPx(activity, 12f);
+        strip.setPadding(padHoriz, padTop, padHoriz, padBottom);
+
+        int stripHeightPx = Theme.dpToPx(activity, 220f);
+        int gap = Theme.dpToPx(activity, 4f);
+
+        for (int i = 0; i < downloads.size(); i++) {
+            InlineDownloadButton.DownloadItem item = downloads.get(i);
+            float rawRatio = resolveRawAspectRatio(item, loadedThumbnails.get(i));
+            GridTile tile = GridTile.forPanoramaSlice(
+                    activity,
+                    themeSettings,
+                    resolveIconType(item),
+                    stripHeightPx,
+                    rawRatio > 0f ? rawRatio : 0.25f
+            );
+            bindItemInteractions(
+                    tile,
+                    i,
+                    isSelectionMode,
+                    selectedIndices,
+                    updateUiHolder,
+                    dialog,
+                    listener
+            );
+            gridTiles.add(tile);
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    stripHeightPx
+            );
+            if (i > 0) {
+                lp.setMarginStart(gap);
+            }
+            strip.addView(tile, lp);
+        }
+
+        scroll.addView(strip, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+        return scroll;
+    }
+
+    static boolean isSplitPanorama(
+            List<InlineDownloadButton.DownloadItem> downloads,
+            List<Bitmap> loadedThumbnails
+    ) {
+        if (downloads == null || downloads.size() < 4) return false;
+        int narrowCount = 0;
+        for (int i = 0; i < downloads.size(); i++) {
+            InlineDownloadButton.DownloadItem item = downloads.get(i);
+            if (!isImage(item)) return false;
+            Bitmap bmp = (loadedThumbnails != null && i < loadedThumbnails.size())
+                    ? loadedThumbnails.get(i)
+                    : null;
+            float ratio = resolveRawAspectRatio(item, bmp);
+            if (ratio > 0f && ratio < MIN_STAGGERED_ASPECT) {
+                narrowCount++;
+            }
+        }
+        return narrowCount >= 3 && narrowCount * 2 >= downloads.size();
+    }
+
     private static int resolveColumnsForActivity(Activity activity, int itemCount) {
         DisplayMetrics dm = activity.getResources().getDisplayMetrics();
         float screenWidthDp = dm.widthPixels / Math.max(1f, dm.density);
@@ -756,8 +854,16 @@ public final class MediaPickerDialog {
             InlineDownloadButton.DownloadItem item,
             Bitmap loadedBitmap
     ) {
+        float raw = resolveRawAspectRatio(item, loadedBitmap);
+        return raw > 0f ? clampAspectRatio(raw) : 1f;
+    }
+
+    private static float resolveRawAspectRatio(
+            InlineDownloadButton.DownloadItem item,
+            Bitmap loadedBitmap
+    ) {
         if (loadedBitmap != null && loadedBitmap.getWidth() > 0 && loadedBitmap.getHeight() > 0) {
-            return clampAspectRatio((float) loadedBitmap.getWidth() / loadedBitmap.getHeight());
+            return (float) loadedBitmap.getWidth() / loadedBitmap.getHeight();
         }
         if (item != null && item.resolution != null) {
             Matcher matcher = DIMENSIONS_PATTERN.matcher(item.resolution);
@@ -766,13 +872,13 @@ public final class MediaPickerDialog {
                     int w = Integer.parseInt(matcher.group(1));
                     int h = Integer.parseInt(matcher.group(2));
                     if (w > 0 && h > 0) {
-                        return clampAspectRatio((float) w / h);
+                        return (float) w / h;
                     }
                 } catch (NumberFormatException ignored) {
                 }
             }
         }
-        return 1f;
+        return -1f;
     }
 
     private static float clampAspectRatio(float ratio) {
@@ -902,7 +1008,7 @@ public final class MediaPickerDialog {
     }
 
     private static LayoutMode layoutModeSetting() {
-        return LayoutMode.fromKey(SettingsRegistry.getStringOrDefault(LAYOUT_SETTING_ID, LayoutMode.LIST.key));
+        return LayoutMode.fromKey(SettingsRegistry.getStringOrDefault(LAYOUT_SETTING_ID, LayoutMode.STAGGERED.key));
     }
 
     private static String gridColumnsSetting() {
@@ -1143,6 +1249,7 @@ public final class MediaPickerDialog {
         private final boolean singleColumn;
         private final boolean compact;
         private final boolean preserveAspectRatio;
+        private final int panoramaFixedHeightPx;
         private float aspectRatio;
         private final float outerCornerPx;
         private final float innerCornerUnselectedPx;
@@ -1158,6 +1265,25 @@ public final class MediaPickerDialog {
         private boolean hasBoundState = false;
         private ValueAnimator cornerAnimator;
 
+        static GridTile forPanoramaSlice(
+                Context context,
+                Theme.SettingsSnapshot themeSettings,
+                IconView.IconType mediaType,
+                int fixedHeightPx,
+                float rawAspectRatio
+        ) {
+            return new GridTile(
+                    context,
+                    themeSettings,
+                    mediaType,
+                    false,
+                    true,
+                    true,
+                    rawAspectRatio,
+                    fixedHeightPx
+            );
+        }
+
         GridTile(
                 Context context,
                 Theme.SettingsSnapshot themeSettings,
@@ -1167,16 +1293,47 @@ public final class MediaPickerDialog {
                 boolean preserveAspectRatio,
                 float initialAspectRatio
         ) {
+            this(
+                    context,
+                    themeSettings,
+                    mediaType,
+                    singleColumn,
+                    compact,
+                    preserveAspectRatio,
+                    initialAspectRatio,
+                    0
+            );
+        }
+
+        private GridTile(
+                Context context,
+                Theme.SettingsSnapshot themeSettings,
+                IconView.IconType mediaType,
+                boolean singleColumn,
+                boolean compact,
+                boolean preserveAspectRatio,
+                float initialAspectRatio,
+                int panoramaFixedHeightPx
+        ) {
             super(context);
             this.themeSettings = themeSettings;
             this.mediaType = mediaType;
             this.singleColumn = singleColumn;
             this.compact = compact;
             this.preserveAspectRatio = preserveAspectRatio;
-            this.aspectRatio = clampAspectRatio(initialAspectRatio);
-            this.outerCornerPx = Theme.dpToPx(context, compact ? 16f : 20f);
+            this.panoramaFixedHeightPx = panoramaFixedHeightPx;
+            this.aspectRatio = panoramaFixedHeightPx > 0
+                    ? Math.max(0.05f, Math.min(3f, initialAspectRatio))
+                    : clampAspectRatio(initialAspectRatio);
+            this.outerCornerPx = Theme.dpToPx(
+                    context,
+                    panoramaFixedHeightPx > 0 ? 10f : (compact ? 16f : 20f)
+            );
             this.innerCornerUnselectedPx = outerCornerPx;
-            this.innerCornerSelectedPx = Theme.dpToPx(context, compact ? 22f : 26f);
+            this.innerCornerSelectedPx = Theme.dpToPx(
+                    context,
+                    panoramaFixedHeightPx > 0 ? 14f : (compact ? 22f : 26f)
+            );
             this.currentInnerCornerPx = innerCornerUnselectedPx;
 
             tileBg.setCornerRadius(outerCornerPx);
@@ -1276,6 +1433,14 @@ public final class MediaPickerDialog {
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            if (panoramaFixedHeightPx > 0) {
+                int targetWidth = computePanoramaWidthPx();
+                super.onMeasure(
+                        MeasureSpec.makeMeasureSpec(targetWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(panoramaFixedHeightPx, MeasureSpec.EXACTLY)
+                );
+                return;
+            }
             int width = MeasureSpec.getSize(widthMeasureSpec);
             int targetHeight;
             if (preserveAspectRatio) {
@@ -1294,10 +1459,20 @@ public final class MediaPickerDialog {
             );
         }
 
+        private int computePanoramaWidthPx() {
+            int minWidth = Theme.dpToPx(getContext(), 38f);
+            int maxWidth = Theme.dpToPx(getContext(), 320f);
+            int naturalWidth = Math.round(panoramaFixedHeightPx * aspectRatio);
+            return Math.max(minWidth, Math.min(maxWidth, naturalWidth));
+        }
+
         void setThumbnail(Bitmap bitmap) {
             if (bitmap != null) {
                 if (preserveAspectRatio && bitmap.getWidth() > 0 && bitmap.getHeight() > 0) {
-                    float refinedRatio = clampAspectRatio((float) bitmap.getWidth() / bitmap.getHeight());
+                    float raw = (float) bitmap.getWidth() / bitmap.getHeight();
+                    float refinedRatio = panoramaFixedHeightPx > 0
+                            ? Math.max(0.05f, Math.min(3f, raw))
+                            : clampAspectRatio(raw);
                     if (Math.abs(refinedRatio - aspectRatio) > 0.02f) {
                         aspectRatio = refinedRatio;
                         requestLayout();
@@ -1374,6 +1549,11 @@ public final class MediaPickerDialog {
                 }
                 topRightContainer.addView(cbWrapper);
             } else {
+                if (panoramaFixedHeightPx > 0
+                        && computePanoramaWidthPx() < Theme.dpToPx(context, 76f)) {
+                    topRightContainer.setVisibility(View.GONE);
+                    return;
+                }
                 boolean showResolutions = showResolutionButton && item.resolutionOptions.size() > 1;
                 if (!showResolutions && !showCopyLinkButton) {
                     topRightContainer.setVisibility(View.GONE);

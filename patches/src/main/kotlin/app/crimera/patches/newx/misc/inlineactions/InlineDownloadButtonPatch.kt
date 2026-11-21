@@ -165,7 +165,7 @@ val newXInlineDownloadButtonPatch =
                         id = "newx.content.media_picker_layout",
                         strings = settingStrings("piko_newx_media_picker_layout"),
                         order = 325,
-                        defaultValue = "list",
+                        defaultValue = "staggered",
                         options =
                             listOf(
                                 choice("list", "piko_newx_media_picker_layout_list"),
