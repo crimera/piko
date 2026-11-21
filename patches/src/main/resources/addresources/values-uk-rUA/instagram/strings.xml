@@ -450,9 +450,7 @@
     <string name="piko_user_type_unverified">Непідтверджені користувачі</string>
     <string name="piko_user_type_verified">Підтверджені (верифіковані) користувачі</string>
     <string name="piko_filter_story_minimum_item_count">Мінімальна кількість історій</string>
-    <string name="piko_filter_story_minimum_item_count_desc">Історії з меншою кількістю фрагментів ніж x будуть приховані (за замовчуванням 1)</string>
     <string name="piko_filter_story_maximum_item_count">Максимальна кількість історій</string>
-    <string name="piko_filter_story_maximum_item_count_desc">Історії з більшою кількістю фрагментів ніж x будуть приховані (за замовчуванням 9999)</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">Зберігати Instants</string>
     <string name="piko_instants_download_desc">Зберігайте одноразові Instants під час їх перегляду, щоб пізніше ви могли переглянути та завантажити їх у розділі «Переглянути збережені Instants».</string>

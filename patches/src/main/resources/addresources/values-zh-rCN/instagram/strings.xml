@@ -431,9 +431,7 @@
     <string name="piko_user_type_unverified">未认证用户</string>
     <string name="piko_user_type_verified">已认证用户</string>
     <string name="piko_filter_story_minimum_item_count">最小快拍项</string>
-    <string name="piko_filter_story_minimum_item_count_desc">少于 X 个项目的快拍将被隐藏 (默认为1)</string>
     <string name="piko_filter_story_maximum_item_count">最大快拍项</string>
-    <string name="piko_filter_story_maximum_item_count_desc">超过 X 项的故事将被隐藏 (默认 9999)</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">保存 Instants</string>
     <string name="piko_view_saved_instants">查看已保存的 Instants</string>

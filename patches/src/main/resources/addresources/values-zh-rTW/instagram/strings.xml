@@ -450,9 +450,7 @@
     <string name="piko_user_type_unverified">未驗證使用者</string>
     <string name="piko_user_type_verified">已驗證使用者</string>
     <string name="piko_filter_story_minimum_item_count">限時動態最少則數</string>
-    <string name="piko_filter_story_minimum_item_count_desc">少於 X 個項目的限時動態將會隱藏（預設值：1）</string>
     <string name="piko_filter_story_maximum_item_count">限時動態最多則數</string>
-    <string name="piko_filter_story_maximum_item_count_desc">多於 X 個項目的限時動態將會隱藏（預設值：9999）</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">儲存 Instants</string>
     <string name="piko_instants_download_desc">在檢視只能看一次的 Instants 時自動擷取，方便日後從「檢視已儲存的 Instants」重新查看或下載。</string>

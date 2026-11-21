@@ -450,9 +450,7 @@
     <string name="piko_user_type_unverified">Usuários não verificados</string>
     <string name="piko_user_type_verified">Usuários verificados</string>
     <string name="piko_filter_story_minimum_item_count">Mínimo de stories</string>
-    <string name="piko_filter_story_minimum_item_count_desc">Stories com menos de \"x\" itens serão ocultadas (padrão: 1)</string>
     <string name="piko_filter_story_maximum_item_count">Número máximo de itens da story</string>
-    <string name="piko_filter_story_maximum_item_count_desc">Stories com mais de \"x\" itens serão ocultadas (padrão: 9999)</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">Salvar Instants</string>
     <string name="piko_instants_download_desc">Capture os Instants visualizados uma única vez, para que você possa visualizá-los novamente e baixá-los mais tarde em \"Visualizar Instants salvos\".</string>

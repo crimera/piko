@@ -431,9 +431,7 @@
     <string name="piko_user_type_unverified">未認証のユーザー</string>
     <string name="piko_user_type_verified">認証済みのユーザー</string>
     <string name="piko_filter_story_minimum_item_count">ストーリー内の最小件数</string>
-    <string name="piko_filter_story_minimum_item_count_desc">指定した項目数未満のストーリーを非表示にします(デフォルト: 1)</string>
     <string name="piko_filter_story_maximum_item_count">ストーリー内の最大件数</string>
-    <string name="piko_filter_story_maximum_item_count_desc">指定した項目数を超えるストーリーを非表示にします(デフォルト: 9999)</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">インスタントを保存</string>
     <string name="piko_instants_download_desc">一度だけ表示できるインスタントを閲覧時に保存し、あとで「保存したインスタントを表示」から再閲覧したりダウンロードしたりできます。</string>
