@@ -6,6 +6,7 @@
 
 package app.crimera.patches.twitter.misc.fix.gallery
 
+import app.crimera.patches.twitter.misc.settings.checkCompatibilityPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -23,6 +24,7 @@ val fix20PhotosSupportPatch = patch(
 ) {
     compatibleWith(COMPATIBILITY_X)
     category("Old patches")
+    dependsOn(checkCompatibilityPatch)
     execute {
         Fingerprint(
             definingClass = ADAPTER,

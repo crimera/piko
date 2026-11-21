@@ -7,6 +7,7 @@
 package app.crimera.patches.twitter.misc.clientversion
 
 import app.crimera.patches.twitter.misc.extension.sharedExtensionPatch
+import app.crimera.patches.twitter.misc.settings.checkCompatibilityPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
@@ -58,7 +59,7 @@ val spoofClientVersionPatch =
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Old patches")
-        dependsOn(sharedExtensionPatch)
+        dependsOn(sharedExtensionPatch, checkCompatibilityPatch)
 
         val spoofedVersion by stringOption(
             key = "spoofedVersion",

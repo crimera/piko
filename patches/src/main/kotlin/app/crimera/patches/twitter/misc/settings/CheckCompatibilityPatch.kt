@@ -19,11 +19,20 @@ internal val checkCompatibilityPatch = patch(
     execute {
         if (packageMetadata.versionName != "12.19.1-release.0") {
             throw PatchException(
-                "\n\n#####################################\n\n" +
-                        "Do not select the old X patches for NewX." +
-                        "\n\nPlease deselect all \"Old patches\". Select only \"NewX:\" patches." +
-                        "\n\nIt is recommended to reset to the \"Recommended patches\" in the patch selection screen.\n\n" +
-                        "#####################################\n\n"
+                """
+
+#####################################
+
+Do not select the old X patches for NewX.
+
+Only version 12.19.1-release.0 is compatible with "Old patches". Version ${packageMetadata.versionName} is a NewX.
+
+Please deselect all "Old patches". Select only "NewX:" patches.
+
+Morphe Manager remembers the selection of old patches. Reset to default from "Selections" (🔖) > "Recommended patches".
+
+#####################################
+"""
             )
         }
     }
