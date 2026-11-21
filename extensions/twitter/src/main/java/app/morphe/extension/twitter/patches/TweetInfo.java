@@ -47,23 +47,45 @@ public class TweetInfo {
             }
         }
     }
+    private static Field commNotesField, promoteBtnField, translateField;
+
+    /** Per post: the three fields are looked up once (by name), not on every post. */
     public static JsonApiTweet checkEntry(JsonApiTweet jsonApiTweet) {
+        if (!hideCommNotes && !hidePromoteBtn && !forceTranslate) return jsonApiTweet;
         try {
             Class jsonApiTweetCls = jsonApiTweet.getClass();
-            if( commNotesFieldName.length()==0 || promoteBtnFieldName.length()==0 || translateFieldName.length()==0 ){
-                loader(jsonApiTweetCls);
+            if (commNotesField == null || promoteBtnField == null || translateField == null) {
+
+                if( commNotesFieldName.length()==0 || promoteBtnFieldName.length()==0 || translateFieldName.length()==0 ){
+                    loader(jsonApiTweetCls);
+                }
+                commNotesField = jsonApiTweetCls.getDeclaredField(commNotesFieldName);
+                promoteBtnField = jsonApiTweetCls.getDeclaredField(promoteBtnFieldName);
+                translateField = jsonApiTweetCls.getDeclaredField(translateFieldName);
+                commNotesField.setAccessible(true);
+                promoteBtnField.setAccessible(true);
+                translateField.setAccessible(true);
             }
+            // Each on its own: the community-notes field is a boolean, and setting it to null threw, which skipped
+            // the steps after it (force translation never applied while notes were hidden: upstream #1796).
             if(hideCommNotes){
-                Field f = jsonApiTweetCls.getDeclaredField(commNotesFieldName);
-                f.set(jsonApiTweet,null);
+                try {
+                    if (commNotesField.getType() == boolean.class) commNotesField.setBoolean(jsonApiTweet, false);
+                    else commNotesField.set(jsonApiTweet, null);
+                } catch (Exception ignored) {
+                }
             }
             if(hidePromoteBtn){
-                Field f = jsonApiTweetCls.getDeclaredField(promoteBtnFieldName);
-                f.set(jsonApiTweet,null);
+                try {
+                    promoteBtnField.set(jsonApiTweet,null);
+                } catch (Exception ignored) {
+                }
             }
             if(forceTranslate){
-                Field f = jsonApiTweetCls.getDeclaredField(translateFieldName);
-                f.set(jsonApiTweet,true);
+                try {
+                    translateField.set(jsonApiTweet,true);
+                } catch (Exception ignored) {
+                }
             }
 
         } catch (Exception unused) {
