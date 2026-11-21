@@ -24,6 +24,12 @@ private object StoryTrayRowsFingerprint : Fingerprint(
     filters = listOf(string("MainFeedStoryTrayBinderGroup.buildRowViewTypes")),
 )
 
+private object FloatingStoryTrayFingerprint : Fingerprint(
+    returnType = "V",
+    parameters = listOf("Landroid/view/View;", "Landroid/view/View;", "Ljava/lang/String;", "I"),
+    filters = listOf(string("floating_tray_overlay_container")),
+)
+
 @Suppress("unused")
 val hideStoriesTrayPatch =
     patch(
@@ -34,17 +40,17 @@ val hideStoriesTrayPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            StoryTrayRowsFingerprint.method.apply {
-                val scratch = findFreeRegister(0)
-                addInstructionsWithLabels(
+            listOf(StoryTrayRowsFingerprint.method, FloatingStoryTrayFingerprint.method).forEach { method ->
+                val scratch = method.findFreeRegister(0)
+                method.addInstructionsWithLabels(
                     0,
                     """
                     $PREF_CALL_DESCRIPTOR->hideStoriesTray()Z
                     move-result v$scratch
-                    if-eqz v$scratch, :native_rows
+                    if-eqz v$scratch, :show_tray
                     return-void
                     """.trimIndent(),
-                    ExternalLabel("native_rows", getInstruction(0)),
+                    ExternalLabel("show_tray", method.getInstruction(0)),
                 )
             }
             enableSettings("hideStoriesTray")
