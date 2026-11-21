@@ -42,6 +42,10 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
+
+import static app.morphe.extension.crimera.constants.ExtensionStrings.PIKO_SETTINGS;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.crimera.PikoUtils;
@@ -65,7 +69,7 @@ public final class InboxLock {
     private static boolean autoPrompted;
     private static Runnable cancelAction;
     private static final Set<Activity> secured = Collections.newSetFromMap(new WeakHashMap<>());
-    private static int startedActivities;
+    private static final Set<Activity> startedActivities = Collections.newSetFromMap(new WeakHashMap<>());
     private static WeakReference<Activity> watched = new WeakReference<>(null);
     private static ViewTreeObserver.OnPreDrawListener drawListener;
     private static final Set<FrameLayout> inboxViews = Collections.newSetFromMap(new WeakHashMap<>());
@@ -76,18 +80,18 @@ public final class InboxLock {
     }
 
     /** Called once from the application init hook. */
-    public static synchronized void init() {
-        if (initialized || !Pref.inboxLock()) return;
-        initialized = true;
+    public static synchronized void init(Application app) {
+        if (initialized) return;
         try {
-            Application app = (Application) Utils.getContext().getApplicationContext();
+            if (!new PikoSharedPrefCategory(app, PIKO_SETTINGS).getBoolean(
+                    Settings.INBOX_LOCK.key, Settings.INBOX_LOCK.defaultValue)) return;
             app.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-                @Override public void onActivityStarted(Activity activity) { startedActivities++; }
+                @Override public void onActivityStarted(Activity activity) { startedActivities.add(activity); }
 
                 @Override public void onActivityStopped(Activity activity) {
                     // A rotation stops and restarts the activity; only really leaving the app locks again.
-                    startedActivities--;
-                    if (startedActivities <= 0 && !activity.isChangingConfigurations()) unlocked = false;
+                    if (startedActivities.remove(activity) && startedActivities.isEmpty()
+                            && !activity.isChangingConfigurations()) unlocked = false;
                 }
 
                 @Override public void onActivityResumed(Activity activity) { watch(activity); }
@@ -96,6 +100,7 @@ public final class InboxLock {
                 @Override public void onActivitySaveInstanceState(Activity a, Bundle b) { }
                 @Override public void onActivityDestroyed(Activity a) { }
             });
+            initialized = true;
         } catch (Throwable t) {
             Logger.printException(() -> "InboxLock init failed", t);
         }
@@ -129,11 +134,6 @@ public final class InboxLock {
     private static void check(Activity activity) {
         try {
             View decor = activity.getWindow().getDecorView();
-            if (!Pref.inboxLock()) {
-                removeCovers();
-                hideFromRecents(activity, false);
-                return;
-            }
             boolean inboxVisible = false;
             for (FrameLayout inbox : inboxViews) {
                 if (inbox.getRootView() != decor || !partlyVisible(inbox)) continue;
@@ -141,7 +141,8 @@ public final class InboxLock {
                 if (!unlocked) cover(activity, inbox);
             }
             boolean threadVisible = isVisible(decor, THREAD_ID);
-            hideFromRecents(activity, unlocked && (inboxVisible || threadVisible));
+            hideFromRecents(activity, DeletedMessagesActivity.isShowingOn(activity)
+                    || (unlocked && (inboxVisible || threadVisible)));
             if (unlocked) return;
             if (threadVisible) {
                 View container = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, THREAD_CONTAINER_ID));
@@ -263,6 +264,10 @@ public final class InboxLock {
         autoPrompted = false;
     }
 
+    static boolean isEnabled() {
+        return initialized;
+    }
+
     /** True while the lock is up, so turning it off in the settings has to be confirmed first. */
     public static boolean mustConfirmToDisable() {
         return initialized && !unlocked;
@@ -277,6 +282,10 @@ public final class InboxLock {
     public static void confirmIfLocked(Activity activity, Runnable action, Runnable onCancel) {
         if (!mustConfirmToDisable()) {
             action.run();
+            return;
+        }
+        if (prompting) {
+            if (onCancel != null) onCancel.run();
             return;
         }
         cancelAction = onCancel;

@@ -78,7 +78,7 @@ val inboxLockPatch =
         execute {
             instagramInitHook.fingerprint.method.apply {
                 val superIndex = indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER)
-                addInstruction(superIndex + 1, "invoke-static {}, $EXTENSION_CLASS->init()V")
+                addInstruction(superIndex + 1, "invoke-static/range {p0 .. p0}, $EXTENSION_CLASS->init(Landroid/app/Application;)V")
             }
 
             DirectInboxViewCreatedFingerprint.method.addInstruction(
