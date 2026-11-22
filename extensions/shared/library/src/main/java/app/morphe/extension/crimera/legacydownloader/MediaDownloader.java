@@ -12,10 +12,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.database.Cursor;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -63,6 +61,7 @@ public final class MediaDownloader {
     private static final long FOLDER_LOAD_TIMEOUT_MS = 15_000;
     private static final int MAX_LISTED_COMPLETIONS = 5;
     private static final String ACTION_COMPLETION_DISMISSED = "app.morphe.extension.crimera.DOWNLOAD_COMPLETION_DISMISSED";
+    private static final int COMPLETION_INTENT_FLAGS = PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE;
     private static MediaDownloader shared;
 
     private final Context context;
@@ -70,9 +69,9 @@ public final class MediaDownloader {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final AtomicInteger notificationIds = new AtomicInteger((int) System.currentTimeMillis());
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private final PendingIntent completionDismissedIntent;
-    // Main thread only: the completion notification and the file names it lists, newest first, since the user last dismissed it.
+    // Main thread only: the completion notification, its tap intent, and the file names it lists, newest first, since the user last opened or dismissed it.
     private int completionNotificationId;
+    private Intent completionViewIntent;
     private final Deque<String> completedFileNames = new ArrayDeque<>();
 
     public static synchronized MediaDownloader shared(Context context) {
@@ -93,22 +92,6 @@ public final class MediaDownloader {
             throw new IllegalStateException("Notification service is unavailable");
         }
         createNotificationChannel();
-
-        BroadcastReceiver dismissed = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                completedFileNames.clear();
-            }
-        };
-        IntentFilter filter = new IntentFilter(ACTION_COMPLETION_DISMISSED);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            this.context.registerReceiver(dismissed, filter, Context.RECEIVER_NOT_EXPORTED);
-        } else {
-            this.context.registerReceiver(dismissed, filter);
-        }
-        completionDismissedIntent = PendingIntent.getBroadcast(this.context, 0,
-                new Intent(ACTION_COMPLETION_DISMISSED).setPackage(this.context.getPackageName()),
-                PendingIntent.FLAG_IMMUTABLE);
     }
 
     private void createNotificationChannel() {
@@ -221,18 +204,15 @@ public final class MediaDownloader {
             final String finalFileName = request.fileName;
             final String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + finalFileName;
             // Built here and not in the posted task, it queries the provider for the mime type.
-            final PendingIntent viewFileIntent =
-                    buildViewFilePendingIntent(outputDocumentUri, finalFileName, finalNotificationId);
+            final Intent viewFileIntent = buildViewFileIntent(outputDocumentUri, finalFileName);
 
             mainHandler.post(() -> {
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done)
                         .setContentTitle(downloadCompletedString)
                         .setOngoing(false) // This unlocks the swipe lock completely
-                        .setProgress(0, 0, false) // Wipes the progress track bar layout away entirely
-                        .setContentIntent(viewFileIntent)
-                        .setDeleteIntent(completionDismissedIntent);
+                        .setProgress(0, 0, false); // Wipes the progress track bar layout away entirely
                 try {
-                    showCompletion(builder, finalNotificationId, finalFileName);
+                    showCompletion(builder, finalNotificationId, finalFileName, viewFileIntent);
                 } catch (Exception e) {
                     PikoUtils.logger(e);
                 }
@@ -261,18 +241,42 @@ public final class MediaDownloader {
 
     /**
      * Replaces the previous completion with {@code fileName}'s under the new {@code notificationId}, listing the
-     * completions since the user last dismissed it. Android drops updates over its rate limit and new notifications
-     * past 50 per app. Main thread only.
+     * completions since the user last opened or dismissed it. Android drops updates over its rate limit and new
+     * notifications past 50 per app. Main thread only.
      */
-    private void showCompletion(Notification.Builder builder, int notificationId, String fileName) {
-        if (!completedFileNames.isEmpty()) notificationManager.cancel(completionNotificationId);
+    private void showCompletion(Notification.Builder builder, int notificationId, String fileName, Intent viewIntent) {
+        if (completionNotificationId != 0) {
+            // Tapping sends the one-shot view intent and swiping the delete intent. Android forgets a one-shot intent
+            // once sent or once its notification is gone. A delete receiver misses taps, and getActiveNotifications()
+            // misses a just-posted notification.
+            boolean dismissed = PendingIntent.getBroadcast(context, completionNotificationId,
+                    completionDismissedIntent(), COMPLETION_INTENT_FLAGS | PendingIntent.FLAG_NO_CREATE) == null;
+            boolean opened = completionViewIntent != null && PendingIntent.getActivity(context,
+                    completionNotificationId, completionViewIntent,
+                    COMPLETION_INTENT_FLAGS | PendingIntent.FLAG_NO_CREATE) == null;
+            if (dismissed || opened) completedFileNames.clear();
+            notificationManager.cancel(completionNotificationId);
+        }
+
         completedFileNames.addFirst(fileName);
         if (completedFileNames.size() > MAX_LISTED_COMPLETIONS) completedFileNames.removeLast();
         Notification.InboxStyle style = new Notification.InboxStyle();
         for (String name : completedFileNames) style.addLine(name);
-        builder.setContentText(String.join(", ", completedFileNames)).setStyle(style);
+        builder.setContentText(String.join(", ", completedFileNames))
+                .setStyle(style)
+                .setAutoCancel(true)
+                .setContentIntent(viewIntent == null ? null
+                        : PendingIntent.getActivity(context, notificationId, viewIntent, COMPLETION_INTENT_FLAGS))
+                .setDeleteIntent(PendingIntent.getBroadcast(context, notificationId, completionDismissedIntent(),
+                        COMPLETION_INTENT_FLAGS));
         notificationManager.notify(notificationId, builder.build());
         completionNotificationId = notificationId;
+        completionViewIntent = viewIntent;
+    }
+
+    /** Nothing receives it: sending it only marks the swiped notification's one-shot delete intent as used. */
+    private Intent completionDismissedIntent() {
+        return new Intent(ACTION_COMPLETION_DISMISSED).setPackage(context.getPackageName());
     }
 
     private void replaceDocument(File replacement, Uri destination) throws IOException {
@@ -501,16 +505,13 @@ public final class MediaDownloader {
     }
 
     // Opens the downloaded file in whichever app handles its mime type.
-    private PendingIntent buildViewFilePendingIntent(Uri documentUri, String fileName, int requestCode) {
+    private Intent buildViewFileIntent(Uri documentUri, String fileName) {
         try {
             String providerMimeType = context.getContentResolver().getType(documentUri);
             String mimeType = providerMimeType != null ? providerMimeType : getMimeType(fileName);
-            Intent viewIntent = new Intent(Intent.ACTION_VIEW)
+            return new Intent(Intent.ACTION_VIEW)
                     .setDataAndType(documentUri, mimeType)
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            return PendingIntent.getActivity(context, requestCode, viewIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         } catch (Exception e) {
             // A notification without a tap action is better than crashing the app.
             PikoUtils.logger(e);
