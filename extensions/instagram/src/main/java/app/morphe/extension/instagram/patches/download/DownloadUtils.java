@@ -10,14 +10,6 @@ package app.morphe.extension.instagram.patches.download;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Dialog;
-import android.app.Notification;
-import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.IOException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -74,15 +66,6 @@ import app.morphe.extension.crimera.PikoUtils;
 import com.instagram.common.session.UserSession;
 
 public class DownloadUtils {
-
-    private static MediaDownloader downloadAllDownloader;
-
-    private static synchronized MediaDownloader getDownloadAllDownloader(Context context) {
-        if (downloadAllDownloader == null) {
-            downloadAllDownloader = new MediaDownloader(context);
-        }
-        return downloadAllDownloader;
-    }
 
     public static String getSubfolderName(String username){
         boolean SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
@@ -348,10 +331,9 @@ public class DownloadUtils {
             requests.add(buildMediaRequest(root, child, group.carouselParent == null ? 0 : index, index, MediaType.ANY, child.getMediaLink(),
                     subFolder, username + "_" + child.getDownloadFilename(MediaType.ANY), null));
         }
-        getDownloadAllDownloader(context).enqueueBatch(requests);
+        MediaDownloader.shared(context).enqueueBatch(requests);
     }
 
-    // Position is set to -1 if we want to download all medias from the media info object.
     public static void downloadMedia(Context context, MediaData mediaInfo, int position, MediaType mediaType) throws Exception {
         downloadMedia(context, mediaInfo, position, position, mediaType);
     }
@@ -362,9 +344,7 @@ public class DownloadUtils {
             Utils.showToastShort(str("piko_no_internet"));
             return;
         }
-        MediaDownloader downloader = position == -1
-                ? getDownloadAllDownloader(context)
-                : new MediaDownloader(context);
+        MediaDownloader downloader = MediaDownloader.shared(context);
         String username = mediaInfo.getUserData().getUsername();
         String subFolder = getSubfolderName(username);
 
@@ -374,7 +354,7 @@ public class DownloadUtils {
             String fileName = DownloadFileNameFormatter.safeFilename(audioMedia.getDownloadName(), ".m4a");
             downloader.enqueue(createDownloadRequest(audioUrl, Constants.DEFAULT_AUDIO_FOLDER, fileName));
 
-        } else if (position != -1) {
+        } else {
             MediaData mediaData = mediaInfo.getMediaAt(position);
             String mediaUrl;
             if (mediaType.equals(MediaType.IMAGE)) {
@@ -406,11 +386,16 @@ public class DownloadUtils {
             String shortcode = mediaData.getShortcode();
             Utils.runOnBackgroundThread(() -> {
                 MediaPicture picture = single ? MediaPicture.largerThan(shortcode, coverShortSide) : null;
-                long coverPixels = 0;
-                MediaInterface frameVideo = null;
+                if (picture != null) {
+                    if (request.url != null && !request.url.trim().isEmpty()) {
+                        request.fallbackSources.add(0, new DownloadRequest.Source(request.url, null));
+                    }
+                    request.url = picture.url;
+                }
                 try {
-                    coverPixels = picture != null ? (long) picture.width * picture.height
+                    long coverPixels = picture != null ? (long) picture.width * picture.height
                             : cover == null ? 0 : (long) cover.getWidth() * cover.getHeight();
+                    request.firstFrameMinPixels = coverPixels;
                     if (coverPixels > 0 && mediaData.isFirstFrameCover()) {
                         List<MediaInterface> videos = new ArrayList<>();
                         List<VideoData> progressive = mediaData.getVideoVariants();
@@ -420,7 +405,7 @@ public class DownloadUtils {
                         for (MediaInterface video : videos) {
                             long pixels = (long) video.getWidth() * video.getHeight();
                             if (pixels > bestPixels && video.getUrl() != null) {
-                                frameVideo = video;
+                                request.firstFrameVideoUrl = video.getUrl();
                                 bestPixels = pixels;
                             }
                         }
@@ -428,83 +413,9 @@ public class DownloadUtils {
                 } catch (Exception | LinkageError e) {
                     PikoUtils.logger(e);
                 }
-                MediaDownloader coverDownloader = frameVideo == null ? downloader
-                        : firstFrameDownloader(context.getApplicationContext(), frameVideo, coverPixels);
-                Utils.runOnMainThread(() -> {
-                    if (picture != null) {
-                        if (request.url != null && !request.url.trim().isEmpty()) {
-                            request.fallbackSources.add(0, new DownloadRequest.Source(request.url, null));
-                        }
-                        request.url = picture.url;
-                    }
-                    coverDownloader.enqueue(request);
-                });
+                downloader.enqueue(request);
             });
-
-        } else if (position == -1) {
-            downloadAllMedia(context, DownloadMediaGroup.carousel(mediaInfo));
-        } else {
-            Utils.showToastShort("There is nothing to download");
         }
-
-    }
-
-    private static MediaDownloader firstFrameDownloader(Context context, MediaInterface video, long coverPixels) {
-        return new MediaDownloader(context) {
-            private boolean attempted;
-
-            @Override
-            protected void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
-                    throws IOException {
-                if (attempted) {
-                    super.download(url, output, builder, notificationId);
-                    return;
-                }
-                attempted = true;
-                File source = null;
-                File picture = null;
-                Bitmap frame = null;
-                boolean extracted = false;
-                try {
-                    try {
-                        source = File.createTempFile("piko-cover-", ".mp4", context.getCacheDir());
-                        picture = File.createTempFile("piko-cover-", ".jpg", context.getCacheDir());
-                        try (OutputStream cached = new FileOutputStream(source)) {
-                            super.download(video.getUrl(), cached, builder, notificationId);
-                        }
-                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                        try {
-                            retriever.setDataSource(source.getAbsolutePath());
-                            frame = retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST);
-                        } finally {
-                            retriever.release();
-                        }
-                        if (frame != null && (long) frame.getWidth() * frame.getHeight() > coverPixels) {
-                            try (OutputStream jpeg = new FileOutputStream(picture)) {
-                                extracted = frame.compress(Bitmap.CompressFormat.JPEG, 95, jpeg);
-                            }
-                        }
-                    } catch (Exception | LinkageError | OutOfMemoryError e) {
-                        extracted = false;
-                        PikoUtils.logger(e);
-                    }
-                    if (extracted) {
-                        // Finish encoding before writing the document so extraction failures leave it untouched.
-                        try (FileInputStream jpeg = new FileInputStream(picture)) {
-                            byte[] buffer = new byte[8192];
-                            int count;
-                            while ((count = jpeg.read(buffer)) != -1) output.write(buffer, 0, count);
-                        }
-                    } else {
-                        super.download(url, output, builder, notificationId);
-                    }
-                } finally {
-                    if (frame != null) frame.recycle();
-                    if (source != null) source.delete();
-                    if (picture != null) picture.delete();
-                }
-            }
-        };
     }
 
     /**
@@ -982,8 +893,7 @@ public class DownloadUtils {
             Utils.showToastShort(str("piko_no_internet"));
             return;
         }
-        MediaDownloader downloader = new MediaDownloader(context);
-        downloader.enqueue(request);
+        MediaDownloader.shared(context).enqueue(request);
     }
 
     public static void externalDownloader(Object mediaObject, int currentMediaIndex){
