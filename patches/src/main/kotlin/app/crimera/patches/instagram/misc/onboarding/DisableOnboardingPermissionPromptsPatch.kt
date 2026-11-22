@@ -6,8 +6,6 @@
 
 package app.crimera.patches.instagram.misc.onboarding
 
-import app.crimera.patches.instagram.misc.settings.settingsPatch
-import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.crimera.patches.common.parameterRegisterStart
 import app.morphe.patcher.Fingerprint
@@ -34,15 +32,7 @@ private object IgBloksFullScreenOpenFingerprint : Fingerprint(
     custom = { method, _ -> !AccessFlags.STATIC.isSet(method.accessFlags) },
 )
 
-@Suppress("unused")
-val disableOnboardingPermissionPromptsPatch = patch(
-    name = "Disable onboarding permission prompts",
-    description = "Prevents contacts and location permission onboarding prompts from appearing",
-    default = true,
-) {
-    dependsOn(settingsPatch)
-    compatibleWith(COMPATIBILITY_INSTAGRAM)
-
+internal val disableOnboardingPermissionPromptsPatch = patch {
     execute {
         IgBloksFullScreenOpenFingerprint.let {
             val appIdField = it.instructionMatches.first().fieldReference

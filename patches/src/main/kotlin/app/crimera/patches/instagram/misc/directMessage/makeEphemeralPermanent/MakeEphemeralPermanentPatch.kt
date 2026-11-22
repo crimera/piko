@@ -8,7 +8,6 @@ package app.crimera.patches.instagram.misc.directMessage.makeEphemeralPermanent
 
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.directItem.directItemEntity
-import app.crimera.patches.instagram.entity.messageInfoEntity.messageInfoEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
@@ -83,7 +82,7 @@ val makeEphemeralPermanentPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(settingsPatch, messageInfoEntity, saveAllMessagesPatch, directItemEntity, userDataEntity)
+        dependsOn(settingsPatch, saveAllMessagesPatch, directItemEntity, userDataEntity)
         execute {
 
             suppressEphemeralMediaReceipts()

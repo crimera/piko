@@ -7,7 +7,6 @@
 package app.crimera.patches.instagram.misc.internalStuffs.developerOptions
 
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
-import app.crimera.patches.instagram.misc.internalStuffs.checkMappingsPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
@@ -21,7 +20,7 @@ val recommendedFlagsPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(settingsPatch, hookFlagsPatch, checkMappingsPatch)
+        dependsOn(settingsPatch, hookFlagsPatch)
         execute {
             enableSettings("recommendedFlags")
         }

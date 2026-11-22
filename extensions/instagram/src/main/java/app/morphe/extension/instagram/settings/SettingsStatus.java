@@ -268,7 +268,9 @@ public class SettingsStatus {
     public static void downloadVoiceMessage() { downloadVoiceMessage = true; }
     public static boolean downloadWithExternalDownloader = false;
     public static void downloadWithExternalDownloader() { downloadWithExternalDownloader = true; }
-    public static boolean downloadSection(){return (SettingsStatus.downloadMedia || saveMediaCommentButton || SettingsStatus.downloadWithExternalDownloader);}
+    public static boolean downloadSection() {
+        return downloadMedia || saveMediaCommentButton || downloadVoiceMessage || downloadWithExternalDownloader;
+    }
 
     //Instants Section
     public static boolean instantsDownload = false;

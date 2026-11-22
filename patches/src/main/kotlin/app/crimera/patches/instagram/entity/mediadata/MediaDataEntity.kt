@@ -19,11 +19,46 @@ import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.patch.patch
 
+internal val mediaUrlPatch = patch {
+    dependsOn(decoderEntity, videoDataEntity)
+    execute {
+        // Extracting image variants list.
+        GetImageVariantsExtensionFingerprint.changeStringAt(
+            1,
+            ImageInfoCandidatesMapperFingerprint.instructionMatches.first().methodReference.name,
+        )
+        GetImageVariantsExtensionFingerprint.changeFirstString(
+            ExtMediaDictImageInfoMapperFingerprint.instructionMatches[1].fieldReference.name,
+        )
+
+        VideoVersionsGetterFingerprint.let {
+            GetVideoVariantsV1ExtensionFingerprint.changeFirstString(it.originalMethod.name)
+            GetMoreExtendedDataExtensionFingerprint.changeFirstString(it.instructionMatches[1].fieldReference.name)
+            GetVideoVariantsV2ExtensionFingerprint.changeFirstString(it.instructionMatches[2].fieldReference.name)
+        }
+
+        // Extracting method is video used in media class.
+        IsVideoExtensionFingerprint.changeFirstString(
+            mediaVideoGetterFingerprint(MediaIsVideoFingerprint.instructionMatches.first().methodReference)
+                .originalMethod.name,
+        )
+
+        // Message audio (voice notes): media -> audio interface -> url. The interface is taken
+        // from the "audio_src" getter, since its name changes between builds.
+        AudioIntfMapperFingerprint.instructionMatches.last().methodReference.let {
+            GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, it.name)
+            GetMessageAudioUrlExtensionFingerprint.changeFirstString(
+                messageAudioGetterFingerprint(it.definingClass).originalMethod.name,
+            )
+        }
+    }
+}
+
 val mediaDataEntity =
     patch(
         description = "This patch is used for decoding obfuscated code of the media data",
     ) {
-        dependsOn(decoderEntity, userDataEntity, videoDataEntity, originalSoundDataIntfEntity, trackDataIntfEntity)
+        dependsOn(mediaUrlPatch, userDataEntity, originalSoundDataIntfEntity, trackDataIntfEntity)
         execute {
             GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(MEDIAEXT_CLASS_NAME))
 
@@ -35,12 +70,6 @@ val mediaDataEntity =
             // Extracting get user data using media and user session.
             GetUserDataWithUserSessionExtensionFingerprint.changeFirstString(
                 GetUserDataFromMediaFingerprint.originalMethod.name,
-            )
-
-            // Extracting image variants list.
-            GetImageVariantsExtensionFingerprint.changeStringAt(
-                1,
-                ImageInfoCandidatesMapperFingerprint.instructionMatches.first().methodReference.name,
             )
 
             GetAdditionalImageCandidatesExtensionFingerprint.changeString(
@@ -67,21 +96,9 @@ val mediaDataEntity =
                 InstagramMainActivityNotificationRelatedFingerprint.instructionMatches[1].methodReference.name,
             )
 
-            VideoVersionsGetterFingerprint.let {
-                GetVideoVariantsV1ExtensionFingerprint.changeFirstString(it.originalMethod.name)
-                GetMoreExtendedDataExtensionFingerprint.changeFirstString(it.instructionMatches[1].fieldReference.name)
-                GetVideoVariantsV2ExtensionFingerprint.changeFirstString(it.instructionMatches[2].fieldReference.name)
-            }
-
             // DASH manifest and audio flag, for downloads above the progressive 720p.
             GetVideoDashManifestExtensionFingerprint.changeFirstString(VideoDashManifestGetterFingerprint.originalMethod.name)
             HasAudioTrackExtensionFingerprint.changeFirstString(HasAudioGetterFingerprint.originalMethod.name)
-
-            // Extracting method is video used in media class.
-            IsVideoExtensionFingerprint.changeFirstString(
-                mediaVideoGetterFingerprint(MediaIsVideoFingerprint.instructionMatches.first().methodReference)
-                    .originalMethod.name,
-            )
 
             // Extraction of the media list.
             GetMediaListExtensionFingerprint.changeFirstString(
@@ -116,17 +133,7 @@ val mediaDataEntity =
                 )
             }
 
-            // Message audio (voice notes): media -> audio interface -> url. The interface is taken
-            // from the "audio_src" getter, since its name changes between builds.
-            AudioIntfMapperFingerprint.instructionMatches.last().methodReference.let {
-                GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, it.name)
-                GetMessageAudioUrlExtensionFingerprint.changeFirstString(
-                    messageAudioGetterFingerprint(it.definingClass).originalMethod.name,
-                )
-            }
-
             ExtMediaDictImageInfoMapperFingerprint.instructionMatches[1].fieldReference.let {
-                GetImageVariantsExtensionFingerprint.changeFirstString(it.name)
                 GetAdditionalImageCandidatesExtensionFingerprint.changeFirstString(it.name)
             }
 

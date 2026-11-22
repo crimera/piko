@@ -8,6 +8,7 @@ package app.crimera.patches.instagram.misc.dm.saveMessages
 
 import app.crimera.patches.instagram.entity.directItem.DirectItemJsonParserFingerprint
 import app.crimera.patches.instagram.entity.directItem.directItemEntity
+import app.crimera.patches.instagram.entity.mediadata.mediaUrlPatch
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
@@ -34,7 +35,7 @@ val saveDeletedMessagesPatch =
         description = "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
         default = true,
     ) {
-        dependsOn(settingsPatch, directItemEntity, userDataEntity)
+        dependsOn(settingsPatch, directItemEntity, userDataEntity, mediaUrlPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {

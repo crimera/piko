@@ -21,6 +21,7 @@ import app.crimera.patches.instagram.misc.dm.hideChatCallButtonsPatch
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
+import app.crimera.patches.instagram.misc.onboarding.disableOnboardingPermissionPromptsPatch
 import app.crimera.patches.instagram.misc.originalsigners.originalSignersPatch
 import app.crimera.patches.instagram.misc.notification.fixDirectNotificationActionCrashPatch
 import app.crimera.patches.instagram.misc.notification.fixNotificationRegistrationCrashPatch
@@ -107,6 +108,7 @@ val settingsPatch =
             originalSignersPatch,
             settingsResourcePatch,
             directShareShortcutLimitPatch,
+            disableOnboardingPermissionPromptsPatch,
             nativeSettingsSwitchStylePatch,
             whitehatIndicatorPatch,
             settingsTaskRemovalPatch,
@@ -287,7 +289,6 @@ val settingsPatch =
                     invoke-static {v$freeRegister}, Ljava/lang/Thread;->setDefaultUncaughtExceptionHandler(Ljava/lang/Thread${'$'}UncaughtExceptionHandler;)V
                     
                     ${SSTS_DESCRIPTOR.format("load")}
-                    ${LOAD_FLAGS_DESCRIPTOR.format("load")}
                     ${LOAD_FLAGS_DESCRIPTOR.format("load")}
                     invoke-static {}, $CONSTANTS_DESCRIPTOR/Constants;->load()V
                     """.trimIndent(),

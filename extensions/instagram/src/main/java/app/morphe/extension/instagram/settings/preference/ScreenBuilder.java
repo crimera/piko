@@ -870,8 +870,12 @@ public class ScreenBuilder {
     }
 
     public void buildDownloadSection() {
-        if (SettingsStatus.downloadMedia || SettingsStatus.saveMediaCommentButton) {
+        boolean mediaDownloads = SettingsStatus.downloadMedia || SettingsStatus.saveMediaCommentButton;
+        if (mediaDownloads) {
             addInternalDownloadPreferences();
+        }
+        if (mediaDownloads || SettingsStatus.downloadVoiceMessage) {
+            addDownloadFilePreferences(mediaDownloads);
         }
         if (!SettingsStatus.downloadWithExternalDownloader) return;
 
@@ -966,7 +970,9 @@ public class ScreenBuilder {
                         Settings.EMBED_DOWNLOAD_METADATA
                 )
         );
+    }
 
+    private void addDownloadFilePreferences(boolean showNameTemplate) {
         addPreference(
                 helper.listPreference(
                         str("piko_download_conflict_policy"),
@@ -975,13 +981,15 @@ public class ScreenBuilder {
                 )
         );
 
-        addPreference(
-                helper.downloadFileNameTemplatePreference(
-                        str("piko_download_file_name_template"),
-                        Pref.downloadFileNameTemplate(),
-                        Settings.DOWNLOAD_FILE_NAME_TEMPLATE
-                )
-        );
+        if (showNameTemplate) {
+            addPreference(
+                    helper.downloadFileNameTemplatePreference(
+                            str("piko_download_file_name_template"),
+                            Pref.downloadFileNameTemplate(),
+                            Settings.DOWNLOAD_FILE_NAME_TEMPLATE
+                    )
+            );
+        }
 
         addPreference(
                 helper.buttonPreference(
