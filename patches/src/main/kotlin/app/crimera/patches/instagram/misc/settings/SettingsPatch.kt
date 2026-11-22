@@ -106,6 +106,7 @@ val settingsPatch =
             sharedExtensionPatch,
             originalSignersPatch,
             settingsResourcePatch,
+            directShareShortcutLimitPatch,
             nativeSettingsSwitchStylePatch,
             whitehatIndicatorPatch,
             settingsTaskRemovalPatch,
