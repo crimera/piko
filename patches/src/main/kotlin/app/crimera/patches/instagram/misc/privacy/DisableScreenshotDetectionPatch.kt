@@ -13,6 +13,7 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
@@ -21,6 +22,7 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -51,6 +53,32 @@ internal object DirectScreenshotCaptureTriggerFingerprint : Fingerprint(
     strings = listOf("igd_screenshot_capture"),
 )
 
+internal object InstantViewerFingerprint : Fingerprint(
+    name = "onCreate",
+    filters = listOf(string("quick_snap_viewer_media_author_id")),
+)
+
+internal object ScreenshotProtectionSurfaceFingerprint : Fingerprint(
+    name = "<init>",
+    parameters = listOf("Landroid/view/SurfaceView;"),
+    filters = listOf(
+        methodCall(smali = "Landroid/view/SurfaceView;->setSecure(Z)V"),
+        methodCall(smali = "Landroid/view/SurfaceView;->setZOrderOnTop(Z)V"),
+        methodCall(smali = "Landroid/view/SurfaceHolder;->setFixedSize(II)V"),
+    ),
+)
+
+internal object InstantSecureWindowFingerprint : Fingerprint(
+    classFingerprint = InstantViewerFingerprint,
+    returnType = "V",
+    parameters = listOf("Z"),
+    filters = listOf(
+        literal(FLAG_SECURE),
+        methodCall(smali = "Landroid/view/Window;->addFlags(I)V"),
+        methodCall(smali = "Landroid/view/Window;->clearFlags(I)V"),
+    ),
+)
+
 internal object ChatRecyclerViewRelatedFingerprint : Fingerprint(
     strings = listOf("Removed holder should be bound and it should come here only in pre-layout. Holder: "),
     filters = listOf(
@@ -79,6 +107,41 @@ val disableScreenshotDetection =
                 invoke-static {}, $PREF_DESCRIPTOR->disableScreenshotDetection()Z
                 move-result
                 """.trimIndent()
+
+            val surfaceConstructor = ScreenshotProtectionSurfaceFingerprint.method
+            Fingerprint(
+                returnType = "Z",
+                filters = listOf(
+                    methodCall(smali = "${surfaceConstructor.definingClass}-><init>(Landroid/view/SurfaceView;)V"),
+                    methodCall(smali = "Landroid/view/View;->getVisibility()I"),
+                ),
+            ).apply {
+                val index = instructionMatches.last().index
+                val surfaceRegister = method.getInstruction(index).registersUsed.single()
+                // This transparent protection surface is cached. Refresh secure state when reused too.
+                // v0 is overwritten by getVisibility immediately after this hook.
+                method.addInstructions(
+                    index,
+                    """
+                    $PREF_CALL v0
+                    xor-int/lit8 v0, v0, 0x1
+                    invoke-virtual {v$surfaceRegister, v0}, Landroid/view/SurfaceView;->setSecure(Z)V
+                    """.trimIndent(),
+                )
+            }
+
+            InstantSecureWindowFingerprint.method.apply {
+                // Instants manage their own secure state outside the DM window controller.
+                addInstructionsWithLabels(
+                    0,
+                    """
+                    $PREF_CALL v0
+                    if-eqz v0, :piko
+                    const/4 p1, 0x0
+                    """.trimIndent(),
+                    ExternalLabel("piko", getInstruction(0)),
+                )
+            }
 
             // Thanks to MyInsta.
             ScreenshotDetectorFingerprint.apply {
