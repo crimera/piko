@@ -13,6 +13,7 @@ import android.text.format.DateFormat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,35 +52,8 @@ public final class RecommendedFlagsScreen {
 
     public static void build(Context context, PreferenceScreen screen, String name, boolean forSearch,
                              List<Flag> flags) {
-        Helper helper = new Helper(context);
         if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(name)) {
-            if (!forSearch) {
-                for (Flag flag : flags) {
-                    if (flag.isModified()) {
-                        screen.addPreference(helper.categoryPreference(str("piko_rec_flags_modified"), "", MODIFIED));
-                        break;
-                    }
-                }
-            }
-            for (Flag.Category category : Flag.Category.values()) {
-                for (Flag flag : flags) {
-                    if (flag.getCategory() == category) {
-                        screen.addPreference(helper.categoryPreference(str(category.titleKey()), "", fragmentName(category)));
-                        break;
-                    }
-                }
-            }
-            long lastModified = RecommendedFlags.getLastModified();
-            String summary = str("piko_rec_flags_download_hint");
-            if (lastModified > 0L) {
-                Locale locale = context.getResources().getConfiguration().getLocales().get(0);
-                String skeleton = DateFormat.is24HourFormat(context) ? "yMMMEdHm" : "yMMMEdhm";
-                String pattern = DateFormat.getBestDateTimePattern(locale, skeleton);
-                summary = str("piko_rec_flags_last_modified_at",
-                        new SimpleDateFormat(pattern, locale).format(new Date(lastModified)));
-            }
-            screen.addPreference(helper.buttonPreference(str("piko_rec_flags_refresh_file"), summary,
-                    "piko_rec_flags_refresh_file"));
+            updateCategories(context, screen, forSearch, flags);
             return;
         }
         for (Flag flag : flags) {
@@ -88,9 +62,55 @@ public final class RecommendedFlagsScreen {
             }
         }
         if (screen.getPreferenceCount() == 0) {
-            Preference empty = helper.buttonPreference(str("piko_settings_search_no_results"), "", null);
+            Preference empty = new Helper(context).buttonPreference(str("piko_settings_search_no_results"), "", null);
             empty.setSelectable(false);
             screen.addPreference(empty);
+        }
+    }
+
+    public static void updateCategories(Context context, PreferenceScreen screen, boolean forSearch, List<Flag> flags) {
+        Helper helper = new Helper(context);
+        EnumSet<Flag.Category> categories = EnumSet.noneOf(Flag.Category.class);
+        boolean hasModified = false;
+        for (Flag flag : flags) {
+            categories.add(flag.getCategory());
+            if (!forSearch && !hasModified) hasModified = flag.isModified();
+        }
+        updateCategory(screen, helper, MODIFIED, "piko_rec_flags_modified", 0, hasModified);
+        int order = 1;
+        for (Flag.Category category : Flag.Category.values()) {
+            updateCategory(screen, helper, fragmentName(category), category.titleKey(), order++, categories.contains(category));
+        }
+
+        long lastModified = RecommendedFlags.getLastModified();
+        String summary = str("piko_rec_flags_download_hint");
+        if (lastModified > 0L) {
+            Locale locale = context.getResources().getConfiguration().getLocales().get(0);
+            String skeleton = DateFormat.is24HourFormat(context) ? "yMMMEdHm" : "yMMMEdhm";
+            String pattern = DateFormat.getBestDateTimePattern(locale, skeleton);
+            summary = str("piko_rec_flags_last_modified_at",
+                    new SimpleDateFormat(pattern, locale).format(new Date(lastModified)));
+        }
+        String refreshKey = "piko_rec_flags_refresh_file";
+        Preference refresh = screen.findPreference(refreshKey);
+        if (refresh == null) {
+            refresh = helper.buttonPreference(str(refreshKey), summary, refreshKey);
+            refresh.setOrder(order);
+            screen.addPreference(refresh);
+        } else {
+            refresh.setSummary(summary);
+        }
+    }
+
+    private static void updateCategory(PreferenceScreen screen, Helper helper, String key, String titleKey,
+                                       int order, boolean visible) {
+        Preference row = screen.findPreference(key);
+        if (visible && row == null) {
+            row = helper.categoryPreference(str(titleKey), "", key);
+            row.setOrder(order);
+            screen.addPreference(row);
+        } else if (!visible && row != null) {
+            screen.removePreference(row);
         }
     }
 }

@@ -88,15 +88,12 @@ public class RecommendedFlags {
         return flags;
     }
 
-    public static void downloadRecommendedFlagsFile(Runnable onComplete) {
+    public static void downloadRecommendedFlagsFile() {
         String filename = Constants.REC_FLAGS+".json";
         String host = Constants.PIKO_MAPPINGS_PATH;
         InstaUtils.downloadFile(host, filename, getRecommendedFlagsFile(), () -> {
             for (Runnable listener : changeListeners) {
                 listener.run();
-            }
-            if (onComplete != null) {
-                onComplete.run();
             }
         });
     }

@@ -417,11 +417,11 @@ public final class SettingsActivity {
                 SettingsFragment fragment,
                 PreferenceScreen rootScreen
         ) {
-            if ((!rootSettings && !RecommendedFlagsScreen.isFlagsScreen(fragmentName)) || searchController != null) {
+            rootFragment = fragment;
+            if ((!rootSettings && !Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) || searchController != null) {
                 return;
             }
 
-            rootFragment = fragment;
             searchController = new SettingsSearchController(
                     activity,
                     createSearchIndex(fragment, rootScreen),
@@ -454,11 +454,7 @@ public final class SettingsActivity {
         ) {
             List<Flag> flags = RecommendedFlags.getFlags(false);
             if (RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
-                fragment.searchableFlags.clear();
-                for (Flag flag : flags) {
-                    fragment.searchableFlags.put(flag.getCode().key, flag);
-                }
-                return SettingsSearchIndex.forRecommendedFlags(flags);
+                return fragment.indexFlags(flags);
             }
             final PreferenceManager preferenceManager = fragment.getPreferenceManager();
             final Context context = fragment.getActivity();
@@ -492,7 +488,7 @@ public final class SettingsActivity {
 
         public void onPause() {
             RecommendedFlags.removeChangeListener(recommendedFlagsChanged);
-            refreshSearchIndexOnResume = searchController != null;
+            refreshSearchIndexOnResume = rootFragment != null;
         }
 
         public void onResume() {
@@ -506,15 +502,22 @@ public final class SettingsActivity {
         }
 
         private void refreshSearchIndex() {
+            if (rootFragment != null && searchController == null) {
+                rootFragment.refreshFlagsScreen();
+                return;
+            }
             if (rootFragment != null && searchController != null) {
+                if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName) && !searchController.state().searchMode) {
+                    List<Flag> flags = RecommendedFlags.getFlags(false);
+                    searchController.replaceIndex(rootFragment.indexFlags(flags));
+                    RecommendedFlagsScreen.updateCategories(activity, rootFragment.getPreferenceScreen(), false, flags);
+                    return;
+                }
                 rootFragment.runPreservingScrollPosition(() -> {
                     searchController.replaceIndex(createSearchIndex(
                             rootFragment,
                             rootFragment.buildScreen(fragmentName)
                     ));
-                    if (RecommendedFlagsScreen.isFlagsScreen(fragmentName) && !searchController.state().searchMode) {
-                        rootFragment.renderSearchState(searchController.state());
-                    }
                 });
             }
         }
@@ -719,13 +722,26 @@ public final class SettingsActivity {
                 };
         private final Runnable refreshFlags = () -> {
             Controller controller = getController(getActivity());
-            if (controller != null && controller.searchController != null && listView != null
-                    && !controller.searchController.state().searchMode
-                    && (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)
-                    || RecommendedFlagsScreen.MODIFIED.equals(fragmentName))) {
-                runPreservingScrollPosition(() -> renderSearchState(controller.searchController.state()));
+            if (controller == null || listView == null) return;
+            if (RecommendedFlagsScreen.MODIFIED.equals(fragmentName)) {
+                refreshFlagsScreen();
+            } else if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)
+                    && controller.searchController != null && !controller.searchController.state().searchMode) {
+                RecommendedFlagsScreen.updateCategories(context, getPreferenceScreen(), false, RecommendedFlags.getFlags(false));
             }
         };
+
+        private void refreshFlagsScreen() {
+            runPreservingScrollPosition(() -> setPreferenceScreen(buildScreen(fragmentName)));
+        }
+
+        private SettingsSearchIndex indexFlags(List<Flag> flags) {
+            searchableFlags.clear();
+            for (Flag flag : flags) {
+                searchableFlags.put(flag.getCode().key, flag);
+            }
+            return SettingsSearchIndex.forRecommendedFlags(flags);
+        }
 
         private void runPreservingScrollPosition(Runnable update) {
             ListView currentList = listView;
@@ -917,6 +933,10 @@ public final class SettingsActivity {
             }
             setPreferenceScreen(screen);
             if (listView != null) {
+                if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) {
+                    listView.setTranscriptMode(state.searchMode
+                            ? ListView.TRANSCRIPT_MODE_DISABLED : ListView.TRANSCRIPT_MODE_NORMAL);
+                }
                 if (searchEntryView != null) {
                     if (state.searchMode && searchEntryAdded) {
                         listView.removeHeaderView(searchEntryView);
