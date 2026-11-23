@@ -71,7 +71,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.12.0-dev.5](https://github.com/crimera/piko/releases/tag/v3.12.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;197 patches total
+> **[v3.12.0-dev.6](https://github.com/crimera/piko/releases/tag/v3.12.0-dev.6)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;197 patches total
 <details>
 <summary>📦 NewX&nbsp;&nbsp;•&nbsp;&nbsp;52 patches</summary>
 <br>
@@ -153,6 +153,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
 | [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app. | • Package name<br>• App name |
 | [Copy comment](#copy-comment) | Adds buttons to copy comments and their authors' usernames on posts and reels. |  |
+| [Custom emoji font](#custom-emoji-font) | Adds options to import or delete a custom emoji font. |  |
 | [Custom font](#custom-font) | Adds an option to replace the app font with a font file from the device storage. |  |
 | [Custom sharing domain](#custom-sharing-domain) | Allows for using custom domains when sharing posts, reels and stories. |  |
 | [Customise story ring size](#customise-story-ring-size) |  |  |
@@ -167,7 +168,6 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
 | [Disable highlights](#disable-highlights) |  |  |
-| [Disable onboarding permission prompts](#disable-onboarding-permission-prompts) | Prevents contacts and location permission onboarding prompts from appearing |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
