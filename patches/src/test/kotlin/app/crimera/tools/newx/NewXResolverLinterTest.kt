@@ -82,6 +82,8 @@ import kotlin.test.assertTrue
 import app.crimera.patches.newx.misc.dynamiccolor.factoryResultFeedsStore
 import app.crimera.patches.newx.misc.dynamiccolor.injectActivatedLikeTint
 import app.crimera.patches.newx.misc.dynamiccolor.isTabSlotColors
+import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsRowDelegate
+import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsRowIconConsumer
 
 class NewXResolverLinterTest {
     @Test
@@ -1017,6 +1019,53 @@ class NewXResolverLinterTest {
             "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(),
             implementation.methodImplementation,
         )
+    }
+
+    @Test
+    fun `delegated post options preserve the lookup action and only replace the native icon`() {
+        val action = "Lfixture/Action;"
+        val row = "Lfixture/Row;"
+        val icon = "Lcom/x/icons/Fixture;"
+        val map = ImmutableFieldReference("Lfixture/State;", "labels", "Ljava/util/Map;")
+        val string = "Ljava/lang/String;"
+        val item = "Lcom/x/ui/common/sheets/Fixture;"
+        fun method(owner: String, parameters: List<String>, registers: Int, code: MethodImplementationBuilder.() -> Unit) =
+            ImmutableMethod(
+                owner, "render", parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
+                "V", AccessFlags.STATIC.value, emptySet(), emptySet(),
+                MethodImplementationBuilder(registers).apply(code).methodImplementation,
+            )
+        val renderer = method("Lfixture/Menu;", listOf(action, map.definingClass), 6) {
+            addInstruction("move-object v1, v4".toInstruction())
+            addInstruction("iget-object v0, v5, $map".toInstruction())
+            addInstruction("invoke-interface {v0, v1}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;".toInstruction())
+            addInstruction("move-result-object v0".toInstruction())
+            addInstruction("check-cast v0, $string".toInstruction())
+            addInstruction("move-object v2, v1".toInstruction())
+            addInstruction("invoke-static {v2, v0}, $row->render($action$string)V".toInstruction())
+            addInstruction("return-void".toInstruction())
+        }
+        val lookup = postOptionsFeedbackLookups(renderer, map) { it == "Ljava/util/Map;" }.single()
+        assertEquals(row, resolvePostOptionsRowDelegate(renderer, lookup, action).definingClass)
+
+        val rowMethod = method(row, listOf(action, string), 6) {
+            val constructor = "$item-><init>(Ljava/lang/Object;$icon$string)V"
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 4, getLabel("icon")))
+            addInstruction("new-instance v0, $item".toInstruction())
+            addInstruction("const/4 v1, 0x0".toInstruction())
+            addInstruction("invoke-direct {v0, v4, v1, v5}, $constructor".toInstruction())
+            addInstruction("return-void".toInstruction())
+            addLabel("icon")
+            addInstruction("new-instance v0, $item".toInstruction())
+            addInstruction("sget-object v2, Lfixture/Icons;->native:$icon".toInstruction())
+            addInstruction("move-object v1, v2".toInstruction())
+            addInstruction("invoke-direct {v0, v4, v1, v5}, $constructor".toInstruction())
+            addInstruction("return-void".toInstruction())
+        }
+        val consumer = resolvePostOptionsRowIconConsumer(rowMethod)
+        assertEquals(8, consumer.index)
+        assertEquals(1, consumer.iconRegister)
+        assertEquals(4, consumer.actionRegister)
     }
 
     @Test
