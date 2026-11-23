@@ -3,6 +3,8 @@ package app.crimera.patches.newx.misc.mediasheet
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
+import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.MultiChoiceSettingDefinition
 import app.crimera.patches.settings.SettingReadRegisterConstraint
@@ -28,6 +30,7 @@ import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
@@ -38,7 +41,8 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 private const val MEDIA_SHEET_FILTER_SIGNATURE =
     "filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;"
 private const val LABEL_BRIDGE_NAME = "getLabelResourceId"
-private const val IMMUTABLE_LIST_DESCRIPTOR = "Lkotlinx/collections/immutable/b;"
+private const val IMMUTABLE_LIST_SCOPE = "Lkotlinx/collections/immutable/"
+private const val ACTION_SHEET_SCOPE = "Lcom/x/ui/common/sheets/"
 private const val ITERABLE_DESCRIPTOR = "Ljava/lang/Iterable;"
 private const val INT_DESCRIPTOR = "I"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
@@ -98,7 +102,7 @@ private object MediaSheetBuilderFingerprint : Fingerprint(
 private data class ResolvedMediaSheetLabel(
     val rowDescriptor: String,
     val labelDescriptor: String,
-    val labelGetter: MethodReference,
+    val labelField: FieldReference,
     val labelResourceField: FieldReference,
 )
 
@@ -209,11 +213,19 @@ private fun resolveMediaSheetLabelModel(match: Match): ResolvedMediaSheetLabel {
         classDefByOrNull(rowConstructor.definingClass)
             ?: throw PatchException("NewX media-sheet row class was not found: ${rowConstructor.definingClass}")
 
-    val labelGetters =
-        rowClass.methods.filter { candidate ->
-            candidate.parameterTypes.isEmpty() && candidate.returnType == labelBase
+    val rowToString = requireExactlyOne(
+        "NewX media-sheet row toString in ${rowClass.type}",
+        rowClass.methods.filter { it.name == "toString" && it.parameterTypes.isEmpty() },
+    )
+    val labelField = rowToString.fieldForToStringLabel(", title=")
+    if (labelField.definingClass != rowClass.type || labelField.type != labelBase ||
+        rowClass.fields.none { field ->
+            field == labelField && AccessFlags.PUBLIC.isSet(field.accessFlags) &&
+                !AccessFlags.STATIC.isSet(field.accessFlags)
         }
-    val labelGetter = requireExactlyOne("NewX media-sheet label getter in ${rowClass.type}", labelGetters)
+    ) {
+        throw PatchException("NewX media-sheet title must be a public row field of type $labelBase: $labelField")
+    }
 
     val labelResourceFields =
         labelClass.fields.filter { field ->
@@ -225,7 +237,7 @@ private fun resolveMediaSheetLabelModel(match: Match): ResolvedMediaSheetLabel {
     return ResolvedMediaSheetLabel(
         rowDescriptor = rowClass.type,
         labelDescriptor = labelClass.type,
-        labelGetter = labelGetter,
+        labelField = labelField,
         labelResourceField = labelResourceField,
     )
 }
@@ -234,15 +246,25 @@ private fun filterMediaSheetOptions(
     method: MutableMethod,
     hiddenItems: MultiChoiceSettingDefinition,
 ) {
+    val instructions = method.instructions.toList()
     val conversions =
-        method.instructions.mapIndexedNotNull { index, instruction ->
+        instructions.mapIndexedNotNull { index, instruction ->
             if (instruction.opcode !in STATIC_INVOKE_OPCODES) return@mapIndexedNotNull null
             val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-            val parameters = reference.parameterTypes.map(CharSequence::toString)
+            if (!reference.returnType.startsWith(IMMUTABLE_LIST_SCOPE) ||
+                reference.parameterTypes.map(CharSequence::toString) != listOf(ITERABLE_DESCRIPTOR)
+            ) return@mapIndexedNotNull null
+            val result = instructions.getOrNull(index + 1) as? OneRegisterInstruction ?: return@mapIndexedNotNull null
+            if (result.opcode != Opcode.MOVE_RESULT_OBJECT) return@mapIndexedNotNull null
             (index to reference).takeIf {
-                reference.returnType == IMMUTABLE_LIST_DESCRIPTOR &&
-                    parameters.size == 1 &&
-                    parameters[0] == ITERABLE_DESCRIPTOR
+                instructions.withIndex().any { (callIndex, call) ->
+                    if (callIndex <= index + 1 || call.opcode !in STATIC_INVOKE_OPCODES) return@any false
+                    val renderer = call.getReference<MethodReference>() ?: return@any false
+                    val listRegister = call.registersUsed.firstOrNull() ?: return@any false
+                    renderer.definingClass.startsWith(ACTION_SHEET_SCOPE) &&
+                        renderer.parameterTypes.firstOrNull() == reference.returnType &&
+                        method.provesValueFromInstruction(index + 1, result.registerA, callIndex, listRegister)
+                }
             }
         }
     val conversion = requireExactlyOne("NewX media-sheet immutable list conversion", conversions)
@@ -289,7 +311,7 @@ private fun filterMediaSheetOptions(
         // The sheet renderer expects the app's immutable list type, so reuse the resolved
         // conversion instead of handing it the extension's ArrayList.
         invokeStatic(conversionReference, resultRegister)
-        moveResult(resultRegister, IMMUTABLE_LIST_DESCRIPTOR)
+        moveResult(resultRegister, conversionReference.returnType)
     }
 }
 
@@ -312,8 +334,7 @@ private fun patchMediaSheetLabelBridge(model: ResolvedMediaSheetLabel) {
 
     bridge.insertHook(0, relocateBranchTargets = false) {
         checkCast(register, model.rowDescriptor)
-        invokeVirtual(model.labelGetter, register)
-        moveResult(register, model.labelGetter.returnType)
+        iget(register, register, model.labelField)
         checkCast(register, model.labelDescriptor)
         iget(register, register, model.labelResourceField)
         returnValue(register)
