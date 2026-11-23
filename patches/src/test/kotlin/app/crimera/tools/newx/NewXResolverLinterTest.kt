@@ -490,11 +490,17 @@ class NewXResolverLinterTest {
         val premium = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "premium", emptyList(), "Z")
         val offline = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "offline", emptyList(), "Z")
         val feature = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "feature", emptyList(), "Z")
-        listOf("direct", "relocated", "unrelatedTry", "dispatchPolicy", "defaultArm").forEach { shape ->
+        listOf("direct", "relocated", "unrelatedTry", "dispatchPolicy", "defaultArm", "retiredSwitch").forEach { shape ->
             val (handler, classes) = downloadCapabilityFixture(shape)
             val before = handler.instructions.map { it.opcode }
-            assertEquals(if (shape == "direct") 3 else 2,
-                resolveVideoDownloadSubscriptionResults(handler, premium, offline, feature, classes::get).size)
+            val rollout = feature.takeUnless { shape == "retiredSwitch" }
+            val expected = when (shape) {
+                "direct" -> 3
+                "retiredSwitch" -> 1
+                else -> 2
+            }
+            assertEquals(expected,
+                resolveVideoDownloadSubscriptionResults(handler, premium, offline, rollout, classes::get).size)
             assertEquals(before, handler.instructions.map { it.opcode })
         }
         // A valid quota policy elsewhere must not stand in for the captured handler's call path.
@@ -514,12 +520,18 @@ class NewXResolverLinterTest {
         val premium = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "premium", emptyList(), "Z")
         val offline = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "offline", emptyList(), "Z")
         val feature = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "feature", emptyList(), "Z")
-        listOf("direct", "relocated", "secondDisconnected", "secondOtherSelector").forEach { shape ->
+        listOf("direct", "relocated", "retiredSwitch", "secondDisconnected", "secondOtherSelector").forEach { shape ->
             val (handler, classes) = timelineDownloadCapabilityFixture(shape)
             val before = handler.instructions.map { it.opcode }
-            if (shape == "direct" || shape == "relocated") {
-                assertEquals(if (shape == "direct") 9 else 7,
-                    resolveTimelineDownloadSubscriptionResults(handler, premium, offline, feature, classes::get).size)
+            if (shape in listOf("direct", "relocated", "retiredSwitch")) {
+                val rollout = feature.takeUnless { shape == "retiredSwitch" }
+                val expected = when (shape) {
+                    "direct" -> 9
+                    "retiredSwitch" -> 1
+                    else -> 7
+                }
+                assertEquals(expected,
+                    resolveTimelineDownloadSubscriptionResults(handler, premium, offline, rollout, classes::get).size)
             } else {
                 val error = assertFailsWith<PatchException>(shape) {
                     resolveTimelineDownloadSubscriptionResults(handler, premium, offline, feature, classes::get)
@@ -547,7 +559,7 @@ class NewXResolverLinterTest {
         fun add(instruction: String) = implementation.downloadInstruction(instruction)
         add("iget-object v1, v10, $callback->host:$host")
         add("iget-object v0, v1, $host->subscriptions:Lcom/x/subscriptions/Fixture;")
-        (List(6) { "feature" } + "premium").forEach { gate ->
+        (List(if (shape == "retiredSwitch") 0 else 6) { "feature" } + "premium").forEach { gate ->
             add("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->$gate()Z")
             add("move-result v2")
         }
@@ -638,7 +650,9 @@ class NewXResolverLinterTest {
         val suspendDescriptor = "$coroutine->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;"
         val handler = MutableMethod(method(handlerType, "event", listOf("Ljava/lang/Object;"), "V", 12) {
             downloadInstruction("iget-object v0, v10, $handlerType->subscriptions:Lcom/x/subscriptions/Fixture;")
-            val gates = listOf("feature", "premium") + if (shape == "direct") listOf("offline") else emptyList()
+            val gates = listOf("feature", "premium", "offline").filter { gate ->
+                (gate != "feature" || shape != "retiredSwitch") && (gate != "offline" || shape == "direct")
+            }
             gates.forEach { gate ->
                 downloadInstruction("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->$gate()Z")
                 if (shape != "missingResult" || gate != "premium") downloadInstruction("move-result v2")

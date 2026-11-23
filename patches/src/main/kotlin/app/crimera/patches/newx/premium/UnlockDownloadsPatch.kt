@@ -7,6 +7,7 @@ import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.OBJECT_MOVE_OPCODES
 import app.crimera.patches.common.INTEGER_MOVE_OPCODES
 import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -462,14 +463,14 @@ internal fun resolveVideoDownloadSubscriptionResults(
     handler: MutableMethod,
     premium: MethodReference,
     offlinePremium: MethodReference,
-    offlineFeature: MethodReference,
+    offlineFeature: MethodReference?,
     classByType: (String) -> ClassDef?,
 ): List<Int> {
     val results = handler.subscriptionResults()
     val references = results.map { handler.instructions[it - 1].getReference<MethodReference>()!!.toString() }
-    val known = setOf(premium.toString(), offlinePremium.toString(), offlineFeature.toString())
+    val known = listOfNotNull(premium, offlinePremium, offlineFeature).map(MethodReference::toString)
     if (references.any { it !in known }) throw PatchException("Unknown NewX video subscription gate in $handler: $references")
-    for (required in listOf(premium, offlineFeature)) {
+    for (required in listOfNotNull(premium, offlineFeature)) {
         requireExactlyOne("NewX video capability $required in $handler", references.filter { it == required.toString() })
     }
     val directOffline = requireAtMostOne("NewX direct offline premium capability in $handler", references.filter { it == offlinePremium.toString() })
@@ -482,17 +483,19 @@ internal fun resolveTimelineDownloadSubscriptionResults(
     handler: MutableMethod,
     premium: MethodReference,
     offlinePremium: MethodReference,
-    offlineFeature: MethodReference,
+    offlineFeature: MethodReference?,
     classByType: (String) -> ClassDef?,
 ): List<Int> {
     val results = handler.subscriptionResults()
     val flow = DownloadFlow(handler)
     val instructions = flow.instructions
-    val known = setOf(premium.toString(), offlinePremium.toString(), offlineFeature.toString())
+    val known = listOfNotNull(premium, offlinePremium, offlineFeature).map(MethodReference::toString)
     val references = results.associate { it - 1 to instructions[it - 1].getReference<MethodReference>()!!.toString() }
     if (references.values.any { it !in known }) throw PatchException("Unknown NewX timeline subscription gate in $handler: $references")
     requireExactlyOne("NewX timeline all-tier premium gate in $handler", references.filterValues { it == premium.toString() }.keys)
-    if (references.values.none { it == offlineFeature.toString() }) throw PatchException("Missing NewX timeline offline feature capability in $handler")
+    if (offlineFeature != null && references.values.none { it == offlineFeature.toString() }) {
+        throw PatchException("Missing NewX timeline offline feature capability in $handler")
+    }
 
     val hosts = references.keys.map { index ->
         val subscription = flow.fieldOrigin(index, instructions[index].registersUsed[0])
@@ -636,9 +639,11 @@ val newXDownloadPatch =
                 "NewX offline-video premium checker",
                 SubscriptionsFeaturesOfflinePremiumFingerprint.scopedMatchAll(),
             )
-            val offlineFeature = requireExactlyOne(
+            // Builds without the rollout switch dispatch offline saves directly. The handler
+            // resolvers still require proof of the downstream offline premium policy.
+            val offlineFeature = requireAtMostOne(
                 "NewX offline-video feature gate",
-                SubscriptionsFeaturesOfflineVideoEnabledFingerprint.scopedMatchAll(),
+                SubscriptionsFeaturesOfflineVideoEnabledFingerprint.scopedMatchAllOrNull().orEmpty(),
             )
             val videoHandler = requireExactlyOne(
                 "NewX video download handler",
@@ -648,7 +653,7 @@ val newXDownloadPatch =
                 videoHandler.method,
                 premium.originalMethod,
                 offlinePremium.originalMethod,
-                offlineFeature.originalMethod,
+                offlineFeature?.originalMethod,
                 { descriptor -> classDefByOrNull(descriptor) },
             )
 
@@ -660,13 +665,13 @@ val newXDownloadPatch =
                 timelineHandler.method,
                 premium.originalMethod,
                 offlinePremium.originalMethod,
-                offlineFeature.originalMethod,
+                offlineFeature?.originalMethod,
                 { descriptor -> classDefByOrNull(descriptor) },
             )
 
             videoHandler.method.forceSubscriptionFeatureResults(videoResults)
             timelineHandler.method.forceSubscriptionFeatureResults(timelineResults)
-            listOf(premium, offlinePremium, offlineFeature).forEach(::forceBooleanResult)
+            listOfNotNull(premium, offlinePremium, offlineFeature).forEach(::forceBooleanResult)
 
             requireMatches(
                 "NewX video media downloadability method",
