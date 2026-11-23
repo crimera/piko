@@ -53,7 +53,6 @@
     <string name="piko_disable_double_tap_like_message">停用訊息雙擊讚好</string>
     <string name="piko_disable_double_tap_to_like">停用雙擊讚好</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">其他</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
     <string name="piko_follow_back_indicator_desc">在個人檔案頁面中新增「已追蹤你」狀態標籤，並在點擊時顯示詳細的好友關係狀態</string>
     <string name="piko_fbi_follows_you">已追蹤你</string>

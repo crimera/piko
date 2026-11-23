@@ -59,8 +59,14 @@ public class ScreenBuilder {
             linksSection();
         } else if (Constants.PIKO_FRAGMENT_DISTRACTION_FREE.equals(fragmentName)) {
             distractionFreeSection();
-        } else if (Constants.PIKO_FRAGMENT_MISC.equals(fragmentName)) {
-            buildMiscSection();
+        } else if (Constants.PIKO_FRAGMENT_APPEARANCE.equals(fragmentName)) {
+            buildAppearanceSection();
+        } else if (Constants.PIKO_FRAGMENT_PROFILE.equals(fragmentName)) {
+            buildProfileSection();
+        } else if (Constants.PIKO_FRAGMENT_POSTS.equals(fragmentName)) {
+            buildPostsSection();
+        } else if (Constants.PIKO_FRAGMENT_REELS.equals(fragmentName)) {
+            buildReelsSection();
         } else if (Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA.equals(fragmentName)) {
             buildDownloadSection();
         } else if (Constants.PIKO_FRAGMENT_NAV_BTNS.equals(fragmentName)) {
@@ -729,10 +735,7 @@ public class ScreenBuilder {
         }
     }
 
-    public void buildMiscSection() {
-        if (!(SettingsStatus.miscSection())) return;
-
-        // PreferenceCategory category= addCategory(str("piko_category_misc"));
+    private void buildAppearanceSection() {
         if (MaterialYouTheme.isAmoledAvailable()) {
             addPreference(
                     helper.availableWhen(
@@ -772,15 +775,18 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.moreOptionsOnPost) {
+        if (SettingsStatus.removeEmptyBottomSpace) {
             addPreference(
                     helper.switchPreference(
-                            str("piko_enable_more_options_on_post"),
-                            str("piko_enable_more_options_on_post_desc"),
-                            Settings.ENABLE_MORE_OPTIONS_ON_POST
+                            str("piko_remove_empty_bottom_space"),
+                            "",
+                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
                     )
             );
         }
+    }
+
+    private void buildProfileSection() {
         if (SettingsStatus.followBackIndicator) {
             addPreference(
                     helper.switchPreference(
@@ -814,12 +820,17 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.resumeReelsAfterScrolling) {
-            addPreference(helper.switchPreference(
-                    str("piko_resume_reels_after_scrolling"),
-                    str("piko_resume_reels_after_scrolling_desc"),
-                    Settings.RESUME_REELS_AFTER_SCROLLING
-            ));
+    }
+
+    private void buildPostsSection() {
+        if (SettingsStatus.moreOptionsOnPost) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_enable_more_options_on_post"),
+                            str("piko_enable_more_options_on_post_desc"),
+                            Settings.ENABLE_MORE_OPTIONS_ON_POST
+                    )
+            );
         }
         if (SettingsStatus.improveImageViewing) {
             addPreference(
@@ -839,14 +850,15 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.removeEmptyBottomSpace) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_remove_empty_bottom_space"),
-                            "",
-                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
-                    )
-            );
+    }
+
+    private void buildReelsSection() {
+        if (SettingsStatus.resumeReelsAfterScrolling) {
+            addPreference(helper.switchPreference(
+                    str("piko_resume_reels_after_scrolling"),
+                    str("piko_resume_reels_after_scrolling_desc"),
+                    Settings.RESUME_REELS_AFTER_SCROLLING
+            ));
         }
     }
 
@@ -1238,6 +1250,16 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.distractionFreeSection()){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_category_distraction_free"),
+                            "",
+                            Constants.PIKO_FRAGMENT_DISTRACTION_FREE
+                    )
+            );
+        }
+
         if (SettingsStatus.ghostSection()){
             addPreference(
                     helper.categoryPreference(
@@ -1258,12 +1280,52 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.profileSection()){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_navigation_tab_profile"),
+                            "",
+                            Constants.PIKO_FRAGMENT_PROFILE
+                    )
+            );
+        }
+
+        if (SettingsStatus.postsSection()){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_category_posts"),
+                            "",
+                            Constants.PIKO_FRAGMENT_POSTS
+                    )
+            );
+        }
+
+        if (SettingsStatus.resumeReelsAfterScrolling){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_navigation_tab_reels"),
+                            "",
+                            Constants.PIKO_FRAGMENT_REELS
+                    )
+            );
+        }
+
         if (SettingsStatus.storySection()){
             addPreference(
                     helper.categoryPreference(
                             str("piko_category_story"),
                             "",
                             Constants.PIKO_FRAGMENT_STORY
+                    )
+            );
+        }
+
+        if (SettingsStatus.instantsDownload){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_instants_title"),
+                            "",
+                            Constants.PIKO_FRAGMENT_INSTANTS
                     )
             );
         }
@@ -1278,26 +1340,6 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.distractionFreeSection()){
-            addPreference(
-                    helper.categoryPreference(
-                            str("piko_category_distraction_free"),
-                            "",
-                            Constants.PIKO_FRAGMENT_DISTRACTION_FREE
-                    )
-            );
-        }
-
-        if (SettingsStatus.miscSection()){
-            addPreference(
-                    helper.categoryPreference(
-                            str("piko_category_misc"),
-                            "",
-                            Constants.PIKO_FRAGMENT_MISC
-                    )
-            );
-        }
-
         if (SettingsStatus.downloadSection()){
             addPreference(
                     helper.categoryPreference(
@@ -1308,12 +1350,12 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.instantsDownload){
+        if (SettingsStatus.appearanceSection()){
             addPreference(
                     helper.categoryPreference(
-                            str("piko_instants_title"),
+                            str("piko_category_appearance"),
                             "",
-                            Constants.PIKO_FRAGMENT_INSTANTS
+                            Constants.PIKO_FRAGMENT_APPEARANCE
                     )
             );
         }

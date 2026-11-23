@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">Wyłącz polubienie wiadomości podwójnym dotknięciem</string>
     <string name="piko_disable_double_tap_to_like">Wyłącz polubienie podwójnym dotknięciem</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">Różne</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Włącz wskaźnik statusu relacji</string>

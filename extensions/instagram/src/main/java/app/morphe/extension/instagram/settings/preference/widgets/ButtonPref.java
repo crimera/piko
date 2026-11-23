@@ -198,8 +198,17 @@ public class ButtonPref extends Preference {
         if (key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)) {
             return UI.DRAWABLE_FRAME_CROSSED_ICON;
         }
-        if (key.equals(Constants.PIKO_FRAGMENT_MISC)) {
-            return UI.DRAWABLE_SHAPES_ICON;
+        if (key.equals(Constants.PIKO_FRAGMENT_APPEARANCE)) {
+            return UI.DRAWABLE_APPEARANCE_ICON;
+        }
+        if (key.equals(Constants.PIKO_FRAGMENT_PROFILE)) {
+            return UI.DRAWABLE_PROFILE_ICON;
+        }
+        if (key.equals(Constants.PIKO_FRAGMENT_POSTS)) {
+            return UI.DRAWABLE_POSTS_ICON;
+        }
+        if (key.equals(Constants.PIKO_FRAGMENT_REELS)) {
+            return UI.DRAWABLE_REELS_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)) {
             return UI.DRAWABLE_DOWNLOAD_ICON;
@@ -217,10 +226,10 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_COLLECTIONS_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_DM)) {
-            return UI.DRAWABLE_SHARE_TO_DIRECT;
+            return UI.DRAWABLE_DM_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)) {
-            return UI.DRAWABLE_SHARE_TO_REEL;
+            return UI.DRAWABLE_FILTER_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_INSTANTS)){
             return UI.DRAWABLE_INSTANTS_ICON;

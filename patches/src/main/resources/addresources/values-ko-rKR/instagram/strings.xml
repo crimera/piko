@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">메시지 두 번 탭하여 좋아요 비활성화</string>
     <string name="piko_disable_double_tap_to_like">두 번 탭하여 좋아요 비활성화</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">기타</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>

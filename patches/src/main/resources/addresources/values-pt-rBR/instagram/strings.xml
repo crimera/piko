@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">Desativar curtida por toque duplo em mensagens</string>
     <string name="piko_disable_double_tap_to_like">Desativar curtida por toque duplo</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">Diversos</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Ativar indicador de status de amizade</string>

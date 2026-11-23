@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">Mesaja çift tıklayıp beğenmeyi devre dışı bırak</string>
     <string name="piko_disable_double_tap_to_like">Çift dokunarak beğenmeyi devre dışı bırak</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">Çeşitli</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>

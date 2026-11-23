@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">Désactiver le double appui pour aimer un message</string>
     <string name="piko_disable_double_tap_to_like">Désactiver le double appui pour aimer</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">Divers</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>

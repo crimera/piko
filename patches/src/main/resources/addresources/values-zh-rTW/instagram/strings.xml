@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">停用訊息雙擊按讚</string>
     <string name="piko_disable_double_tap_to_like">停用雙擊按讚</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">其他</string>
     <string name="piko_material_you_title">Material You 模式</string>
     <string name="piko_amoled_title">AMOLED 純黑模式</string>
     <string name="piko_follow_back_indicator">顯示追蹤關係</string>

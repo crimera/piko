@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">メッセージをダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_to_like">ダブルタップでの「いいね！」を無効化</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">その他</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>

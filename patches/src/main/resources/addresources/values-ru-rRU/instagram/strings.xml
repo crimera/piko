@@ -62,7 +62,6 @@
     <string name="piko_disable_double_tap_like_message">Отключить двойное нажатие для отметки «Нравится» на сообщении</string>
     <string name="piko_disable_double_tap_to_like">Отключить двойное нажатие для отметки «Нравится»</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">Разное</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">Amoled</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>

@@ -71,6 +71,7 @@ val settingsResourcePatch =
                     "piko_settings_shortcut_foreground.xml",
                     "piko_ghost_icon.xml",
                 ),
+                ResourceGroup("color", "piko_settings_shortcut_gradient.xml"),
                 ResourceGroup(
                     "raw",
                     "piko_tabler_icons_license.txt",

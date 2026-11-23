@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">禁用双击点赞消息</string>
     <string name="piko_disable_double_tap_to_like">禁用双击点赞</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">杂项</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">纯黑</string>
     <string name="piko_follow_back_indicator">启用友谊状态指示器</string>

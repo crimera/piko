@@ -51,7 +51,10 @@ public class Constants {
     public static final String PIKO_FRAGMENT_LINKS = "piko_frag_links";
     public static final String PIKO_FRAGMENT_DISTRACTION_FREE = "piko_frag_distraction_free";
     public static final String PIKO_FRAGMENT_FOCUS_LOCK = "piko_frag_focus_lock";
-    public static final String PIKO_FRAGMENT_MISC = "piko_frag_misc";
+    public static final String PIKO_FRAGMENT_APPEARANCE = "piko_frag_appearance";
+    public static final String PIKO_FRAGMENT_PROFILE = "piko_frag_profile";
+    public static final String PIKO_FRAGMENT_POSTS = "piko_frag_posts";
+    public static final String PIKO_FRAGMENT_REELS = "piko_frag_reels";
     public static final String PIKO_FRAGMENT_DOWNLOAD_MEDIA = "piko_frag_download_media";
     public static final String PIKO_FRAGMENT_NAV_BTNS = "piko_frag_nav_btns";
     public static final String PIKO_FRAGMENT_DEV_OPTIONS = "piko_frag_dev_options";

@@ -213,7 +213,6 @@ public class SettingsStatus {
         return (hideReelsFollowButton || disableDoubleTapLike || hideHiddenRequests || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideFeedPosts || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideLikes || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
     }
 
-    //Misc section.
     public static boolean changeLikeAnimation = false;
     public static void changeLikeAnimation() { changeLikeAnimation = true; }
     public static boolean followBackIndicator = false;
@@ -238,10 +237,15 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {
-        return moreOptionsOnPost || changeLikeAnimation || removeEmptyBottomSpace || copyCommentButton
-                || improveImageViewing || resumeReelsAfterScrolling || followBackIndicator || followListNonFollowerBadge
-                || fontSection() || MaterialYouTheme.isAmoledAvailable() || MaterialYouTheme.isMaterialYouAvailable();
+    public static boolean appearanceSection() {
+        return changeLikeAnimation || removeEmptyBottomSpace || fontSection()
+                || MaterialYouTheme.isAmoledAvailable() || MaterialYouTheme.isMaterialYouAvailable();
+    }
+    public static boolean profileSection() {
+        return followBackIndicator || followListNonFollowerBadge;
+    }
+    public static boolean postsSection() {
+        return moreOptionsOnPost || improveImageViewing || copyCommentButton;
     }
 
     //Font section.

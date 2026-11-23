@@ -114,7 +114,8 @@
     <string name="piko_disable_double_tap_to_like">Disable double tap to like</string>
 
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">Misc</string>
+    <string name="piko_category_appearance">Appearance</string>
+    <string name="piko_category_posts">Posts</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
