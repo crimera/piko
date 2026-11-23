@@ -46,6 +46,7 @@ final class DashSegmentManifest {
         String url;
         long start = -1;
         long end = -1;
+        long bandwidth;
 
         Representation(Group group) {
             this.group = group;
@@ -53,6 +54,10 @@ final class DashSegmentManifest {
     }
 
     static Map<String, DashIndex> read(String manifest) throws Exception {
+        return read(manifest, null, null);
+    }
+
+    static Map<String, DashIndex> read(String manifest, Integer durationMs, Map<String, Long> audioBitrates) throws Exception {
         if (manifest == null || manifest.isEmpty()) return Collections.emptyMap();
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new StringReader(manifest));
@@ -94,6 +99,13 @@ final class DashSegmentManifest {
                 String mime = attr(parser, "mimeType");
                 track.audio = "audio/mp4".equals(mime == null ? group.mimeType : mime)
                         && (group.contentType == null || "audio".equals(group.contentType));
+                if (audioBitrates != null && track.audio) {
+                    try {
+                        track.bandwidth = Long.parseLong(attr(parser, "bandwidth"));
+                    } catch (NumberFormatException ignored) {
+                        track.bandwidth = 0;
+                    }
+                }
                 tracks.add(track);
             } else if (depth >= 2 && depth <= 5 && ("SegmentBase".equals(name)
                     || "SegmentList".equals(name) || "SegmentTemplate".equals(name)
@@ -130,20 +142,36 @@ final class DashSegmentManifest {
                 || (presentationUs >= 0 && periodUs >= 0 && presentationUs != periodUs)) return Collections.emptyMap();
         long durationUs = periodUs >= 0 ? periodUs : presentationUs;
         if (durationUs <= 0) return Collections.emptyMap();
+        // Asset and manifest durations can differ slightly at audio sample boundaries.
+        if (durationMs != null && durationMs > 0 && Math.abs(durationUs - durationMs * 1000L) > 100_000) {
+            return Collections.emptyMap();
+        }
+        Group audioGroup = null;
+        boolean ambiguousAudio = false;
         Map<String, DashIndex> result = new HashMap<>();
         for (Representation item : tracks) {
-            if (!item.supported || !item.group.supported || item.urlCount != 1 || item.indexCount != 1
-                    || item.start < 0 || item.end < item.start || item.end == Long.MAX_VALUE
+            if (audioBitrates != null && item.audio) {
+                if (audioGroup != null && audioGroup != item.group) ambiguousAudio = true;
+                audioGroup = item.group;
+            }
+            if (!item.supported || !item.group.supported || item.urlCount != 1 || item.indexCount > 1
                     || ambiguousUrls.contains(item.url)) continue;
             try {
                 URI url = URI.create(item.url);
                 if ("https".equals(url.getScheme()) && url.getHost() != null && url.getUserInfo() == null
                         && url.getFragment() == null) {
-                    result.put(item.url, new DashIndex(item.start, item.end, durationUs, item.audio));
+                    if (item.indexCount == 1 && item.start >= 0 && item.end >= item.start && item.end < Long.MAX_VALUE) {
+                        result.put(item.url, new DashIndex(item.start, item.end, durationUs, item.audio));
+                    }
+                    if (audioBitrates != null && item.audio) audioBitrates.put(item.url, item.bandwidth);
                 }
             } catch (IllegalArgumentException ignored) {
                 // An invalid optional candidate does not affect the other renditions.
             }
+        }
+        if (audioBitrates != null) {
+            if (ambiguousAudio) audioBitrates.clear();
+            result.keySet().retainAll(audioBitrates.keySet());
         }
         return result;
     }

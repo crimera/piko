@@ -401,15 +401,6 @@ public class MediaData extends Entity {
         }
     }
 
-    /** The sharpest DASH rendition when it beats the progressive file the media downloads as by default; null otherwise. */
-    public DashVideoData getSharperDashVideo() throws Exception {
-        List<DashVideoData> videos = this.getDashVideos();
-        if (videos.isEmpty()) return null;
-        VideoData progressive = this.getBestVideo();
-        int progressiveShortSide = progressive == null ? 0 : progressive.shortSide();
-        return videos.get(0).shortSide() > progressiveShortSide ? videos.get(0) : null;
-    }
-
     private static <T extends MediaInterface> T highestResolution(List<T> variants) throws Exception {
         T best = null;
         long bestResolution = -1;

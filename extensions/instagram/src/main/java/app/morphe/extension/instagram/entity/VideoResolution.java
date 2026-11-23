@@ -8,6 +8,8 @@ package app.morphe.extension.instagram.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,13 +20,16 @@ import app.morphe.extension.crimera.legacydownloader.MediaType;
 public final class VideoResolution implements MediaInterface {
     private final int resolution;
     private final List<VideoVariant> candidates;
+    private final Map<VideoVariant, Long> pixels;
 
-    private VideoResolution(int resolution, List<VideoVariant> candidates) {
+    private VideoResolution(int resolution, List<VideoVariant> candidates, Map<VideoVariant, Long> pixels) {
         this.resolution = resolution;
-        this.candidates = Collections.unmodifiableList(candidates);
+        this.pixels = pixels;
+        this.candidates = Collections.unmodifiableList(rankByQuality(candidates));
     }
 
     public static List<VideoResolution> group(List<? extends VideoVariant> variants) throws Exception {
+        Map<VideoVariant, Long> pixels = new IdentityHashMap<>();
         Map<Integer, List<VideoVariant>> groups = new TreeMap<>(Collections.reverseOrder());
         for (VideoVariant variant : variants) {
             if (variant == null) continue;
@@ -34,6 +39,7 @@ public final class VideoResolution implements MediaInterface {
                 Integer width = variant.getWidth();
                 Integer height = variant.getHeight();
                 int size = width == null || height == null ? 0 : Math.max(0, Math.min(width, height));
+                pixels.put(variant, size == 0 ? 0L : (long) width * height);
                 groups.computeIfAbsent(size, ignored -> new ArrayList<>()).add(variant);
             } catch (Exception | LinkageError ignored) {
                 // One unreadable rendition must not hide the remaining resolutions.
@@ -41,7 +47,7 @@ public final class VideoResolution implements MediaInterface {
         }
         List<VideoResolution> result = new ArrayList<>();
         for (Map.Entry<Integer, List<VideoVariant>> entry : groups.entrySet()) {
-            result.add(new VideoResolution(entry.getKey(), rank(entry.getValue())));
+            result.add(new VideoResolution(entry.getKey(), entry.getValue(), pixels));
         }
         return result;
     }
@@ -86,9 +92,26 @@ public final class VideoResolution implements MediaInterface {
         }
         // A bitrate across different codecs is not a reliable measure of visual quality.
         String codec = candidate.getVideoCodec();
-        return !codec.isEmpty() && codec.equals(current.getVideoCodec())
+        if (!codec.isEmpty() && codec.equals(current.getVideoCodec())
                 && candidate.getBitrate() > 0 && current.getBitrate() > 0
-                && candidate.getBitrate() > current.getBitrate();
+                && candidate.getBitrate() != current.getBitrate()) {
+            return candidate.getBitrate() > current.getBitrate();
+        }
+        String audioCodec = candidate.getAudioCodec();
+        return !audioCodec.isEmpty() && audioCodec.equals(current.getAudioCodec())
+                && candidate.getAudioBitrate() > 0 && current.getAudioBitrate() > 0
+                && candidate.getAudioBitrate() > current.getAudioBitrate();
+    }
+
+    private List<VideoVariant> rankByQuality(List<VideoVariant> variants) {
+        List<VideoVariant> ranked = rank(variants);
+        ranked.sort(Comparator.comparingLong((VideoVariant video) -> pixels.get(video)).reversed());
+        return ranked;
+    }
+
+    /** Includes track formats read from cached progressive videos on the download worker. */
+    public List<VideoVariant> rankedCandidates() {
+        return rankByQuality(candidates);
     }
 
     public List<VideoVariant> getCandidates() {

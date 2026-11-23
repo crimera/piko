@@ -16,9 +16,11 @@ val originalSoundDataIntfEntity =
         execute {
             OriginalSoundMapperFingerprint.instructionMatches.let {
                 GetAudioIdExtension.changeFirstString(it[1].methodReference.name)
-                GetUserDataExtension.changeFirstString(it[3].methodReference.name)
-                GetAudioNameExtension.changeFirstString(it[6].methodReference.name)
-                GetAudioUrlExtension.changeFirstString(it[8].methodReference.name)
+                GetAudioDashManifestExtension.changeFirstString(it[3].methodReference.name)
+                GetDurationExtension.changeFirstString(it[5].methodReference.name)
+                GetUserDataExtension.changeFirstString(it[7].methodReference.name)
+                GetAudioNameExtension.changeFirstString(it[10].methodReference.name)
+                GetAudioUrlExtension.changeFirstString(it[12].methodReference.name)
             }
         }
     }

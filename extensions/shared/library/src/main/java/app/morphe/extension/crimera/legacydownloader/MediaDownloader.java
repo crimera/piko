@@ -47,7 +47,6 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -336,27 +335,55 @@ public final class MediaDownloader {
 
     private void downloadSources(DownloadRequest request, Uri outputUri,
                                  Notification.Builder builder, int notificationId) throws Exception {
+        boolean ranked = !request.qualitySources.isEmpty();
+        List<DownloadRequest.Source> sources = ranked ? request.sourcesByNetworkCost() : legacySources(request);
+        if (sources.isEmpty()) throw new IOException("No available download source");
+        Map<String, File> staged = new HashMap<>();
+        try {
+            for (int i = 0; i < sources.size(); i++) {
+                DownloadRequest.Source source = sources.get(i);
+                List<DownloadRequest.Source> remaining = sources.subList(i + 1, sources.size());
+                try {
+                    downloadSource(source, request, outputUri, builder, notificationId, i > 0, staged,
+                            ranked ? remaining : Collections.emptyList());
+                    return;
+                } catch (Exception | LinkageError e) {
+                    if (ranked && e instanceof UnavailableSource) {
+                        String failedUrl = ((UnavailableSource) e).url;
+                        remaining.removeIf(candidate -> candidate.uses(failedUrl));
+                    }
+                    if (failedStorage(e) || remaining.isEmpty()) throw e;
+                    staged.entrySet().removeIf(entry -> {
+                        if (remaining.stream().anyMatch(candidate -> candidate.uses(entry.getKey()))) return false;
+                        deleteCacheFile(entry.getValue());
+                        return true;
+                    });
+                    if (!staged.isEmpty()) {
+                        List<DownloadRequest.Source> next = request.sourcesByNetworkCost(new HashSet<>(remaining), staged.keySet());
+                        if (next.isEmpty()) throw e;
+                        remaining.clear();
+                        remaining.addAll(next);
+                    }
+                    PikoUtils.logger(e);
+                }
+            }
+        } finally {
+            for (File file : staged.values()) deleteCacheFile(file);
+        }
+    }
+
+    private static List<DownloadRequest.Source> legacySources(DownloadRequest request) {
         List<DownloadRequest.Source> sources = new ArrayList<>();
         DownloadRequest.Source primary = new DownloadRequest.Source(request.url, request.audioUrl);
         DownloadRequest.Source cached = request.cachedSource;
-        boolean cachedAlternative = cached != null && (!Objects.equals(cached.url, primary.url)
-                || !Objects.equals(cached.audioUrl, primary.audioUrl));
-        if (cachedAlternative) sources.add(cached);
+        boolean cachedAlternative = cached != null && !cached.equals(primary);
+        if (cachedAlternative) sources.add(new DownloadRequest.Source(cached.url, cached.audioUrl, true));
         sources.add(primary);
         if (request.cachedMedia == null || cached != null) {
             sources.addAll(request.fallbackSources);
             if (request.fallbackUrl != null) sources.add(new DownloadRequest.Source(request.fallbackUrl, null));
         }
-        for (int i = 0; i < sources.size(); i++) {
-            try {
-                downloadSource(sources.get(i), request, outputUri, builder, notificationId, i > 0,
-                        cachedAlternative && i == 0);
-                return;
-            } catch (Exception | LinkageError e) {
-                if (failedStorage(e) || i == sources.size() - 1) throw e;
-                PikoUtils.logger(e);
-            }
-        }
+        return sources;
     }
 
     private static boolean failedStorage(Throwable failure) {
@@ -373,40 +400,50 @@ public final class MediaDownloader {
 
     private void downloadSource(DownloadRequest.Source source, DownloadRequest request, Uri outputUri,
                                 Notification.Builder builder, int notificationId, boolean retry,
-                                boolean cacheOnly) throws Exception {
+                                Map<String, File> staged, List<DownloadRequest.Source> remaining) throws Exception {
+        boolean cacheOnly = source.cacheOnly;
         if (source.audioUrl == null && request.metadata == null) {
             // Plain downloads also support providers offering write-only streams, not seekable files.
-            download(request, source.url, retry ? null : request.cachedMedia, truncate -> truncate
+            DownloadOutput destination = truncate -> truncate
                     ? context.getContentResolver().openOutputStream(outputUri, "wt")
-                    : context.getContentResolver().openOutputStream(outputUri), retry, cacheOnly, builder, notificationId);
+                    : context.getContentResolver().openOutputStream(outputUri);
+            File complete = staged.get(source.url);
+            if (complete != null) {
+                try (InputStream input = new FileInputStream(complete)) {
+                    copyDownload(input, destination, retry, false, -1, builder, notificationId);
+                }
+            } else {
+                download(request, source.url, retry ? null : request.cachedMedia, destination, retry,
+                        cacheOnly, builder, notificationId);
+            }
             return;
         }
-        // Cache and clean up each rendition independently so failed tracks never enter the next merge.
         List<File> cacheFiles = new ArrayList<>();
-        boolean downloadedToCache = false;
+        File media = null;
         try {
-            downloadToCache(request, source.url, retry ? null : request.cachedMedia, cacheOnly, cacheFiles, builder, notificationId);
-            List<File> inputs = new ArrayList<>(cacheFiles);
+            media = downloadToCache(request, source.url, retry ? null : request.cachedMedia, cacheOnly,
+                    cacheFiles, staged, remaining, builder, notificationId);
+            List<File> inputs = new ArrayList<>();
+            inputs.add(media);
             if (source.audioUrl != null) {
-                downloadToCache(request, source.audioUrl, retry ? null : request.cachedAudio, cacheOnly, cacheFiles, builder, notificationId);
-                File audio = cacheFiles.get(cacheFiles.size() - 1);
+                File audio = downloadToCache(request, source.audioUrl, retry ? null : request.cachedAudio, cacheOnly,
+                        cacheFiles, staged, remaining, builder, notificationId);
                 inputs.add(request.audioToAacLc ? toAacLc(audio, cacheFiles) : audio);
             }
-            downloadedToCache = true;
             Mp4Remuxer.write(inputs, openOutput(outputUri), request.metadata);
         } catch (Exception | LinkageError e) {
-            if (failedStorage(e) || source.audioUrl != null || !downloadedToCache
-                    || !Mp4Remuxer.isReadableVideo(cacheFiles.get(0))) throw e;
+            if (failedStorage(e) || source.audioUrl != null || media == null
+                    || !Mp4Remuxer.isReadableVideo(media)) throw e;
             // Keep a readable original without metadata when rewriting it failed.
             PikoUtils.logger(e);
-            copyRawFile(cacheFiles.get(0), outputUri);
+            copyRawFile(media, outputUri);
         } finally {
-            for (File file : cacheFiles) {
-                if (file.exists() && !file.delete()) {
-                    PikoUtils.logger(new IOException("Could not delete download cache file"));
-                }
-            }
+            for (File file : cacheFiles) deleteCacheFile(file);
         }
+    }
+
+    private static void deleteCacheFile(File file) {
+        if (file.exists() && !file.delete()) PikoUtils.logger(new IOException("Could not delete download cache file"));
     }
 
     @FunctionalInterface
@@ -417,6 +454,15 @@ public final class MediaDownloader {
     private static final class OutputFailure extends IOException {
         OutputFailure(IOException cause) {
             super(cause.getMessage(), cause);
+        }
+    }
+
+    private static final class UnavailableSource extends IOException {
+        final String url;
+
+        UnavailableSource(String url, int status) {
+            super("Download failed (HTTP " + status + ")");
+            this.url = url;
         }
     }
 
@@ -529,6 +575,10 @@ public final class MediaDownloader {
             conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
             conn.setReadTimeout(READ_TIMEOUT_MS);
             conn.connect();
+            if (!request.qualitySources.isEmpty()) {
+                int status = conn.getResponseCode();
+                if (status == 403 || status == 404 || status == 410) throw new UnavailableSource(url, status);
+            }
             try (InputStream input = new BufferedInputStream(conn.getInputStream())) {
                 copyDownload(input, output, truncate, false, conn.getContentLength(), builder, notificationId);
             }
@@ -537,10 +587,12 @@ public final class MediaDownloader {
         }
     }
 
-    /** Fetches {@code url} into a new cache file, added to {@code cacheFiles} first so a failed fetch is cleaned up too. */
-    private void downloadToCache(DownloadRequest request, String url, InputStream prepared, boolean cacheOnly, List<File> cacheFiles,
+    private File downloadToCache(DownloadRequest request, String url, InputStream prepared, boolean cacheOnly,
+                                 List<File> cacheFiles, Map<String, File> staged, List<DownloadRequest.Source> remaining,
                                  Notification.Builder builder, int notificationId)
             throws IOException {
+        File complete = staged.get(url);
+        if (complete != null) return complete;
         File cacheFile;
         try {
             cacheFile = File.createTempFile("piko-download-", ".mp4", context.getCacheDir());
@@ -549,6 +601,11 @@ public final class MediaDownloader {
         }
         cacheFiles.add(cacheFile);
         download(request, url, prepared, truncate -> new FileOutputStream(cacheFile), false, cacheOnly, builder, notificationId);
+        if (remaining.stream().anyMatch(source -> source.uses(url))) {
+            staged.put(url, cacheFile);
+            cacheFiles.remove(cacheFile);
+        }
+        return cacheFile;
     }
 
     /**

@@ -19,6 +19,14 @@ public interface VideoVariant extends MediaInterface {
         return 0;
     }
 
+    default String getAudioCodec() {
+        return "";
+    }
+
+    default int getAudioBitrate() {
+        return 0;
+    }
+
     /** Playback resolution to MOS, so only scores measured at the same size are compared. */
     default Map<Integer, Double> getQualityScores() {
         return Collections.emptyMap();

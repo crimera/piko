@@ -27,7 +27,6 @@ import java.lang.reflect.Field;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -346,6 +345,7 @@ public class DownloadUtils {
             String fileName = DownloadFileNameFormatter.safeFilename(audioMedia.getDownloadName(), ".m4a");
             DownloadRequest request = createDownloadRequest(audioUrl, Constants.DEFAULT_AUDIO_FOLDER, fileName);
             request.readDashIndexes = mediaData.getDashIndexReader(audioUrl);
+            audioMedia.prepareDownload(request);
             enqueueDownload(context, request);
 
         } else {
@@ -388,11 +388,13 @@ public class DownloadUtils {
         if (progressive != null) variants.addAll(progressive);
         variants.addAll(media.getDashVideos());
         long threshold = (long) (coverPixels * (1 + MediaData.ROUNDING_TOLERANCE));
+        Set<String> seen = new HashSet<>();
         for (VideoResolution resolution : VideoResolution.group(variants)) {
             for (VideoVariant candidate : resolution.getCandidates()) {
                 Integer width = candidate.getWidth(), height = candidate.getHeight();
                 if (width == null || height == null || (long) width * height <= threshold) continue;
                 String url = candidate.getUrl();
+                if (!seen.add(url)) continue;
                 InputStream video = InstagramVideoCache.openTrack(url, request.dashIndex(url));
                 if (video != null) return video;
             }
@@ -400,12 +402,6 @@ public class DownloadUtils {
         return null;
     }
 
-    /**
-     * The request for one media, as {@code variant} when one was chosen. A video with none chosen
-     * downloads as the sharpest DASH rendition, with its audio merged in, when that is sharper
-     * than the progressive file. Automatic downloads retry the same resolution before the
-     * existing progressive fallback; a chosen resolution only retries its own renditions.
-     */
     private static DownloadRequest buildMediaRequest(
             MediaData rootMediaData,
             MediaData childMediaData,
@@ -420,19 +416,7 @@ public class DownloadUtils {
         boolean isVideo = mediaType.equals(MediaType.VIDEO)
                 || (mediaType.equals(MediaType.ANY) && childMediaData.isVideo());
         String fileName = fallbackFileName;
-        String progressiveUrl = mediaUrl;
-        String audioUrl = variant == null ? null : variant.getAudioUrl();
-
         String variantTag = variant == null ? null : variant.getVariantTag();
-        DashVideoData dashVideo = variant instanceof DashVideoData
-                ? (DashVideoData) variant
-                : isVideo && variant == null && Pref.preferDashFormat()
-                ? childMediaData.getSharperDashVideo()
-                : null;
-        if (dashVideo != null) {
-            mediaUrl = dashVideo.getUrl();
-            audioUrl = dashVideo.getAudioUrl();
-        }
 
         try {
             String username = rootMediaData.getUserData().getUsername();
@@ -468,18 +452,11 @@ public class DownloadUtils {
         }
 
         DownloadRequest request = createDownloadRequest(mediaUrl, subFolder, fileName);
-        if (variant instanceof VideoResolution) {
-            List<VideoVariant> candidates = ((VideoResolution) variant).getCandidates();
-            for (int i = 1; i < candidates.size(); i++) {
-                try {
-                    VideoVariant candidate = candidates.get(i);
-                    String url = candidate.getUrl();
-                    if (url == null || url.trim().isEmpty()) continue;
-                    request.fallbackSources.add(new DownloadRequest.Source(url, candidate.getAudioUrl()));
-                } catch (Exception | LinkageError ignored) {
-                    // A failed optional candidate must not prevent the selected download.
-                }
-            }
+        if (isVideo) {
+            request.audioUrl = variant == null ? null : variant.getAudioUrl();
+            request.readDashIndexes = childMediaData.getDashIndexReader();
+            request.audioToAacLc = Pref.dashAudioAacLc();
+            addVideoSources(request, childMediaData, variant);
         } else if (variant instanceof ImageResolution) {
             List<String> urls = ((ImageResolution) variant).getCandidateUrls();
             for (int i = 1; i < urls.size(); i++) {
@@ -490,17 +467,6 @@ public class DownloadUtils {
         if (!isVideo && variant == null && mediaType == MediaType.IMAGE && childMediaData.isVideo()) {
             originalImage = childMediaData.getBestOriginalImage();
             if (originalImage != null && !originalImage.getUrl().equals(mediaUrl)) request.fallbackUrl = originalImage.getUrl();
-        }
-        request.audioUrl = audioUrl;
-        if (isVideo) request.readDashIndexes = childMediaData.getDashIndexReader();
-        request.audioToAacLc = isVideo && Pref.dashAudioAacLc();
-        if (variant == null && dashVideo != null
-                && progressiveUrl != null && !progressiveUrl.trim().isEmpty()) {
-            request.fallbackUrl = progressiveUrl;
-        }
-        if (isVideo && variant == null) addSameResolutionFallbacks(request, childMediaData);
-        if (variant instanceof VideoResolution && !Pref.preferDashFormat()) {
-            addCachedDashAlternatives(request, childMediaData, variant.shortSide());
         }
         if (!isVideo && variant == null && (mediaType == MediaType.ANY || mediaType == MediaType.IMAGE)) {
             try {
@@ -586,53 +552,54 @@ public class DownloadUtils {
         }
     }
 
-    private static void addSameResolutionFallbacks(DownloadRequest request, MediaData mediaData) {
+    private static void addVideoSources(DownloadRequest request, MediaData media, MediaInterface selected) {
+        boolean allowDash = Pref.preferDashFormat();
         try {
             List<VideoVariant> videos = new ArrayList<>();
-            boolean preferDash = Pref.preferDashFormat();
-            if (preferDash) videos.addAll(mediaData.getDashVideos());
-            List<VideoData> progressive = mediaData.getVideoVariants();
-            if (progressive != null) videos.addAll(progressive);
-
-            List<String> primary = Arrays.asList(request.url, request.audioUrl);
-            for (VideoResolution resolution : VideoResolution.group(videos)) {
-                if (resolution.shortSide() <= 0) continue;
-                List<DownloadRequest.Source> sources = new ArrayList<>();
-                boolean containsPrimary = false;
-                for (VideoVariant candidate : resolution.getCandidates()) {
-                    try {
-                        String url = candidate.getUrl();
-                        String audio = candidate.getAudioUrl();
-                        if (url == null || url.trim().isEmpty()) continue;
-                        if (primary.equals(Arrays.asList(url, audio))) containsPrimary = true;
-                        sources.add(new DownloadRequest.Source(url, audio));
-                    } catch (Exception | LinkageError ignored) {
-                        // A failed optional candidate must not prevent the original download.
+            if (selected instanceof VideoResolution) {
+                videos.addAll(((VideoResolution) selected).getCandidates());
+                if (!allowDash) {
+                    for (DashVideoData dash : media.getDashVideos()) {
+                        if (dash.shortSide() == selected.shortSide()) videos.add(dash);
                     }
                 }
-                if (!containsPrimary) continue;
-
-                Set<List<String>> seen = new HashSet<>();
-                seen.add(primary);
-                // Keep the legacy complete-file fallback last, even if it appears in this group.
-                if (request.fallbackUrl != null) seen.add(Arrays.asList(request.fallbackUrl, null));
-                for (DownloadRequest.Source source : sources) {
-                    if (seen.add(Arrays.asList(source.url, source.audioUrl))) request.fallbackSources.add(source);
-                }
-                if (!preferDash) addCachedDashAlternatives(request, mediaData, resolution.shortSide());
-                return;
+            } else if (selected instanceof VideoVariant) {
+                videos.add((VideoVariant) selected);
+            } else {
+                List<VideoData> progressive = media.getVideoVariants();
+                if (progressive != null) videos.addAll(progressive);
+                videos.addAll(media.getDashVideos());
             }
+            List<VideoResolution> resolutions = VideoResolution.group(videos);
+            request.prepareQualitySources = () -> {
+                for (VideoResolution resolution : resolutions) {
+                    List<VideoVariant> candidates = resolution.getCandidates();
+                    if (candidates.size() > 1) {
+                        for (VideoVariant candidate : candidates) {
+                            if (!(candidate instanceof VideoData)) continue;
+                            try (InputStream cached = request.localSource.open(candidate.getUrl())) {
+                                ((VideoData) candidate).readCachedQuality(cached);
+                            } catch (Exception | LinkageError ignored) {
+                                // Quality is optional. Keep the URL even if its local header disappeared.
+                            }
+                        }
+                    }
+                    for (VideoVariant candidate : resolution.rankedCandidates()) {
+                        try {
+                            request.qualitySources.add(new DownloadRequest.Source(candidate.getUrl(),
+                                    candidate.getAudioUrl(), !allowDash && candidate instanceof DashVideoData));
+                        } catch (Exception | LinkageError ignored) {
+                            // An unreadable rendition must not hide the other candidates.
+                        }
+                    }
+                }
+                // Some posts expose a playable URL without a readable rendition list.
+                if (request.url != null && !request.url.isEmpty()) {
+                    request.qualitySources.add(new DownloadRequest.Source(request.url, request.audioUrl));
+                }
+            };
         } catch (Exception | LinkageError e) {
             PikoUtils.logger(e);
-        }
-    }
-
-    private static void addCachedDashAlternatives(DownloadRequest request, MediaData media, int shortSide) {
-        if (shortSide <= 0) return;
-        for (DashVideoData video : media.getDashVideos()) {
-            if (video.shortSide() == shortSide) {
-                request.localAlternatives.add(new DownloadRequest.Source(video.getUrl(), video.getAudioUrl()));
-            }
         }
     }
 

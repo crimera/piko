@@ -35,6 +35,16 @@ public class OriginalSoundDataIntf extends Entity implements AudioMediaInterface
     }
 
     @Override
+    public String getAudioDashManifest() throws Exception {
+        return (String) super.getMethod("dashManifestGetter");
+    }
+
+    @Override
+    public Integer getDurationMs() throws Exception {
+        return (Integer) super.getMethod("durationGetter");
+    }
+
+    @Override
     public String getDownloadName() throws Exception {
         UserData userData = this.getUserData();
         String username = userData.getUsername();

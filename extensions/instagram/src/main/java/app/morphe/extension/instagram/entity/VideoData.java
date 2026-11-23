@@ -7,9 +7,50 @@
 
 package app.morphe.extension.instagram.entity;
 
+import android.media.MediaFormat;
+
+import java.io.InputStream;
+
 import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 public class VideoData extends Entity implements VideoVariant {
+    private CachedTrackFormat cachedFormat;
+
+    public void readCachedQuality(InputStream input) {
+        if (input != null) cachedFormat = CachedTrackFormat.read(input);
+    }
+
+    @Override
+    public String getVideoCodec() {
+        if (cachedFormat == null || cachedFormat.video == null) return "";
+        String mime = cachedFormat.video.getString(MediaFormat.KEY_MIME);
+        if ("video/avc".equals(mime)) return "H.264";
+        if ("video/hevc".equals(mime)) return "H.265";
+        if ("video/av01".equals(mime)) return "AV1";
+        if ("video/x-vnd.on2.vp9".equals(mime)) return "VP9";
+        return "";
+    }
+
+    @Override
+    public int getBitrate() {
+        return bitrate(cachedFormat == null ? null : cachedFormat.video);
+    }
+
+    @Override
+    public String getAudioCodec() {
+        return cachedFormat != null && cachedFormat.audio != null
+                ? cachedFormat.audio.getString(MediaFormat.KEY_MIME) : "";
+    }
+
+    @Override
+    public int getAudioBitrate() {
+        return bitrate(cachedFormat == null ? null : cachedFormat.audio);
+    }
+
+    private static int bitrate(MediaFormat format) {
+        return format != null && format.containsKey(MediaFormat.KEY_BIT_RATE) ? format.getInteger(MediaFormat.KEY_BIT_RATE) : 0;
+    }
+
     public VideoData(Object obj) {
         super(obj);
     }

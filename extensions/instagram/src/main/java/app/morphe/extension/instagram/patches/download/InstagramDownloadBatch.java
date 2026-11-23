@@ -29,7 +29,11 @@ final class InstagramDownloadBatch {
         MediaDownloader.shared(context).enqueueBatch(requests, request -> {
             request.localSource = url -> openLocal(request, url);
             request.userAgent = InstagramDownloadBatch::userAgent;
-            prepareLocal(request);
+            if (request.prepareQualitySources != null) {
+                request.prepareQualitySources.run();
+                request.prepareQualitySources = null;
+            }
+            if (request.qualitySources.isEmpty()) prepareLocal(request);
             return true;
         });
     }
@@ -64,9 +68,6 @@ final class InstagramDownloadBatch {
         for (int i = 0; i < request.sameResolutionFallbacks; i++) {
             DownloadRequest.Source alternative = request.fallbackSources.get(i);
             if (selectLocal(request, alternative.url, alternative.audioUrl)) return;
-        }
-        for (DownloadRequest.Source source : request.localAlternatives) {
-            if (selectLocal(request, source.url, source.audioUrl)) return;
         }
     }
 

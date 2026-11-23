@@ -12,9 +12,14 @@ import android.content.Context;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -55,10 +60,32 @@ public class DownloadRequest {
     public static final class Source {
         public final String url;
         public final String audioUrl;
+        public final boolean cacheOnly;
 
         public Source(String url, String audioUrl) {
+            this(url, audioUrl, false);
+        }
+
+        public Source(String url, String audioUrl, boolean cacheOnly) {
             this.url = url;
             this.audioUrl = audioUrl;
+            this.cacheOnly = cacheOnly;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof Source)) return false;
+            Source source = (Source) other;
+            return Objects.equals(url, source.url) && Objects.equals(audioUrl, source.audioUrl);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(url, audioUrl);
+        }
+
+        boolean uses(String address) {
+            return address.equals(url) || address.equals(audioUrl);
         }
     }
 
@@ -69,6 +96,52 @@ public class DownloadRequest {
 
     /** Checks each source URL for a complete local copy before downloading it. */
     public LocalSource localSource;
+    /** Same-content candidates in preferred quality order. Only eligible formats may use the network. */
+    public final List<Source> qualitySources = new ArrayList<>();
+    public Runnable prepareQualitySources;
+
+    public List<Source> sourcesByNetworkCost() {
+        return sourcesByNetworkCost(null, Collections.emptySet());
+    }
+
+    List<Source> sourcesByNetworkCost(Set<Source> remaining, Set<String> stagedTracks) {
+        Map<Source, Source> candidates = new LinkedHashMap<>();
+        for (Source source : qualitySources) {
+            if (source.url == null || source.url.isEmpty()) continue;
+            if (remaining != null && !remaining.contains(source)) continue;
+            // A cache-only alias must not disable an explicitly permitted source.
+            if (!source.cacheOnly || !candidates.containsKey(source)) candidates.put(source, source);
+        }
+        if (candidates.size() == 1 && !candidates.values().iterator().next().cacheOnly) {
+            return new ArrayList<>(candidates.values());
+        }
+        Map<String, Integer> trackCosts = new HashMap<>();
+        for (String url : stagedTracks) trackCosts.put(url, 0);
+        Map<Source, Integer> costs = new HashMap<>();
+        List<Source> eligible = new ArrayList<>();
+        for (Source source : candidates.values()) {
+            int cost = trackCosts.computeIfAbsent(source.url, this::networkCost);
+            if (source.audioUrl != null) cost += trackCosts.computeIfAbsent(source.audioUrl, this::networkCost);
+            if (source.cacheOnly && cost != 0) continue;
+            eligible.add(source);
+            costs.put(source, cost);
+        }
+        // Stable sorting retains quality order within each request count.
+        eligible.sort(Comparator.comparingInt(costs::get));
+        return eligible;
+    }
+
+    private int networkCost(String url) {
+        if (localSource != null) {
+            try (InputStream stream = localSource.open(url)) {
+                if (stream != null) return 0;
+            } catch (IOException ignored) {
+                // The local entry can be evicted while selecting a rendition.
+            }
+        }
+        return 1;
+    }
+
     public Function<Context, String> userAgent;
     /** Streams for a fully cached rendition, including separate audio when present. */
     public Source cachedSource;
@@ -76,8 +149,6 @@ public class DownloadRequest {
     public InputStream cachedAudio;
     /** Leading fallback sources at the requested resolution. */
     public int sameResolutionFallbacks;
-    /** Same-quality tracks the player may have cached even when their format is disabled for network downloads. */
-    public final List<Source> localAlternatives = new ArrayList<>();
 
     public enum ConflictPolicy { RENAME, SKIP, OVERWRITE }
 
