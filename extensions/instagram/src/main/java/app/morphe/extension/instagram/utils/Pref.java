@@ -639,4 +639,29 @@ public class Pref {
             return 3;
         }
     }
+
+    public static boolean dmNotificationAllowlist() {
+        return SharedPref.getBooleanPref(Settings.DM_NOTIFICATION_ALLOWLIST)
+                && SettingsStatus.dmNotificationAllowlist;
+    }
+
+    public static boolean dmNotificationAllowlistGroups() {
+        return SharedPref.getBooleanPref(Settings.DM_NOTIFICATION_ALLOWLIST_GROUPS);
+    }
+
+    public static String dmNotificationAllowedUsers() {
+        return SharedPref.getStringPref(Settings.DM_NOTIFICATION_ALLOWED_USERS);
+    }
+
+    public static boolean setDmNotificationAllowedUsers(String value) {
+        return SharedPref.setStringPref(Settings.DM_NOTIFICATION_ALLOWED_USERS.key, value);
+    }
+
+    public static String dmNotificationAllowedThreads() {
+        return SharedPref.getStringPref(Settings.DM_NOTIFICATION_ALLOWED_THREADS);
+    }
+
+    public static boolean setDmNotificationAllowedThreads(String value) {
+        return SharedPref.setStringPref(Settings.DM_NOTIFICATION_ALLOWED_THREADS.key, value);
+    }
 }

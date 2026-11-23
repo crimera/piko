@@ -340,6 +340,7 @@ public final class InboxLock {
      */
     public static Notification hideNotification(Notification original) {
         try {
+            DmNotificationAllowlist.noteOriginalNotification(original);
             if (!initialized || original == null || unlocked || !Pref.inboxLockNotifications()) return original;
             if (!Notification.CATEGORY_MESSAGE.equals(original.category) && !MESSAGE_CHANNEL.equals(original.getChannelId())) {
                 return original;

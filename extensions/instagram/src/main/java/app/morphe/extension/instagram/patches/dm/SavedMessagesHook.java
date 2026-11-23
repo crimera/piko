@@ -253,8 +253,11 @@ public class SavedMessagesHook {
 
     private static void markDeletedAndNotify(PikoMessageDb db, String messageId) {
         if (!db.markDeleted(messageId)) return;
-        // The notice shows who wrote what, so a hidden chat gets none.
-        if (HiddenChats.shouldMuteDeletion(db.getThreadId(messageId))) return;
+        // The notice shows who wrote what, so a hidden chat or muted sender gets none.
+        String threadId = db.getThreadId(messageId);
+        if (HiddenChats.shouldMuteDeletion(threadId)) return;
+        if (DmNotificationAllowlist.shouldMuteDeletion(
+                threadId, db.getSenderId(messageId), db.getSenderDisplay(messageId))) return;
 
         String type = db.getMessageType(messageId);
         String content = db.getStoredContent(messageId);

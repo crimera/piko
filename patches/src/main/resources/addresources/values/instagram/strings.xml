@@ -182,6 +182,35 @@
     <string name="piko_ephemeral_expired">Expired</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
     <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
+    <string name="piko_dm_notif_allowlist">Only allow DM notifications from selected people</string>
+    <string name="piko_dm_notif_allowlist_desc">Mute DM push notifications and deleted-message alerts unless the sender or chat is on your allowlist</string>
+    <string name="piko_dm_notif_manage">Allowed people and chats</string>
+    <string name="piko_dm_notif_manage_title">Allowed DM notifications</string>
+    <string name="piko_dm_notif_allowlist_groups">Allow group chats with allowed people</string>
+    <string name="piko_dm_notif_allowlist_groups_desc">Also allow notifications from group chats that include someone on your allowlist</string>
+    <string name="piko_dm_notif_add_username">Add @</string>
+    <string name="piko_dm_notif_add_username_title">Add username</string>
+    <string name="piko_dm_notif_add_username_desc">Enter one or more Instagram usernames (separated by commas or new lines)</string>
+    <string name="piko_dm_notif_add_username_hint">username</string>
+    <string name="piko_dm_notif_added_count">Added %d to DM notification allowlist</string>
+    <string name="piko_dm_notif_invalid_username">Enter a valid username</string>
+    <string name="piko_dm_notif_added_user">DM notifications allowed for %s</string>
+    <string name="piko_dm_notif_removed_user">Removed %s from allowed DM notifications</string>
+    <string name="piko_dm_notif_add_profile">Allow DM notifications</string>
+    <string name="piko_dm_notif_remove_profile">Remove from allowed DM notifications</string>
+    <string name="piko_dm_notif_section_people">Allowed people</string>
+    <string name="piko_dm_notif_section_allowed_chats">Allowed chats</string>
+    <string name="piko_dm_notif_section_recent_chats">Recent DM chats</string>
+    <string name="piko_dm_notif_no_recent_chats">Open your DM inbox once to list your recent chats here, or tap Add @ above.</string>
+    <string name="piko_dm_notif_chat_allowed">Notifications allowed</string>
+    <string name="piko_dm_notif_chat_muted">Muted</string>
+    <string name="piko_dm_notif_group_allowed">Group • Notifications allowed</string>
+    <string name="piko_dm_notif_group_allowed_via_member">Group • Allowed via member</string>
+    <string name="piko_dm_notif_group_muted">Group • Muted</string>
+    <string name="piko_dm_notif_summary_empty">No one selected (all DMs muted when enabled)</string>
+    <string name="piko_dm_notif_summary_people">%d people allowed</string>
+    <string name="piko_dm_notif_summary_chats">%d chats allowed</string>
+    <string name="piko_dm_notif_summary_both">%1$d people, %2$d chats allowed</string>
 
     <!-- Story Section -->
     <string name="piko_category_story">Story</string>

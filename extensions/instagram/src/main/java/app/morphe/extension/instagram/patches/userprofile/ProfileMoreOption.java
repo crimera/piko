@@ -23,7 +23,9 @@ import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.instagram.patches.dm.DmNotificationAllowlistPref;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.InstagramButton;
@@ -40,6 +42,10 @@ public class ProfileMoreOption {
     }
 
     public static void moreOptionsDailogueBox(Context context, UserData userData, Callable<String> refreshUrl) {
+        moreOptionsDailogueBox(context, userData, refreshUrl, false);
+    }
+
+    public static void moreOptionsDailogueBox(Context context, UserData userData, Callable<String> refreshUrl, boolean isSelfProfile) {
         try {
             InstagramDialogBox dialog = new InstagramDialogBox(context);
 
@@ -50,8 +56,20 @@ public class ProfileMoreOption {
             options.add(str("piko_copy_user_id"));
             options.add(str("piko_copy_bio"));
             options.add(str("piko_copy_links_from_bio"));
+            boolean showDmNotifOption = SettingsStatus.dmNotificationAllowlist && !isSelfProfile;
+            boolean dmNotifAllowed = false;
+            if (showDmNotifOption) {
+                dmNotifAllowed = DmNotificationAllowlistPref.isUserAllowed(
+                        userData.getUserId(),
+                        userData.getUsername()
+                );
+                options.add(str(dmNotifAllowed
+                        ? "piko_dm_notif_remove_profile"
+                        : "piko_dm_notif_add_profile"));
+            }
             if (DEBUG) options.add(str("piko_debug"));
 
+            final boolean currentlyAllowed = dmNotifAllowed;
             CharSequence[] items = options.toArray(new CharSequence[0]);
 
             dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -92,6 +110,20 @@ public class ProfileMoreOption {
 
                         } else if (selectedOption.equals(str("piko_view_profile_picture"))) {
                             ProfilePictureViewer.show(context, userData, refreshUrl);
+
+                        } else if (selectedOption.equals(str("piko_dm_notif_add_profile"))
+                                || selectedOption.equals(str("piko_dm_notif_remove_profile"))) {
+                            String uid = userData.getUserId();
+                            String uname = userData.getUsername();
+                            String fname = userData.getFullName();
+                            String display = (uname != null && !uname.isEmpty()) ? ("@" + uname) : uid;
+                            if (currentlyAllowed) {
+                                DmNotificationAllowlistPref.removeAllowedUser(uid, uname);
+                                Utils.showToastShort(String.format(str("piko_dm_notif_removed_user"), display));
+                            } else {
+                                DmNotificationAllowlistPref.addAllowedUser(uid, uname, fname);
+                                Utils.showToastShort(String.format(str("piko_dm_notif_added_user"), display));
+                            }
 
                         } else if (selectedOption.equals(str("piko_debug"))) {
                             // Using userData as it will be easier to debug known functions.
@@ -152,8 +184,14 @@ public class ProfileMoreOption {
             InstagramButton button = new InstagramButton(context);
             button.setText(str("piko_more_profile_options"));
             button.setStyle(InstagramButtonStyleEnum.SECONDARY);
+            boolean selfProfile = false;
+            try {
+                selfProfile = profileInfo.isSelfProfile();
+            } catch (Exception ignored) {
+            }
+            final boolean isSelf = selfProfile;
             button.setOnClickListener(() ->
-                    moreOptionsDailogueBox(context, userData, () -> userData.refreshProfilePictureUrl(profileInfo.getUserSession()))
+                    moreOptionsDailogueBox(context, userData, () -> userData.refreshProfilePictureUrl(profileInfo.getUserSession()), isSelf)
             );
 
             int marginPx = Dim.dp12;

@@ -107,6 +107,9 @@ public class ButtonPref extends Preference {
                     } else if (key.equals("view_deleted_messages")) {
                         SavedMessagesHook.openDeletedMessages(context);
 
+                    } else if (key.equals("piko_dm_notif_manage")) {
+                        ActivityHook.startDmNotificationAllowlistActivity(context);
+
                     } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);
 
@@ -163,7 +166,8 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_pref_delete_font")
                 || key.equals("piko_pref_add_emoji")
                 || key.equals("piko_pref_delete_emoji")
-                || key.equals("view_deleted_messages")));
+                || key.equals("view_deleted_messages")
+                || key.equals("piko_dm_notif_manage")));
     }
 
     private static boolean hasPressedHighlight(String key) {

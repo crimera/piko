@@ -23,6 +23,7 @@ import app.morphe.extension.crimera.legacydownloader.FolderPickerFragment;
 import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.dm.DeletedMessagesActivity;
+import app.morphe.extension.instagram.patches.dm.DmNotificationAllowlistActivity;
 import app.morphe.extension.instagram.patches.instants.InstantsVaultActivity;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefFragment;
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefFragment;
@@ -41,6 +42,7 @@ public class ActivityHook {
     static final String LAUNCH_TYPE_RESTORE = "restore";
     static final String LAUNCH_TYPE_FOLDER_PICKER = "folder_picker";
     static final String LAUNCH_TYPE_DELETED_MESSAGES = "deleted_messages";
+    static final String LAUNCH_TYPE_DM_NOTIF_ALLOWLIST = "dm_notif_allowlist";
     static final String LAUNCH_TYPE_INSTANTS_VAULT = "instants_vault";
 
 
@@ -51,6 +53,10 @@ public class ActivityHook {
         }
         if (activityClass != null && activityClass.equals(DeletedMessagesActivity.class)) {
             startDeletedMessagesActivity(context);
+            return;
+        }
+        if (activityClass != null && activityClass.equals(DmNotificationAllowlistActivity.class)) {
+            startDmNotificationAllowlistActivity(context);
             return;
         }
         if (activityClass != null && activityClass.equals(SettingsActivity.class)) {
@@ -136,6 +142,8 @@ public class ActivityHook {
             return SettingsActivity.handleBackPressed(activity);
         } else if (LAUNCH_TYPE_DELETED_MESSAGES.equals(launchType)) {
             return DeletedMessagesActivity.handleBackPressed(activity);
+        } else if (LAUNCH_TYPE_DM_NOTIF_ALLOWLIST.equals(launchType)) {
+            return DmNotificationAllowlistActivity.handleBackPressed(activity);
         } else if (LAUNCH_TYPE_INSTANTS_VAULT.equals(launchType)) {
             return InstantsVaultActivity.handleBackPressed(activity);
         }
@@ -163,6 +171,9 @@ public class ActivityHook {
                 break;
             case LAUNCH_TYPE_DELETED_MESSAGES:
                 DeletedMessagesActivity.setupOnActivity(activity);
+                break;
+            case LAUNCH_TYPE_DM_NOTIF_ALLOWLIST:
+                DmNotificationAllowlistActivity.setupOnActivity(activity);
                 break;
             case LAUNCH_TYPE_INSTANTS_VAULT:
                 InstantsVaultActivity.setupOnActivity(activity);
@@ -232,6 +243,12 @@ public class ActivityHook {
 
     public static void startDeletedMessagesActivity(Context context) {
         launchActivity(context, createDeletedMessagesIntent(context));
+    }
+
+    public static void startDmNotificationAllowlistActivity(Context context) {
+        Intent intent = createProxyIntent(context);
+        intent.putExtra(EXTRA_PIKO_LAUNCH_TYPE, LAUNCH_TYPE_DM_NOTIF_ALLOWLIST);
+        launchActivity(context, intent);
     }
 
     public static void startInstantsVaultActivity(Context context) {

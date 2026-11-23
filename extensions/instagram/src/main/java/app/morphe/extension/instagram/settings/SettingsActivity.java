@@ -49,6 +49,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.patches.devFlags.Flag;
+import app.morphe.extension.instagram.patches.dm.DmNotificationAllowlistPref;
 import app.morphe.extension.instagram.settings.preference.RecommendedFlagsScreen;
 import app.morphe.extension.instagram.settings.preference.widgets.RecommendedFlagPreference;
 import app.morphe.extension.instagram.settings.preference.Helper;
@@ -797,6 +798,10 @@ public final class SettingsActivity {
             refreshPreferenceSummary(
                     "piko_download_set_path",
                     StorageUtils::getCustomPathForDisplay
+            );
+            refreshPreferenceSummary(
+                    "piko_dm_notif_manage",
+                    DmNotificationAllowlistPref::summaryText
             );
             Preference preference = findPreference(Settings.AMOLED_THEME.key);
             if (preference instanceof SwitchPref) {

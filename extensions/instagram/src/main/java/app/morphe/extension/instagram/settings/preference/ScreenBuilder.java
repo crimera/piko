@@ -24,6 +24,7 @@ import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
+import app.morphe.extension.instagram.patches.dm.DmNotificationAllowlistPref;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.patches.focusLock.FocusLockTargets;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -359,6 +360,33 @@ public class ScreenBuilder {
                                     Settings.HIDDEN_CHATS_MUTE
                             ),
                             () -> SharedPref.getBooleanPref(Settings.HIDDEN_CHATS)
+                    )
+            );
+        }
+
+        if (SettingsStatus.dmNotificationAllowlist) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_dm_notif_allowlist"),
+                            str("piko_dm_notif_allowlist_desc"),
+                            Settings.DM_NOTIFICATION_ALLOWLIST
+                    )
+            );
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_dm_notif_manage"),
+                            DmNotificationAllowlistPref.summaryText(),
+                            "piko_dm_notif_manage"
+                    )
+            );
+            addPreference(
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_dm_notif_allowlist_groups"),
+                                    str("piko_dm_notif_allowlist_groups_desc"),
+                                    Settings.DM_NOTIFICATION_ALLOWLIST_GROUPS
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.DM_NOTIFICATION_ALLOWLIST)
                     )
             );
         }
