@@ -81,7 +81,6 @@
     <string name="piko_customise_story_timestamp">自訂限時動態的時間格式</string>
     <string name="piko_customise_story_timestamp_desc">自訂顯示限時動態發佈時間的格式</string>
     <string name="piko_customise_story_ring_size">自訂限時動態光圈尺寸</string>
-    <string name="piko_customise_story_ring_size_desc">按百分比調整限時動態光圈尺寸 (預設值：100)</string>
     <string name="piko_disable_story_flipping">停用自動切換限時動態</string>
     <string name="piko_disable_story_flipping_desc">停用自動切換/移動至下一個限時動態</string>
     <!-- Download Media Section -->

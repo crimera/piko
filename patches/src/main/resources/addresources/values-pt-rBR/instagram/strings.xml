@@ -187,7 +187,7 @@
     <string name="piko_customise_story_timestamp">Personalizar o formato do horário nos stories</string>
     <string name="piko_customise_story_timestamp_desc">Personalize o formato do horário mostrado de quando o stories foi postado.</string>
     <string name="piko_customise_story_ring_size">Personalizar tamanho do anel do stories</string>
-    <string name="piko_customise_story_ring_size_desc">Altera o tamanho do anel do stories por uma porcentagem (Padrão: 100)</string>
+    <string name="piko_customise_story_ring_size_desc">Alterar o tamanho do círculo da história em porcentagem</string>
     <string name="piko_disable_story_flipping">Desativar troca automática de stories</string>
     <string name="piko_disable_story_flipping_desc">Desativa ir para o próximo stories automaticamente.</string>
     <string name="piko_loop_story">Stories em loop</string>
@@ -227,7 +227,6 @@
     <string name="piko_download_conflict_skip">Ignorar mídia já baixada</string>
     <string name="piko_download_conflict_overwrite">Sobrescrever o arquivo existente</string>
     <string name="piko_download_media_exists">A mídia já existe</string>
-    <string name="piko_download_media_in_progress">A mídia já está baixando</string>
     <string name="piko_download_file_name_template">Formato do nome do arquivo</string>
     <string name="piko_download_file_name_template_invalid">Nome inválido</string>
     <string name="piko_download_file_name_insert_token">Inserir %1$s</string>
@@ -375,6 +374,9 @@
     <string name="piko_pref_delete_font_success">Fonte excluída com sucesso</string>
     <string name="piko_pref_delete_font_fail">Falha ao excluir a fonte</string>
     <string name="piko_pref_delete_font_warn">Nenhuma fonte personalizada encontrada para ser excluída</string>
+    <string name="piko_emoji_font">Fonte Emoji</string>
+    <string name="piko_pref_add_emoji">Adicionar emoji</string>
+    <string name="piko_pref_delete_emoji">Excluir emoji</string>
     <string name="piko_use_system_font">Usar a fonte do sistema</string>
     <string name="piko_use_system_font_desc">Aplica-se somente quando nenhum arquivo de fonte for adicionado abaixo; adicionar um arquivo de fonte anula essa configuração.</string>
     <!-- Developer Options Section -->
@@ -450,9 +452,9 @@
     <string name="piko_user_type_unverified">Usuários não verificados</string>
     <string name="piko_user_type_verified">Usuários verificados</string>
     <string name="piko_filter_story_minimum_item_count">Mínimo de stories</string>
-    <string name="piko_filter_story_minimum_item_count_desc">Stories com menos de \"x\" itens serão ocultadas (padrão: 1)</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Stories com menos de x itens serão ocultadas</string>
     <string name="piko_filter_story_maximum_item_count">Número máximo de itens da story</string>
-    <string name="piko_filter_story_maximum_item_count_desc">Stories com mais de \"x\" itens serão ocultadas (padrão: 9999)</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Stories com menos de x itens serão ocultadas</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">Salvar Instants</string>
     <string name="piko_instants_download_desc">Capture os Instants visualizados uma única vez, para que você possa visualizá-los novamente e baixá-los mais tarde em \"Visualizar Instants salvos\".</string>

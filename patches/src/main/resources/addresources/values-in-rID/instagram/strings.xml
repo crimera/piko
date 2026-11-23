@@ -2,12 +2,12 @@
 <resources>
     <!-- Ads Section -->
     <string name="piko_category_ads">Iklan</string>
-    <string name="piko_disable_ads">Nonaktifkan iklan</string>
+    <string name="piko_disable_ads">Matikan iklan</string>
     <string name="piko_hide_suggested_content">Sembunyikan konten yang disarankan</string>
     <string name="piko_hide_suggested_content_desc">Menyembunyikan cerita, reel, dan utas yang direkomendasikan (Postingan yang direkomendasikan tetap akan ditampilkan).</string>
     <!-- Developer Options Section -->
-    <string name="piko_category_dev_options">Pilihan Pengembang</string>
-    <string name="piko_enable_dev_options">Aktifkan pilihan pengembang</string>
+    <string name="piko_category_dev_options">Pilihan pengembang</string>
+    <string name="piko_enable_dev_options">Hidupkan pilihan pengembang</string>
     <string name="piko_enable_dev_options_desc">Membuka pilihan pengembang dengan menekan lama ikon beranda</string>
     <string name="piko_directly_open_metaconfig">Langsung membuka penggantian MetaConfig</string>
     <string name="piko_export_dev_overrides">Ekspor override</string>
@@ -42,7 +42,24 @@
     <string name="piko_disable_comments">Nonaktifkan komentar</string>
     <string name="piko_limit_following_feed">Batasi feed hanya untuk profil yang diikuti</string>
     <string name="piko_limit_following_feed_desc">Menyaring feed beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.</string>
-    <string name="piko_disable_reels_scrolling">Nonaktifkan pengguliran Reels</string>
+    <string name="piko_focus_lock_reels_tab">Tab Reels</string>
+    <string name="piko_focus_lock_duration_1_minute">1 menit</string>
+    <string name="piko_focus_lock_duration_5_minutes">5 menit</string>
+    <string name="piko_focus_lock_duration_10_minutes">10 menit</string>
+    <string name="piko_focus_lock_duration_30_minutes">30 menit</string>
+    <string name="piko_focus_lock_duration_1_hour">1 jam</string>
+    <string name="piko_focus_lock_duration_2_hours">2 jam</string>
+    <string name="piko_focus_lock_duration_6_hours">6 jam</string>
+    <string name="piko_focus_lock_duration_12_hours">12 jam</string>
+    <string name="piko_focus_lock_duration_1_day">1 hari</string>
+    <string name="piko_focus_lock_duration_3_days">3 hari</string>
+    <string name="piko_focus_lock_duration_1_week">1 minggu</string>
+    <string name="piko_focus_lock_duration_2_weeks">2 minggu</string>
+    <string name="piko_focus_lock_duration_1_month">1 bulan</string>
+    <string name="piko_focus_lock_duration_3_months">3 bulan</string>
+    <string name="piko_focus_lock_button_lock">Kunci sekarang</string>
+    <string name="piko_focus_lock_button_unlock">Buka kunci</string>
+    <string name="piko_disable_reels_scrolling">Matikan pengguliran Reels</string>
     <string name="piko_disable_reels_scrolling_desc">Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reels berikutnya. Catatan: Pada pemasangan pertama kali, animasi \'Tips\' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik.</string>
     <string name="piko_disable_swipe_to_create">Nonaktifkan fitur usap untuk membuat</string>
     <string name="piko_disable_swipe_to_create_desc">Mencegah layar pembuatan terbuka saat mengusap ke kanan pada tab beranda.</string>
@@ -89,16 +106,17 @@
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">Jadikan media sementara menjadi permanen</string>
     <string name="piko_unlimited_replays_desc">Mengubah media sekali lihat atau dua kali lihat yang belum kedaluwarsa menjadi tampilan permanen</string>
+    <string name="piko_ephemeral_expired">Kedaluwarsa</string>
     <string name="piko_enable_mark_chat_as_read">Aktifkan pilihan tandai obrolan sebagai sudah dibaca</string>
     <string name="piko_enable_mark_chat_as_read_desc">Tambahkan opsi, dengan menekan lama obrolan, untuk menandainya sebagai sudah dibaca. Saat Anda menandai obrolan sebagai sudah dibaca, orang lain dapat melihat bahwa Anda telah membaca pesan mereka, meskipun opsi Lihat pesan langsung secara anonim diaktifkan</string>
     <!-- Story Section -->
+    <string name="piko_category_story">Cerita</string>
     <string name="piko_view_story_mentions">Lihat sebutan cerita</string>
     <string name="piko_vsm_title">Sebutan cerita</string>
     <string name="piko_vsm_no_mentions">Tidak ada sebutan di cerita ini</string>
     <string name="piko_customise_story_timestamp">Sesuaikan stempel waktu cerita</string>
     <string name="piko_customise_story_timestamp_desc">Sesuaikan stempel waktu yang menunjukkan kapan cerita diposting</string>
     <string name="piko_customise_story_ring_size">Sesuaikan ukuran lingkaran cerita</string>
-    <string name="piko_customise_story_ring_size_desc">Ubah ukuran lingkaran cerita berdasarkan persentase (Bawaan: 100)</string>
     <string name="piko_disable_story_flipping">Nonaktifkan pembalikan cerita</string>
     <string name="piko_disable_story_flipping_desc">Nonaktifkan pembalikan/perpindahan otomatis ke cerita berikutnya</string>
     <string name="piko_loop_story">Ulangi cerita</string>
@@ -107,13 +125,20 @@
     <string name="piko_category_download_media">Unduh media</string>
     <string name="piko_category_downloads">Unduhan</string>
     <string name="piko_enable_download">Aktifkan unduhan</string>
+    <string name="piko_download_buttons_stories">Cerita</string>
     <string name="piko_save_media_comment">Simpan komentar media</string>
     <string name="piko_save_media_comment_desc">Menambahkan tombol untuk menyimpan komentar media pada postingan dan reels</string>
     <string name="piko_enable_direct_download">Aktifkan unduhan langsung</string>
+    <string name="piko_select_media_download">Pilih media untuk diunduh</string>
+    <string name="piko_download_photo_number">Foto %d</string>
+    <string name="piko_download_video_number">Video %d</string>
     <string name="piko_download_username_folder">Pisahkan media berdasarkan nama pengguna</string>
     <string name="piko_download_username_folder_desc">Membuat subfolder berdasarkan nama pengguna</string>
     <string name="piko_embed_download_metadata">Sematkan metadata video</string>
     <string name="piko_embed_download_metadata_desc">Menambahkan keterangan, tautan postingan, pembuat, dan tanggal unggah ke berkas MP4 yang diunduh</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Stempel waktu</string>
+    <string name="piko_download_file_name_token_type">Jenis</string>
+    <string name="piko_download_file_name_token_variant_suffix">Varian</string>
     <string name="piko_download_current_media">Unduh media saat ini</string>
     <string name="piko_download_as_image">Unduh sebagai gambar</string>
     <string name="piko_video_variants">Varian video</string>
@@ -171,8 +196,8 @@
     <string name="piko_app_version">Versi aplikasi: %s</string>
     <string name="piko_patch_version">Versi tambalan: %s</string>
     <string name="piko_patch_info_title">Informasi tambalan</string>
-    <string name="piko_patch_enabled">Diaktifkan</string>
-    <string name="piko_patch_disabled">Dinonaktifkan</string>
+    <string name="piko_patch_enabled">Dihidupkan</string>
+    <string name="piko_patch_disabled">Dimatikan</string>
     <!-- Export and Import Section -->
     <string name="piko_export_success">Berhasil diekspor</string>
     <string name="piko_export_fail">Gagal mengekspor</string>
@@ -181,9 +206,10 @@
     <string name="piko_import_success">Berhasil diimpor</string>
     <string name="piko_import_fail">Gagal mengimpor</string>
     <string name="piko_restart_app">Aplikasi perlu dimulai ulang agar perubahan tersebut dapat diterapkan</string>
-    <string name="piko_ok">OKE</string>
+    <string name="piko_close">Tutup</string>
+    <string name="piko_ok">OK</string>
     <string name="piko_reset">Atur ulang</string>
-    <string name="piko_cancel">Batalkan</string>
+    <string name="piko_cancel">Batal</string>
     <string name="piko_debug">Debug Piko</string>
     <string name="piko_debug_desc">Menambahkan pilihan debug pada beberapa komponen untuk pengujian</string>
     <string name="piko_export_experiment_list">Ekspor daftar eksperimen</string>
@@ -196,13 +222,15 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Ubah animasi suka</string>
     <string name="piko_change_like_animation_desc">Ubah animasi ke salah satu animasi suka Rings yang ada</string>
+    <string name="piko_like_animation_preview">Pratinjau animasi</string>
+    <string name="piko_like_animation_preview_unavailable">Pratinjau tidak tersedia</string>
     <!-- For arrays -->
     <string name="piko_array_default">Bawaan</string>
     <string name="piko_array_detailed_timestamp">Stempel waktu terperinci (Hari Kerja/Bulan/Tanggal/Jam/Menit/Detik)</string>
     <string name="piko_array_post_time">Waktu posting (Jam/Menit/Detik)</string>
     <string name="piko_array_time_left">Waktu tersisa (Jam/Menit/Detik tersisa)</string>
-    <string name="piko_array_recmd_flag_state_enable">Aktifkan</string>
-    <string name="piko_array_recmd_flag_state_disable">Nonaktifkan</string>
+    <string name="piko_array_recmd_flag_state_enable">Hidupkan</string>
+    <string name="piko_array_recmd_flag_state_disable">Matikan</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Selamat datang di Piko</string>
     <string name="piko_welcome_message">Untuk meningkatkan pengalaman Anda menggunakan Piko, silakan buka pengaturan Piko dan sesuaikan preferensi Anda</string>
@@ -216,11 +244,15 @@
     <string name="piko_action_bar_chat">Ikon bilah tindakan obrolan</string>
     <string name="piko_action_bar_chat_desc">Ikon bilah tindakan di dalam DM</string>
     <string name="piko_action_bar_inbox">Ikon bilah tindakan kotak masuk</string>
+    <string name="piko_action_bar_button_audio_call_icon">Ikon panggilan audio</string>
+    <string name="piko_action_bar_button_video_call_icon">Ikon panggilan video</string>
     <string name="piko_action_bar_button_settings_icon">Ikon pengaturan</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ikon mode hantu</string>
+    <string name="piko_jump_oldest_cancelled">Dibatalkan</string>
     <string name="piko_action_bar_button_profile_info_icon">Ikon info profil</string>
     <string name="piko_action_bar_button_create_icon">Ikon buat</string>
     <string name="piko_action_bar_button_notifications_icon">Ikon pemberitahuan</string>
+    <string name="piko_settings_search_hint">Telusuri</string>
     <!-- Font Section -->
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">Tanda yang direkomendasikan</string>
@@ -285,9 +317,7 @@
     <string name="piko_user_type_unverified">Pengguna tidak terverifikasi</string>
     <string name="piko_user_type_verified">Pengguna terverifikasi</string>
     <string name="piko_filter_story_minimum_item_count">Item cerita minimum</string>
-    <string name="piko_filter_story_minimum_item_count_desc">Cerita yang berisi kurang dari x item akan disembunyikan (nilai bawaan 1)</string>
     <string name="piko_filter_story_maximum_item_count">Item cerita maksimum</string>
-    <string name="piko_filter_story_maximum_item_count_desc">Cerita yang memiliki lebih dari x item akan disembunyikan (nilai bawaan 9999)</string>
     <!-- Save Instants -->
     <string name="piko_delete">Hapus</string>
     <!-- Save & view deleted (unsent) direct messages -->

@@ -171,6 +171,17 @@
     <string name="piko_newx_media_picker_resolution_button_summary">在媒體下載選擇器中，為每個媒體項目顯示開啟解析度選擇器的圖示</string>
     <string name="piko_newx_media_picker_thumbnails_title">載入媒體縮圖</string>
     <string name="piko_newx_media_picker_thumbnails_summary">在媒體下載選擇器中載入圖片預覽，取代媒體類型圖示</string>
+    <string name="piko_newx_media_picker_layout_title">媒體選擇器版面配置</string>
+    <string name="piko_newx_media_picker_layout_summary">選擇下載媒體時，媒體項目在選擇器中的排列方式</string>
+    <string name="piko_newx_media_picker_layout_list">清單</string>
+    <string name="piko_newx_media_picker_layout_grid">格狀</string>
+    <string name="piko_newx_media_picker_layout_staggered">瀑布流</string>
+    <string name="piko_newx_media_picker_grid_columns_title">欄數</string>
+    <string name="piko_newx_media_picker_grid_columns_summary">下載媒體時，選擇器在格狀檢視中的欄數</string>
+    <string name="piko_newx_media_picker_grid_columns_auto">自動</string>
+    <string name="piko_newx_media_picker_grid_columns_2">2 欄</string>
+    <string name="piko_newx_media_picker_grid_columns_3">3 欄</string>
+    <string name="piko_newx_media_picker_grid_columns_4">4 欄</string>
     <string name="piko_newx_media_picker_merge_button_title">顯示合併按鈕</string>
     <string name="piko_newx_media_picker_merge_button_summary">在媒體選擇器中顯示下載並合併分割作品圖片的按鈕</string>
     <string name="piko_newx_inline_download_image_resolution_title">相片畫質</string>

@@ -171,6 +171,17 @@
     <string name="piko_newx_media_picker_resolution_button_summary">Muestra el ícono que abre el selector de resolución para cada elemento multimedia en el selector de descarga de archivos multimedia</string>
     <string name="piko_newx_media_picker_thumbnails_title">Cargar miniaturas de los archivos multimedia</string>
     <string name="piko_newx_media_picker_thumbnails_summary">Carga vistas previas de imágenes en el selector de archivos para descargar, en lugar de íconos de tipos de archivos</string>
+    <string name="piko_newx_media_picker_layout_title">Diseño del selector de contenido</string>
+    <string name="piko_newx_media_picker_layout_summary">Elige cómo se organizan los elementos en el selector de contenido para descargar</string>
+    <string name="piko_newx_media_picker_layout_list">Lista</string>
+    <string name="piko_newx_media_picker_layout_grid">Cuadrícula</string>
+    <string name="piko_newx_media_picker_layout_staggered">Escalonada</string>
+    <string name="piko_newx_media_picker_grid_columns_title">Columnas de la cuadrícula</string>
+    <string name="piko_newx_media_picker_grid_columns_summary">Número de columnas en la vista de cuadrícula del selector de contenido para descargar</string>
+    <string name="piko_newx_media_picker_grid_columns_auto">Auto</string>
+    <string name="piko_newx_media_picker_grid_columns_2">2 columnas</string>
+    <string name="piko_newx_media_picker_grid_columns_3">3 columnas</string>
+    <string name="piko_newx_media_picker_grid_columns_4">4 columnas</string>
     <string name="piko_newx_media_picker_merge_button_title">Mostrar el botón «Combinar»</string>
     <string name="piko_newx_media_picker_merge_button_summary">Muestra un botón para descargar y combinar imágenes divididas en el selector de medios</string>
     <string name="piko_newx_inline_download_image_resolution_title">Calidad de las fotos</string>

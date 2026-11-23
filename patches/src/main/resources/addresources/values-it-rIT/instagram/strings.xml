@@ -125,7 +125,6 @@
     <string name="piko_customise_story_timestamp">Personalizza timestamp della storia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizza il timestamp che mostra quando la storia è stata pubblicata</string>
     <string name="piko_customise_story_ring_size">Personalizza dimensione cerchio delle storie</string>
-    <string name="piko_customise_story_ring_size_desc">Cambia la dimensione del cerchio delle storie in percentuale (Predefinito: 100)</string>
     <string name="piko_disable_story_flipping">Disabilita scorrimento delle storie</string>
     <string name="piko_disable_story_flipping_desc">Disabilita scorrimento automatico alla storia successiva</string>
     <string name="piko_loop_story">Storia in loop</string>
@@ -305,9 +304,7 @@
     <string name="piko_user_type_unverified">Utenti non verificati</string>
     <string name="piko_user_type_verified">Utenti verificati</string>
     <string name="piko_filter_story_minimum_item_count">Oggetti minimi della storia</string>
-    <string name="piko_filter_story_minimum_item_count_desc">Le storie che hanno meno di x elementi saranno nascoste (predefinito 1)</string>
     <string name="piko_filter_story_maximum_item_count">Oggetti minimi della storia</string>
-    <string name="piko_filter_story_maximum_item_count_desc">Le storie che hanno più di x elementi saranno nascoste (predefinito 9999)</string>
     <!-- Save Instants -->
     <string name="piko_delete">Elimina</string>
     <!-- Save & view deleted (unsent) direct messages -->

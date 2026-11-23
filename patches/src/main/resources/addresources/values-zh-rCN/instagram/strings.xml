@@ -185,7 +185,6 @@
     <string name="piko_customise_story_timestamp">自定义快拍时间戳</string>
     <string name="piko_customise_story_timestamp_desc">自定义快拍发布时间的时间戳格式</string>
     <string name="piko_customise_story_ring_size">自定义快拍环大小</string>
-    <string name="piko_customise_story_ring_size_desc">按百分比调整快拍环的大小（默认：100）</string>
     <string name="piko_disable_story_flipping">禁用快拍自动滚动</string>
     <string name="piko_disable_story_flipping_desc">禁用自动跳转/移动到下个快拍</string>
     <string name="piko_loop_story">循环快拍</string>
@@ -431,9 +430,7 @@
     <string name="piko_user_type_unverified">未认证用户</string>
     <string name="piko_user_type_verified">已认证用户</string>
     <string name="piko_filter_story_minimum_item_count">最小快拍项</string>
-    <string name="piko_filter_story_minimum_item_count_desc">少于 X 个项目的快拍将被隐藏 (默认为1)</string>
     <string name="piko_filter_story_maximum_item_count">最大快拍项</string>
-    <string name="piko_filter_story_maximum_item_count_desc">超过 X 项的故事将被隐藏 (默认 9999)</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">保存 Instants</string>
     <string name="piko_view_saved_instants">查看已保存的 Instants</string>

@@ -187,7 +187,6 @@
     <string name="piko_customise_story_timestamp">Personalizar horario de la historia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizar el horario mostrado de cuando se publicó la historia</string>
     <string name="piko_customise_story_ring_size">Personalizar tamaño del anillo de historia</string>
-    <string name="piko_customise_story_ring_size_desc">Cambia el tamaño del anillo de historia por un porcentaje (Predeterminado: 100)</string>
     <string name="piko_disable_story_flipping">Desactiva saltar a la siguiente historia automáticamente</string>
     <string name="piko_disable_story_flipping_desc">Desactiva saltar a la siguiente historia automáticamente</string>
     <string name="piko_loop_story">Historia en bucle</string>
@@ -227,7 +226,6 @@
     <string name="piko_download_conflict_skip">Omitir los archivos multimedia ya descargados</string>
     <string name="piko_download_conflict_overwrite">Sobrescribir el archivo existente</string>
     <string name="piko_download_media_exists">El medio ya existe</string>
-    <string name="piko_download_media_in_progress">El archivo multimedia ya se está descargando</string>
     <string name="piko_download_file_name_template">Formato de nombre de archivo</string>
     <string name="piko_download_file_name_template_invalid">Nombre de archivo no válido</string>
     <string name="piko_download_file_name_insert_token">Insertar %1$s</string>
@@ -375,6 +373,9 @@
     <string name="piko_pref_delete_font_success">Fuente eliminada exitosamente</string>
     <string name="piko_pref_delete_font_fail">No se pudo eliminar la fuente</string>
     <string name="piko_pref_delete_font_warn">No se encontró ninguna fuente personalizada para eliminar</string>
+    <string name="piko_emoji_font">Fuente de emojis</string>
+    <string name="piko_pref_add_emoji">Añadir emoji</string>
+    <string name="piko_pref_delete_emoji">Eliminar emoji</string>
     <string name="piko_use_system_font">Utilice la fuente del sistema</string>
     <string name="piko_use_system_font_desc">Solo se aplica cuando no se agrega ningún archivo de fuente a continuación; agregar uno anula este cambio.</string>
     <!-- Developer Options Section -->
@@ -450,9 +451,9 @@
     <string name="piko_user_type_unverified">Usuarios no verificados</string>
     <string name="piko_user_type_verified">Usuarios verificados</string>
     <string name="piko_filter_story_minimum_item_count">Elementos mínimos de la historia</string>
-    <string name="piko_filter_story_minimum_item_count_desc">Las historias con menos de x elementos se ocultarán (Por defecto 1)</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Se ocultarán las historias que tengan menos de x elementos</string>
     <string name="piko_filter_story_maximum_item_count">Elementos de historia máximos</string>
-    <string name="piko_filter_story_maximum_item_count_desc">Las historias que tengan más de x elementos se ocultarán (Por defecto 9999)</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Se ocultarán las historias que tengan más de x elementos</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">Guardar instantes</string>
     <string name="piko_instants_download_desc">Capture los instantes de una sola vista a medida que los vea, para que pueda volver a verlos y descargarlos más tarde desde “Ver instantes guardados”.</string>

@@ -187,7 +187,7 @@
     <string name="piko_customise_story_timestamp">Налаштувати час публікації історій</string>
     <string name="piko_customise_story_timestamp_desc">Налаштувати формат часу, коли була опублікована історія</string>
     <string name="piko_customise_story_ring_size">Змінити розмір кільця історії</string>
-    <string name="piko_customise_story_ring_size_desc">Змінити розмір кільця історії у відсотках (за замовчуванням: 100)</string>
+    <string name="piko_customise_story_ring_size_desc">Змінити розмір кільця історій у відсотках</string>
     <string name="piko_disable_story_flipping">Вимкнути перегортання історій</string>
     <string name="piko_disable_story_flipping_desc">Вимкнути автоматичний перехід до наступної історії</string>
     <string name="piko_loop_story">Зациклювати історію</string>
@@ -227,7 +227,6 @@
     <string name="piko_download_conflict_skip">Пропускати вже завантажене медіа</string>
     <string name="piko_download_conflict_overwrite">Перезаписати наявний файл</string>
     <string name="piko_download_media_exists">Медіа вже існує</string>
-    <string name="piko_download_media_in_progress">Медіа вже завантажується</string>
     <string name="piko_download_file_name_template">Формат імені файлу</string>
     <string name="piko_download_file_name_template_invalid">Недійсне ім\'я файлу</string>
     <string name="piko_download_file_name_insert_token">Вставити %1$s</string>
@@ -375,6 +374,9 @@
     <string name="piko_pref_delete_font_success">Шрифт успішно видалено</string>
     <string name="piko_pref_delete_font_fail">Не вдалося видалити шрифт</string>
     <string name="piko_pref_delete_font_warn">Не знайдено власного шрифту для видалення</string>
+    <string name="piko_emoji_font">Шрифт емодзі</string>
+    <string name="piko_pref_add_emoji">Додати емодзі</string>
+    <string name="piko_pref_delete_emoji">Видалити емодзі</string>
     <string name="piko_use_system_font">Використовувати системний шрифт</string>
     <string name="piko_use_system_font_desc">Застосовується лише тоді, коли нижче не додано файл шрифту; додавання файлу замінює цей перемикач.</string>
     <!-- Developer Options Section -->
@@ -450,9 +452,9 @@
     <string name="piko_user_type_unverified">Непідтверджені користувачі</string>
     <string name="piko_user_type_verified">Підтверджені (верифіковані) користувачі</string>
     <string name="piko_filter_story_minimum_item_count">Мінімальна кількість історій</string>
-    <string name="piko_filter_story_minimum_item_count_desc">Історії з меншою кількістю фрагментів ніж x будуть приховані (за замовчуванням 1)</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Історії, що містять менше ніж x елементів, будуть приховані</string>
     <string name="piko_filter_story_maximum_item_count">Максимальна кількість історій</string>
-    <string name="piko_filter_story_maximum_item_count_desc">Історії з більшою кількістю фрагментів ніж x будуть приховані (за замовчуванням 9999)</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Історії, що містять більше ніж x елементів, будуть приховані</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">Зберігати Instants</string>
     <string name="piko_instants_download_desc">Зберігайте одноразові Instants під час їх перегляду, щоб пізніше ви могли переглянути та завантажити їх у розділі «Переглянути збережені Instants».</string>

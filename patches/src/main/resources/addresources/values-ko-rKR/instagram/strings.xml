@@ -185,7 +185,6 @@
     <string name="piko_customise_story_timestamp">스토리 시간 표시 설정</string>
     <string name="piko_customise_story_timestamp_desc">스토리가 게시된 시간을 표시하는 방식을 변경합니다</string>
     <string name="piko_customise_story_ring_size">스토리 링 크기 설정</string>
-    <string name="piko_customise_story_ring_size_desc">스토리 링 크기를 백분율로 변경합니다 (기본값: 100)</string>
     <string name="piko_disable_story_flipping">스토리 자동 넘기기 비활성화</string>
     <string name="piko_disable_story_flipping_desc">스토리가 자동으로 다음으로 넘어가지 않도록 합니다</string>
     <string name="piko_loop_story">스토리 반복 재생</string>
@@ -225,7 +224,6 @@
     <string name="piko_download_conflict_skip">이미 다운로드한 미디어 건너뛰기</string>
     <string name="piko_download_conflict_overwrite">기존 파일 덮어쓰기</string>
     <string name="piko_download_media_exists">미디어가 이미 존재합니다</string>
-    <string name="piko_download_media_in_progress">미디어가 이미 다운로드 중입니다</string>
     <string name="piko_download_file_name_template">파일 이름 형식</string>
     <string name="piko_download_file_name_template_invalid">잘못된 파일 이름입니다</string>
     <string name="piko_download_file_name_insert_token">%1$s 삽입</string>
@@ -438,9 +436,7 @@
     <string name="piko_user_type_unverified">인증되지 않은 사용자</string>
     <string name="piko_user_type_verified">인증된 사용자</string>
     <string name="piko_filter_story_minimum_item_count">최소 스토리 항목</string>
-    <string name="piko_filter_story_minimum_item_count_desc">사용자가 설정한 개수 미만의 항목이 있는 스토리를 숨깁니다 (기본값: 1)</string>
     <string name="piko_filter_story_maximum_item_count">최대 스토리 항목</string>
-    <string name="piko_filter_story_maximum_item_count_desc">사용자가 설정한 개수를 초과하는 항목이 있는 스토리를 숨깁니다 (기본값: 9999)</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">인스턴트 저장</string>
     <string name="piko_instants_download_desc">한 번만 볼 수 있는 인스턴트를 시청하는 동안 캡처하여 나중에 \'저장된 인스턴트 보기\'에서 다시 보고 다운로드할 수 있습니다</string>

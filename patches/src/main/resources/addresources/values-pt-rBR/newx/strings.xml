@@ -171,6 +171,17 @@
     <string name="piko_newx_media_picker_resolution_button_summary">Exibe o ícone que abre o seletor de resolução para cada item de mídia no seletor de mídia para download</string>
     <string name="piko_newx_media_picker_thumbnails_title">Carregar miniaturas de mídia</string>
     <string name="piko_newx_media_picker_thumbnails_summary">Carrega pré-visualizações de imagens no seletor de mídia para download em vez de ícones de tipo de mídia</string>
+    <string name="piko_newx_media_picker_layout_title">Layout do seletor de mídia</string>
+    <string name="piko_newx_media_picker_layout_summary">Escolha como são organizados os itens de mídia no seletor de download</string>
+    <string name="piko_newx_media_picker_layout_list">Lista</string>
+    <string name="piko_newx_media_picker_layout_grid">Grade</string>
+    <string name="piko_newx_media_picker_layout_staggered">Escalonado</string>
+    <string name="piko_newx_media_picker_grid_columns_title">Colunas da grade</string>
+    <string name="piko_newx_media_picker_grid_columns_summary">Número de colunas na visualização em grade do seletor de mídia para download</string>
+    <string name="piko_newx_media_picker_grid_columns_auto">Automático</string>
+    <string name="piko_newx_media_picker_grid_columns_2">2 colunas</string>
+    <string name="piko_newx_media_picker_grid_columns_3">3 colunas</string>
+    <string name="piko_newx_media_picker_grid_columns_4">4 colunas</string>
     <string name="piko_newx_media_picker_merge_button_title">Mostrar botão de mesclagem</string>
     <string name="piko_newx_media_picker_merge_button_summary">Exibe um botão para baixar e mesclar imagens de obras de arte divididas no seletor de mídia</string>
     <string name="piko_newx_inline_download_image_resolution_title">Qualidade da foto</string>

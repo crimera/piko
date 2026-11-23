@@ -171,6 +171,17 @@
     <string name="piko_newx_media_picker_resolution_button_summary">Показує значок, який відкриває вибір роздільної здатності для кожного медіаелемента у вікні вибору завантаження медіа</string>
     <string name="piko_newx_media_picker_thumbnails_title">Завантажувати мініатюри медіа</string>
     <string name="piko_newx_media_picker_thumbnails_summary">Завантажує попередні перегляди зображень у вікні вибору завантаження медіа замість значків типу медіа</string>
+    <string name="piko_newx_media_picker_layout_title">Макет вибору медіа</string>
+    <string name="piko_newx_media_picker_layout_summary">Виберіть, як елементи медіа розташовуються у вікні вибору медіа для завантаження</string>
+    <string name="piko_newx_media_picker_layout_list">Список</string>
+    <string name="piko_newx_media_picker_layout_grid">Сітка</string>
+    <string name="piko_newx_media_picker_layout_staggered">Каскадна сітка</string>
+    <string name="piko_newx_media_picker_grid_columns_title">Стовпці сітки</string>
+    <string name="piko_newx_media_picker_grid_columns_summary">Кількість стовпців у режимі сітки вікна вибору медіа для завантаження</string>
+    <string name="piko_newx_media_picker_grid_columns_auto">Авто</string>
+    <string name="piko_newx_media_picker_grid_columns_2">2 стовпці</string>
+    <string name="piko_newx_media_picker_grid_columns_3">3 стовпці</string>
+    <string name="piko_newx_media_picker_grid_columns_4">4 стовпці</string>
     <string name="piko_newx_media_picker_merge_button_title">Показувати кнопку об\'єднання</string>
     <string name="piko_newx_media_picker_merge_button_summary">Показує кнопку для завантаження та об\'єднання розділених ілюстрацій у вікні вибору медіа</string>
     <string name="piko_newx_inline_download_image_resolution_title">Якість фото</string>
