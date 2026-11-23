@@ -38,7 +38,7 @@ final class InstagramDownloadBatch {
         });
     }
 
-    private static String userAgent(Context context) {
+    static String userAgent(Context context) {
         if (cachedUserAgent != null) return cachedUserAgent;
         try {
             PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
