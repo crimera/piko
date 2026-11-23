@@ -2267,7 +2267,7 @@ class NewXResolverLinterTest {
 
     @Test
     fun `reply sorting selection resolves the validated cast-to-store tuple through every positive form`() {
-        for (shape in listOf("adjacent", "entryMove", "multiHop", "returningOverwrite", "unrelatedStore", "postCastMove", "tryUnrelated")) {
+        for (shape in listOf("adjacent", "entryMove", "multiHop", "returningOverwrite", "unrelatedStore", "postCastMove", "tryUnrelated", "typed")) {
             val method = replySelectionFixture(shape)
             val instructions = method.implementation!!.instructions.toList()
             val site = resolveReplySortingSelectionSite(method, replyEnum, method.defaultUrtIndex())
@@ -2276,8 +2276,13 @@ class NewXResolverLinterTest {
                 site.storeIndex,
                 "$shape must select the store on the defaultUrt path, not an earlier returning arm",
             )
-            assertEquals(Opcode.CHECK_CAST, instructions[site.castIndex].opcode, shape)
-            assertEquals(replyEnum, ((instructions[site.castIndex] as ReferenceInstruction).reference as TypeReference).type, shape)
+            if (shape == "typed") {
+                assertEquals(null, site.castIndex, shape)
+            } else {
+                val cast = instructions[requireNotNull(site.castIndex)] as ReferenceInstruction
+                assertEquals(Opcode.CHECK_CAST, cast.opcode, shape)
+                assertEquals(replyEnum, (cast.reference as TypeReference).type, shape)
+            }
             assertEquals(Opcode.IPUT_OBJECT, instructions[site.storeIndex].opcode, shape)
             assertEquals(site.register, (instructions[site.storeIndex] as TwoRegisterInstruction).registerA, shape)
             assertTrue(site.storeIndex < method.defaultUrtIndex(), shape)
@@ -2372,6 +2377,11 @@ class NewXResolverLinterTest {
                     add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
                     endSelection()
                 }
+                "typed" -> {
+                    add("move-object/from16 v3, v$parameter")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                }
                 "entryMove" -> {
                     add("move-object/from16 v0, v$parameter")
                     add("move-object/from16 v7, v238")
@@ -2462,7 +2472,7 @@ class NewXResolverLinterTest {
         }
         return ImmutableMethod(
             "Lfixture/ReplySortingCallback;", "invoke",
-            listOf(ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null)), "V",
+            listOf(ImmutableMethodParameter(if (shape == "typed") replyEnum else "Ljava/lang/Object;", emptySet(), null)), "V",
             AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation.methodImplementation,
         )
     }

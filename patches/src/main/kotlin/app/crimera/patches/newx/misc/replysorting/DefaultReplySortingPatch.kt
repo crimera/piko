@@ -159,6 +159,15 @@ private object NewXComposeReplySortingSelectionFingerprint : Fingerprint(
         ),
 )
 
+// R8 can extract the selection body from the erased callback into a typed post-detail method.
+private fun replySortingSelectionMethodFingerprint(enumClass: String) = Fingerprint(
+    definingClass = "Lcom/x/postdetail/",
+    returnType = "V",
+    parameters = listOf(enumClass),
+    isStatic = false,
+    strings = listOf("timelineRepository", "defaultUrtTimelineComponent"),
+)
+
 /**
  * Targets the Compose state initializer that seeds the reply-sorting sheet with
  * `mutableStateOf(TimelineRankingMode.Relevance)`.
@@ -241,7 +250,7 @@ private fun seedFeedsRequest(
  * register, which holds the chosen enum on every incoming path to [storeIndex].
  */
 internal data class ReplySortingSelectionSite(
-    val castIndex: Int,
+    val castIndex: Int?,
     val storeIndex: Int,
     val register: Int,
 )
@@ -259,14 +268,15 @@ internal fun resolveReplySortingSelectionSite(
 ): ReplySortingSelectionSite {
     val implementation = method.implementation
         ?: throw PatchException("Reply sorting selection handler has no implementation")
+    val parameterType = method.parameterTypes.singleOrNull()?.toString()
     if (AccessFlags.STATIC.isSet(method.accessFlags) ||
-        method.parameterTypes.map(CharSequence::toString) != listOf("Ljava/lang/Object;")
+        parameterType != "Ljava/lang/Object;" && parameterType != enumClass
     ) {
         throw PatchException(
             "Unexpected reply sorting selection handler parameters: ${method.parameterTypes}",
         )
     }
-    // The receiver and the single Object argument occupy the last two registers.
+    // The receiver and the single reference argument occupy the last two registers.
     val selectedParameterRegister = implementation.registerCount - 1
     if (selectedParameterRegister < 1) {
         throw PatchException("Invalid reply sorting selection handler register layout")
@@ -279,21 +289,28 @@ internal fun resolveReplySortingSelectionSite(
             "Reply sorting selection boundary index $defaultUrtIndex is not the defaultUrtTimelineComponent anchor in $method",
         )
     }
-    val castSites = instructions.withIndex().mapNotNull { (index, instruction) ->
-        if (index >= defaultUrtIndex || instruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
-        val cast = instruction as? OneRegisterInstruction ?: return@mapNotNull null
-        if (instruction.getReference<TypeReference>()?.type != enumClass) return@mapNotNull null
-        if (!method.provesParameterValue(index, cast.registerA, selectedParameterRegister)) {
-            return@mapNotNull null
+    val sources: List<Pair<Int?, Int>> =
+        if (parameterType == enumClass) {
+            listOf(null to selectedParameterRegister)
+        } else {
+            instructions.withIndex().mapNotNull { (index, instruction) ->
+                if (index >= defaultUrtIndex || instruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
+                val cast = instruction as? OneRegisterInstruction ?: return@mapNotNull null
+                if (instruction.getReference<TypeReference>()?.type != enumClass) return@mapNotNull null
+                if (!method.provesParameterValue(index, cast.registerA, selectedParameterRegister)) {
+                    return@mapNotNull null
+                }
+                index to cast.registerA
+            }
         }
-        index to cast.registerA
-    }
 
     val successors = method.normalControlFlowSuccessors()
         ?: throw PatchException("Reply sorting selection handler has unsupported control flow: $method")
-    val sites = castSites.flatMap { (castIndex, castRegister) ->
+    val sites = sources.flatMap { (castIndex, sourceRegister) ->
         instructions.withIndex().mapNotNull { (storeIndex, instruction) ->
-            if (storeIndex <= castIndex || storeIndex >= defaultUrtIndex) return@mapNotNull null
+            if (storeIndex >= defaultUrtIndex || castIndex != null && storeIndex <= castIndex) {
+                return@mapNotNull null
+            }
             if (instruction.opcode != Opcode.IPUT_OBJECT) return@mapNotNull null
             val store = instruction as? TwoRegisterInstruction ?: return@mapNotNull null
             val fieldType = instruction.getReference<FieldReference>()?.type
@@ -302,10 +319,12 @@ internal fun resolveReplySortingSelectionSite(
             if (defaultUrtIndex !in successors.reachableIndicesFrom(storeIndex).orEmpty()) {
                 return@mapNotNull null
             }
-            if (!method.provesValueFromInstruction(castIndex, castRegister, storeIndex, store.registerA)) {
-                return@mapNotNull null
+            val storesSelection = if (castIndex == null) {
+                method.provesParameterValue(storeIndex, store.registerA, sourceRegister)
+            } else {
+                method.provesValueFromInstruction(castIndex, sourceRegister, storeIndex, store.registerA)
             }
-            ReplySortingSelectionSite(castIndex, storeIndex, store.registerA)
+            ReplySortingSelectionSite(castIndex, storeIndex, store.registerA).takeIf { storesSelection }
         }
     }
 
@@ -456,9 +475,8 @@ val newXDefaultReplySortingPatch =
             val selectionMatch =
                 requireExactlyOne(
                     label = "NewX Compose reply sorting selection handler",
-                    candidates = NewXComposeReplySortingSelectionFingerprint
-                        .matchAllOrNull()
-                        .orEmpty(),
+                    candidates = NewXComposeReplySortingSelectionFingerprint.matchAllOrNull().orEmpty() +
+                        replySortingSelectionMethodFingerprint(enumClass).scopedMatchAllOrNull().orEmpty(),
                 )
             val selectionMethod = selectionMatch.method
             // Resolve the anchor from the live method rather than the cached match indexes, so earlier
