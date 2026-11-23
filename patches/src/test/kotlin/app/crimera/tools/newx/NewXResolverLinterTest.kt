@@ -14,6 +14,7 @@ import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
 import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.resolveInlineActionKindLayoutMethod
+import app.crimera.patches.newx.timeline.hasKnownSpacesBarSignature
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineActionKindRenderCall
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineIconSizeHook
 import app.crimera.patches.newx.misc.inlineactions.isCapturedInlineActionEntryRenderer
@@ -825,6 +826,25 @@ class NewXResolverLinterTest {
             add("return-void")
         }
         return MutableMethod(renderer) to mapOf(sizing to sizingClass(sizing, true), auxiliary to sizingClass(auxiliary, false))
+    }
+
+    @Test
+    fun `Spaces bar renderer allows a second action callback before the composer`() {
+        val function0 = "Lkotlin/jvm/functions/Function0;"
+        val function1 = "Lkotlin/jvm/functions/Function1;"
+        val prefix = listOf(
+            "Lfixture/Flow;", function1, "Landroidx/compose/ui/Modifier;", "Z",
+            function1, "Lkotlin/jvm/functions/Function2;",
+        )
+        val tail = listOf("Landroidx/compose/runtime/Composer;", "I", "I")
+        fun renderer(vararg callbacks: String) = ImmutableMethod(
+            "Lfixture/Spaces;", "render",
+            (prefix + callbacks + tail).map { ImmutableMethodParameter(it, emptySet(), null) },
+            "V", AccessFlags.STATIC.value, emptySet(), emptySet(), null,
+        )
+        assertTrue(renderer(function0).hasKnownSpacesBarSignature())
+        assertTrue(renderer(function0, function0).hasKnownSpacesBarSignature())
+        assertFalse(renderer(function0, function1).hasKnownSpacesBarSignature())
     }
 
     @Test
