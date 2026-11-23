@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import kotlin.jvm.functions.Function0;
 
 import app.morphe.extension.crimera.settings.SettingsRegistry;
+import app.morphe.extension.newx.settings.ComposeSettingsHook;
 import app.morphe.extension.shared.ResourceUtils;
 
 /**
@@ -81,12 +82,27 @@ public final class DrawerTabOpener {
         return ResourceUtils.getStringOrThrow("piko_newx_nav_bar_notifications");
     }
 
+    /**
+     * Item-model drawers emit the Piko settings row from a dense shared row call, so the toggle is
+     * read here and a disabled row is skipped on the null title. Defaults to shown, matching the
+     * registered setting.
+     */
+    @Nullable
+    public static String getPikoSettingsTitle() {
+        if (!isToggleEnabled("newx.navigation.show_piko_settings_in_drawer", true)) return null;
+        return ComposeSettingsHook.getSettingsTitle();
+    }
+
     private static boolean isShortcutEnabled(String key) {
-        if (!SettingsRegistry.isRegistered(key)) return false;
+        return isToggleEnabled(key, false);
+    }
+
+    private static boolean isToggleEnabled(String key, boolean defaultValue) {
+        if (!SettingsRegistry.isRegistered(key)) return defaultValue;
         try {
-            return SettingsRegistry.getBooleanOrDefault(key, false);
+            return SettingsRegistry.getBooleanOrDefault(key, defaultValue);
         } catch (RuntimeException exception) {
-            return false;
+            return defaultValue;
         }
     }
 

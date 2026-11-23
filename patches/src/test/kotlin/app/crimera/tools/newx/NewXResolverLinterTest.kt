@@ -14,6 +14,7 @@ import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
 import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.resolveInlineActionKindLayoutMethod
+import app.crimera.patches.newx.misc.drawer.parseItemBranches
 import app.crimera.patches.newx.timeline.hasKnownSpacesBarSignature
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineActionKindRenderCall
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineIconSizeHook
@@ -40,6 +41,7 @@ import app.crimera.patches.newx.misc.postoptions.postOptionsParameterOffset
 import app.crimera.patches.newx.misc.postoptions.postOptionsFeedbackLookups
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
 import com.android.tools.smali.dexlib2.Opcode
@@ -1020,6 +1022,36 @@ class NewXResolverLinterTest {
             "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(),
             implementation.methodImplementation,
         )
+    }
+
+    @Test
+    fun `drawer item icon dispatch stops at the first native return`() {
+        val icon = "Lcom/x/icons/Fixture;"
+        val first = "Lfixture/First;"
+        val second = "Lfixture/Second;"
+        val code = MethodImplementationBuilder(3).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            add("instance-of v0, v2, $first")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 0, getLabel("next")))
+            add("sget-object v1, Lfixture/Icons;->first:$icon")
+            add("return-object v1")
+            addLabel("next")
+            add("instance-of v0, v2, $second")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 0, getLabel("unknown")))
+            add("sget-object v1, Lfixture/Icons;->second:$icon")
+            add("return-object v1")
+            addLabel("unknown")
+            add("const/4 v1, 0x0")
+            add("return-object v1")
+        }
+        val method = ImmutableMethod(
+            "Lfixture/Drawer;", "icon", listOf(ImmutableMethodParameter("Lfixture/Item;", emptySet(), null)),
+            icon, AccessFlags.STATIC.value, emptySet(), emptySet(), code.methodImplementation,
+        )
+        val fields = parseItemBranches(method).mapValues { (_, branch) ->
+            branch.filterIsInstance<ReferenceInstruction>().map { (it.reference as FieldReference).name }
+        }
+        assertEquals(mapOf(first to listOf("first"), second to listOf("second")), fields)
     }
 
     @Test
