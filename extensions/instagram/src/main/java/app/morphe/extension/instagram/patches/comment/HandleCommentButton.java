@@ -110,12 +110,11 @@ public class HandleCommentButton {
                         UserData userData = commentData.getCommentUserData();
 
                         String userName = (userData != null) ? userData.getUsername() : "comment_"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-                        String mediaLink = imageData.getMediaLink();
                         String fileName = userName + "_" + imageData.getDownloadFilename(MediaType.ANY);
 
                         String subFolder = DownloadUtils.getSubfolderName(userName);
 
-                        DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
+                        DownloadUtils.downloadCommentMedia(context, imageData, subFolder, fileName);
                     }
                 
                 return true;

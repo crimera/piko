@@ -63,8 +63,12 @@ public interface AudioMediaInterface {
         if (candidates.size() > 1 && request.localSource != null) {
             candidates.replaceAll((url, bitrate) -> bitrate > 0 ? bitrate : cachedAudioBitrate(request, url));
         }
-        candidates.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .forEachOrdered(entry -> request.qualitySources.add(new DownloadRequest.Source(entry.getKey(), null)));
+        long highestBitrate = candidates.values().stream().mapToLong(Long::longValue).max().orElse(0);
+        candidates.forEach((url, bitrate) -> {
+            if (highestBitrate <= 0 || bitrate == highestBitrate) {
+                request.qualitySources.add(new DownloadRequest.Source(url, null));
+            }
+        });
     }
 
     private static long cachedAudioBitrate(DownloadRequest request, String url) {
