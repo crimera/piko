@@ -6,6 +6,7 @@ import app.morphe.patcher.patch.classDefForEach
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.inlineactions.newXThumbnailCachePatch
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.common.flatMapParallel
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
@@ -40,6 +41,7 @@ import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction11n
@@ -1156,10 +1158,31 @@ private fun resolveNativePhotoViewerTarget(
         candidates = mediaGetters.distinctBy { it.toNativeCall().descriptor },
     ).toNativeCall()
 
-    // Controller, destination, and navigate call are all derived from the call graph:
-    // the controller field's class must declare a (destination, Z) -> V method whose
-    // destination is a supertype of the resolved route (kj/k(jj,Z) on old targets,
-    // sj/k(rj,Z) on alpha.04). Never hardcode either descriptor; R8 reassigns them.
+    // The route can implement several destination interfaces. Only the native call that
+    // consumes this viewer allocation identifies the post's navigation controller.
+    val hostCode = hostMethod.instructions.withIndex().toList()
+    val routeAllocations = hostCode.filter { (_, instruction) ->
+        instruction.opcode == Opcode.NEW_INSTANCE &&
+            instruction.getReference<TypeReference>()?.type == routeClass
+    }
+    val viewerNavigationCalls = hostCode.mapNotNull { (callIndex, instruction) ->
+        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+        if (instruction.opcode !in listOf(
+                Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE,
+                Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE,
+            ) ||
+            reference.returnType != "V" ||
+            reference.parameterTypes.size != 2 || reference.parameterTypes[1] != "Z"
+        ) return@mapNotNull null
+        val routeRegister = instruction.registersUsed.getOrNull(1) ?: return@mapNotNull null
+        reference.takeIf {
+            routeAllocations.any { (sourceIndex, allocation) ->
+                sourceIndex < callIndex && hostMethod.provesValueFromInstruction(
+                    sourceIndex, (allocation as OneRegisterInstruction).registerA, callIndex, routeRegister,
+                )
+            }
+        }
+    }.toSet()
     val navigationCandidates =
         hostClass.fields.flatMap { field ->
             val navigationClass =
@@ -1171,6 +1194,7 @@ private fun resolveNativePhotoViewerTarget(
                 if (method.returnType != "V") return@mapNotNull null
                 if (!parameters[0].startsWith("L")) return@mapNotNull null
                 if (!classImplements(routeClass, parameters[0])) return@mapNotNull null
+                if (method !in viewerNavigationCalls) return@mapNotNull null
                 Triple(field, method, parameters[0])
             }
         }
