@@ -84,6 +84,7 @@ import app.crimera.patches.newx.misc.dynamiccolor.injectActivatedLikeTint
 import app.crimera.patches.newx.misc.dynamiccolor.isTabSlotColors
 import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsRowDelegate
 import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsRowIconConsumer
+import app.crimera.patches.newx.timeline.resolveProvenForYouCurrentPageRefreshBridges
 
 class NewXResolverLinterTest {
     @Test
@@ -1019,6 +1020,54 @@ class NewXResolverLinterTest {
             "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(),
             implementation.methodImplementation,
         )
+    }
+
+    @Test
+    fun `For You refresh resolves the live page index through both native lookup shapes`() {
+        val event = "Lfixture/Event;"
+        fun tabHandler(safeLookup: Boolean, overwriteIndex: Boolean): Method {
+            val code = MethodImplementationBuilder(7).apply {
+                fun add(instruction: String) = addInstruction(instruction.toInstruction())
+                add("iget-object v0, v6, Lfixture/Home;->state:Lfixture/State;")
+                add("invoke-virtual {v0}, Lfixture/State;->get()Ljava/lang/Object;")
+                add("move-result-object v1")
+                add("check-cast v1, Lfixture/Pages;")
+                add("iget-object v1, v1, Lfixture/Pages;->list:Ljava/util/List;")
+                add("invoke-virtual {v0}, Lfixture/State;->get()Ljava/lang/Object;")
+                add("move-result-object v2")
+                add("check-cast v2, Lfixture/Pages;")
+                add("iget v2, v2, Lfixture/Pages;->selected:I")
+                if (overwriteIndex) add("const/4 v2, 0x0")
+                if (safeLookup) {
+                    add("invoke-static {v1, v2}, Lkotlin/collections/CollectionsKt;->getOrNull(Ljava/util/List;I)Ljava/lang/Object;")
+                } else {
+                    add("invoke-interface {v1, v2}, Ljava/util/List;->get(I)Ljava/lang/Object;")
+                }
+                add("move-result-object v1")
+                add("check-cast v1, Lfixture/Child;")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("done")))
+                add("invoke-virtual {v1}, Lfixture/Child;->component()Ljava/lang/Object;")
+                add("move-result-object v1")
+                add("instance-of v2, v1, Lfixture/ForYou;")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, getLabel("done")))
+                add("check-cast v1, Lfixture/ForYou;")
+                add("iget-object v1, v1, Lfixture/ForYou;->controller:Lfixture/Controller;")
+                add("sget-object v2, Lfixture/Refresh;->INSTANCE:Lfixture/Refresh;")
+                add("invoke-interface {v1, v2}, Lfixture/Controller;->dispatch($event)V")
+                addLabel("done")
+                add("return-void")
+            }
+            return ImmutableMethod(
+                "Lfixture/Home;", "refresh", emptyList(), "V", AccessFlags.PUBLIC.value,
+                emptySet(), emptySet(), code.methodImplementation,
+            )
+        }
+        for (safeLookup in listOf(false, true)) {
+            val bridge = tabHandler(safeLookup, false).resolveProvenForYouCurrentPageRefreshBridges(setOf(event)).single()
+            assertEquals("selected", bridge.pagesIndexField.name)
+            assertEquals("dispatch", bridge.refreshDispatch.name)
+            assertTrue(tabHandler(safeLookup, true).resolveProvenForYouCurrentPageRefreshBridges(setOf(event)).isEmpty())
+        }
     }
 
     @Test
