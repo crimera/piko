@@ -32,8 +32,12 @@ import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 
+internal val downloadCachePatch = patch {
+    dependsOn(instagramImageCachePatch, instagramVideoCachePatch)
+}
+
 internal val directMessageDownloadPatch = patch {
-    dependsOn(settingsPatch, saveAllMessagesPatch)
+    dependsOn(settingsPatch, saveAllMessagesPatch, downloadCachePatch)
 
     execute {
         val saverClass = GetDirectThreadMediaSaverModuleNameFingerprint.originalClassDef

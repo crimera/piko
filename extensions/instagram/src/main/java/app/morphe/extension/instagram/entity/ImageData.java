@@ -38,6 +38,10 @@ public class ImageData implements MediaInterface {
         return MediaUrls.wholeFile(this.obj.getUrl());
     }
 
+    public String getPreviewUrl() {
+        return obj.getUrl();
+    }
+
     public MediaType getMediaType(){
         return MediaType.IMAGE;
     }

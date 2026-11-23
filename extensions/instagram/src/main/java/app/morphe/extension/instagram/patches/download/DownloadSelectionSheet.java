@@ -348,7 +348,7 @@ final class DownloadSelectionSheet {
                     bestSize = size;
                 }
             }
-            return best == null ? null : best.getUrl();
+            return best == null ? null : best.getPreviewUrl();
         } catch (Exception e) {
             return null;
         }

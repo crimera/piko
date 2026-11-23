@@ -24,6 +24,8 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
+import android.system.ErrnoException;
+import android.system.OsConstants;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -45,10 +47,12 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
 import app.morphe.extension.crimera.PikoUtils;
@@ -107,6 +111,10 @@ public final class MediaDownloader {
 
     /** Saves the requests in order, after every batch enqueued before it. Same names in a batch are numbered apart, around existing folders, before the conflict policy applies, so a rerun meets the same names. */
     public void enqueueBatch(List<DownloadRequest> requests) {
+        enqueueBatch(requests, request -> true);
+    }
+
+    public void enqueueBatch(List<DownloadRequest> requests, Predicate<DownloadRequest> prepare) {
         List<DownloadRequest> batch = new ArrayList<>(requests);
         if (batch.isEmpty()) return;
         if (!StorageUtils.checkStoragePermissions()) {
@@ -132,7 +140,7 @@ public final class MediaDownloader {
                 return;
             }
             for (DownloadRequest request : batch) {
-                runDownloadTask(request);
+                runDownloadTask(request, prepare);
             }
         });
     }
@@ -145,12 +153,13 @@ public final class MediaDownloader {
         return names;
     }
 
-    private void runDownloadTask(DownloadRequest request) {
+    private void runDownloadTask(DownloadRequest request, Predicate<DownloadRequest> prepare) {
         int notificationId = notificationIds.incrementAndGet();
         Uri outputDocumentUri = null;
         boolean downloadCompleted = false;
         boolean replacing = false;
         File replacement = null;
+        File cover = null;
         try {
             Notification.Builder builder;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -169,6 +178,12 @@ public final class MediaDownloader {
                     : children.get(request.fileName);
             if (existing != null && request.conflictPolicy == DownloadRequest.ConflictPolicy.SKIP) {
                 showToast(ExtensionStrings.DOWNLOAD_MEDIA_EXISTS);
+                return;
+            }
+            cover = encodeFirstFrame(request);
+            if (cover != null) {
+                request.cachedMedia = new FileInputStream(cover);
+            } else if (!prepare.test(request)) {
                 return;
             }
             replacing = existing != null && request.conflictPolicy == DownloadRequest.ConflictPolicy.OVERWRITE;
@@ -235,6 +250,9 @@ public final class MediaDownloader {
                 PikoUtils.logger(notificationException);
             }
         } finally {
+            closeCached(request.cachedMedia);
+            closeCached(request.cachedAudio);
+            if (cover != null) cover.delete();
             if (replacement != null) replacement.delete();
         }
     }
@@ -307,60 +325,77 @@ public final class MediaDownloader {
         }
     }
 
+    private static void closeCached(InputStream stream) {
+        if (stream == null) return;
+        try {
+            stream.close();
+        } catch (IOException e) {
+            PikoUtils.logger(e);
+        }
+    }
+
     private void downloadSources(DownloadRequest request, Uri outputUri,
                                  Notification.Builder builder, int notificationId) throws Exception {
         List<DownloadRequest.Source> sources = new ArrayList<>();
-        sources.add(new DownloadRequest.Source(request.url, request.audioUrl));
-        sources.addAll(request.fallbackSources);
-        if (request.fallbackUrl != null) sources.add(new DownloadRequest.Source(request.fallbackUrl, null));
+        DownloadRequest.Source primary = new DownloadRequest.Source(request.url, request.audioUrl);
+        DownloadRequest.Source cached = request.cachedSource;
+        boolean cachedAlternative = cached != null && (!Objects.equals(cached.url, primary.url)
+                || !Objects.equals(cached.audioUrl, primary.audioUrl));
+        if (cachedAlternative) sources.add(cached);
+        sources.add(primary);
+        if (request.cachedMedia == null || cached != null) {
+            sources.addAll(request.fallbackSources);
+            if (request.fallbackUrl != null) sources.add(new DownloadRequest.Source(request.fallbackUrl, null));
+        }
         for (int i = 0; i < sources.size(); i++) {
             try {
-                downloadSource(sources.get(i), request, outputUri, builder, notificationId, i > 0);
+                downloadSource(sources.get(i), request, outputUri, builder, notificationId, i > 0,
+                        cachedAlternative && i == 0);
                 return;
             } catch (Exception | LinkageError e) {
-                if (i == sources.size() - 1) throw e;
+                if (failedStorage(e) || i == sources.size() - 1) throw e;
                 PikoUtils.logger(e);
             }
         }
     }
 
-    private void downloadSource(DownloadRequest.Source source, DownloadRequest request, Uri outputUri,
-                                Notification.Builder builder, int notificationId, boolean retry) throws Exception {
-        if (source.audioUrl == null && request.metadata == null) {
-            File cover = retry ? null : encodeFirstFrame(request, builder, notificationId);
-            try {
-                // Plain downloads also support providers offering write-only streams, not seekable files.
-                OutputStream stream = retry
-                        ? context.getContentResolver().openOutputStream(outputUri, "wt")
-                        : context.getContentResolver().openOutputStream(outputUri);
-                if (stream == null) throw new IOException("Could not open download file");
-                try (OutputStream output = new BufferedOutputStream(stream)) {
-                    if (cover != null) {
-                        Files.copy(cover.toPath(), output);
-                    } else {
-                        download(source.url, output, builder, notificationId);
-                    }
-                }
-            } finally {
-                if (cover != null) cover.delete();
+    private static boolean failedStorage(Throwable failure) {
+        for (Throwable error = failure; error != null; error = error.getCause()) {
+            if (error instanceof OutputFailure || error instanceof SecurityException) return true;
+            if (error instanceof ErrnoException) {
+                int errno = ((ErrnoException) error).errno;
+                if (errno == OsConstants.ENOSPC || errno == OsConstants.EROFS || errno == OsConstants.EIO
+                        || errno == OsConstants.EACCES || errno == OsConstants.EFBIG) return true;
             }
+        }
+        return false;
+    }
+
+    private void downloadSource(DownloadRequest.Source source, DownloadRequest request, Uri outputUri,
+                                Notification.Builder builder, int notificationId, boolean retry,
+                                boolean cacheOnly) throws Exception {
+        if (source.audioUrl == null && request.metadata == null) {
+            // Plain downloads also support providers offering write-only streams, not seekable files.
+            download(request, source.url, retry ? null : request.cachedMedia, truncate -> truncate
+                    ? context.getContentResolver().openOutputStream(outputUri, "wt")
+                    : context.getContentResolver().openOutputStream(outputUri), retry, cacheOnly, builder, notificationId);
             return;
         }
         // Cache and clean up each rendition independently so failed tracks never enter the next merge.
         List<File> cacheFiles = new ArrayList<>();
         boolean downloadedToCache = false;
         try {
-            downloadToCache(source.url, cacheFiles, builder, notificationId);
+            downloadToCache(request, source.url, retry ? null : request.cachedMedia, cacheOnly, cacheFiles, builder, notificationId);
             List<File> inputs = new ArrayList<>(cacheFiles);
             if (source.audioUrl != null) {
-                downloadToCache(source.audioUrl, cacheFiles, builder, notificationId);
+                downloadToCache(request, source.audioUrl, retry ? null : request.cachedAudio, cacheOnly, cacheFiles, builder, notificationId);
                 File audio = cacheFiles.get(cacheFiles.size() - 1);
                 inputs.add(request.audioToAacLc ? toAacLc(audio, cacheFiles) : audio);
             }
             downloadedToCache = true;
             Mp4Remuxer.write(inputs, openOutput(outputUri), request.metadata);
         } catch (Exception | LinkageError e) {
-            if (source.audioUrl != null || !downloadedToCache
+            if (failedStorage(e) || source.audioUrl != null || !downloadedToCache
                     || !Mp4Remuxer.isReadableVideo(cacheFiles.get(0))) throw e;
             // Keep a readable original without metadata when rewriting it failed.
             PikoUtils.logger(e);
@@ -374,47 +409,70 @@ public final class MediaDownloader {
         }
     }
 
-    private void copyDownload(
-            InputStream input,
-            OutputStream output,
-            int length,
-            Notification.Builder builder,
-            int notificationId
-    ) throws IOException {
+    @FunctionalInterface
+    private interface DownloadOutput {
+        OutputStream open(boolean truncate) throws IOException;
+    }
+
+    private static final class OutputFailure extends IOException {
+        OutputFailure(IOException cause) {
+            super(cause.getMessage(), cause);
+        }
+    }
+
+    /** A cache eviction can restart from byte zero. A failed destination must not cause a network retry. */
+    private boolean copyDownload(InputStream input, DownloadOutput destination, boolean truncate, boolean fromCache,
+                                 int length, Notification.Builder builder, int notificationId) throws IOException {
         byte[] buffer = new byte[8192];
         long total = 0;
-        int count;
         long lastUpdateTime = 0;
-        while ((count = input.read(buffer)) != -1) {
-            total += count;
-            output.write(buffer, 0, count);
+        IOException inputFailure;
+        try {
+            OutputStream stream = destination.open(truncate);
+            if (stream == null) throw new IOException("Could not open download file");
+            try (OutputStream output = new BufferedOutputStream(stream)) {
+                while (true) {
+                    int count;
+                    try {
+                        count = input.read(buffer);
+                    } catch (IOException e) {
+                        inputFailure = e;
+                        break;
+                    }
+                    if (count == -1) return true;
+                    total += count;
+                    output.write(buffer, 0, count);
 
-            if (length > 0) {
-                int percent = (int) (total * 100 / length);
-                if (percent >= 100) percent = 99;
-
-                long currentTime = System.currentTimeMillis();
-                if (currentTime - lastUpdateTime > 200) {
-                    builder.setProgress(100, percent, false);
-                    notificationManager.notify(notificationId, builder.build());
-                    lastUpdateTime = currentTime;
+                    if (length > 0) {
+                        int percent = (int) Math.min(99, total * 100 / length);
+                        long currentTime = System.currentTimeMillis();
+                        if (currentTime - lastUpdateTime > 200) {
+                            builder.setProgress(100, percent, false);
+                            notificationManager.notify(notificationId, builder.build());
+                            lastUpdateTime = currentTime;
+                        }
+                    }
                 }
             }
+        } catch (IOException e) {
+            throw new OutputFailure(e);
         }
-        output.flush();
+        if (!fromCache) throw inputFailure;
+        return false;
     }
 
     /** The request's first-frame cover as a cache JPEG the caller deletes, or null to save {@code url} instead. */
-    private File encodeFirstFrame(DownloadRequest request, Notification.Builder builder, int notificationId) {
-        if (request.firstFrameVideoUrl == null) return null;
+    private File encodeFirstFrame(DownloadRequest request) {
+        if (request.firstFrameVideo == null) return null;
         File video = null;
         File picture = null;
         Bitmap frame = null;
         boolean encoded = false;
         try {
-            video = File.createTempFile("piko-cover-", ".mp4", context.getCacheDir());
-            try (OutputStream cached = new FileOutputStream(video)) {
-                download(request.firstFrameVideoUrl, cached, builder, notificationId);
+            try (InputStream cached = request.firstFrameVideo.call()) {
+                if (cached == null) return null;
+                video = File.createTempFile("piko-cover-", ".mp4", context.getCacheDir());
+                Files.copy(cached, video.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
@@ -441,16 +499,38 @@ public final class MediaDownloader {
         }
     }
 
-    /** Fetches {@code url} into {@code output}, reporting progress on the notification. */
-    private void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
-            throws IOException {
+    private void download(DownloadRequest request, String url, InputStream prepared, DownloadOutput output,
+                          boolean truncate, boolean cacheOnly, Notification.Builder builder, int notificationId) throws IOException {
+        InputStream cached = prepared;
+        if (cached == null && request.localSource != null) {
+            try {
+                cached = request.localSource.open(url);
+            } catch (IOException ignored) {
+                // The item can disappear before its cache entry is opened.
+            }
+        }
+        if (cached != null) {
+            try {
+                if (copyDownload(cached, output, truncate, true, -1, builder, notificationId)) return;
+            } finally {
+                // The request owns prepared streams and closes them after all file operations.
+                if (prepared == null) closeCached(cached);
+            }
+            if (request.localSource == null) throw new IOException("Could not read local media");
+            truncate = true;
+        }
+        if (cacheOnly) throw new IOException("Could not read local media");
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         try {
+            if (request.userAgent != null) {
+                String userAgent = request.userAgent.apply(context);
+                if (userAgent != null) conn.setRequestProperty("User-Agent", userAgent);
+            }
             conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
             conn.setReadTimeout(READ_TIMEOUT_MS);
             conn.connect();
             try (InputStream input = new BufferedInputStream(conn.getInputStream())) {
-                copyDownload(input, output, conn.getContentLength(), builder, notificationId);
+                copyDownload(input, output, truncate, false, conn.getContentLength(), builder, notificationId);
             }
         } finally {
             conn.disconnect();
@@ -458,13 +538,17 @@ public final class MediaDownloader {
     }
 
     /** Fetches {@code url} into a new cache file, added to {@code cacheFiles} first so a failed fetch is cleaned up too. */
-    private void downloadToCache(String url, List<File> cacheFiles, Notification.Builder builder, int notificationId)
+    private void downloadToCache(DownloadRequest request, String url, InputStream prepared, boolean cacheOnly, List<File> cacheFiles,
+                                 Notification.Builder builder, int notificationId)
             throws IOException {
-        File cacheFile = File.createTempFile("piko-download-", ".mp4", context.getCacheDir());
-        cacheFiles.add(cacheFile);
-        try (OutputStream output = new BufferedOutputStream(new FileOutputStream(cacheFile))) {
-            download(url, output, builder, notificationId);
+        File cacheFile;
+        try {
+            cacheFile = File.createTempFile("piko-download-", ".mp4", context.getCacheDir());
+        } catch (IOException e) {
+            throw new OutputFailure(e);
         }
+        cacheFiles.add(cacheFile);
+        download(request, url, prepared, truncate -> new FileOutputStream(cacheFile), false, cacheOnly, builder, notificationId);
     }
 
     /**
@@ -484,23 +568,18 @@ public final class MediaDownloader {
 
     /** Opens the download document for writing from its start, whatever an earlier attempt left in it. */
     private FileOutputStream openOutput(Uri outputUri) throws IOException {
-        ParcelFileDescriptor descriptor = context.getContentResolver().openFileDescriptor(outputUri, "rwt");
-        if (descriptor == null) {
-            throw new IOException("Could not open download file");
+        try {
+            ParcelFileDescriptor descriptor = context.getContentResolver().openFileDescriptor(outputUri, "rwt");
+            if (descriptor == null) throw new IOException("Could not open download file");
+            return new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
+        } catch (IOException e) {
+            throw new OutputFailure(e);
         }
-        return new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
     }
 
     private void copyRawFile(File inputFile, Uri outputUri) throws IOException {
         try (InputStream input = new BufferedInputStream(new FileInputStream(inputFile))) {
-            try (OutputStream output = new BufferedOutputStream(openOutput(outputUri))) {
-                byte[] buffer = new byte[8192];
-                int count;
-                while ((count = input.read(buffer)) != -1) {
-                    output.write(buffer, 0, count);
-                }
-                output.flush();
-            }
+            copyDownload(input, truncate -> openOutput(outputUri), true, false, -1, null, 0);
         }
     }
 

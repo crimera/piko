@@ -10,7 +10,10 @@ package app.morphe.extension.instagram.entity;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +23,7 @@ import android.net.Uri;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.legacydownloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.DownloadRequest.DashIndex;
 import app.morphe.extension.instagram.constants.PostType;
 
 import com.instagram.api.schemas.MusicInfo;
@@ -347,6 +351,32 @@ public class MediaData extends Entity {
     // the getter has run once.
     private String getVideoDashManifest() throws Exception {
         return (String) super.getMethod(this.getExtendedData(), "methodName");
+    }
+
+    public Supplier<Map<String, DashIndex>> getDashIndexReader() {
+        return getDashIndexReader(null);
+    }
+
+    public Supplier<Map<String, DashIndex>> getDashIndexReader(String selectedAudioUrl) {
+        String manifest;
+        try {
+            manifest = getVideoDashManifest();
+        } catch (Exception | LinkageError e) {
+            return null;
+        }
+        if (manifest == null || manifest.isEmpty()) return null;
+        // A queued save can outlive the displayed post. Parse the captured manifest on the download worker.
+        return () -> {
+            try {
+                Map<String, DashIndex> indexes = DashSegmentManifest.read(manifest);
+                if (selectedAudioUrl == null) return indexes;
+                DashIndex audio = indexes.get(selectedAudioUrl);
+                return audio != null && audio.audioRepresentation
+                        ? Collections.singletonMap(selectedAudioUrl, audio) : Collections.emptyMap();
+            } catch (Exception e) {
+                return Collections.emptyMap();
+            }
+        };
     }
 
     /** Whether the video has a sound track, by the app's has_audio flag; true when the flag is missing. */

@@ -16,6 +16,7 @@ import app.crimera.patches.instagram.misc.comment.chatButtonConstructorFingerpri
 import app.crimera.patches.instagram.misc.comment.commentButtonClickCheckPatch
 import app.crimera.patches.instagram.misc.comment.debugComment.debugCommentPatch
 import app.crimera.patches.instagram.misc.comment.nativeChatButtonResources
+import app.crimera.patches.instagram.misc.download.downloadCachePatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
@@ -31,6 +32,7 @@ val saveMediaCommentPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(
             settingsPatch,
+            downloadCachePatch,
             addCommentPatch,
             commentButtonClickCheckPatch,
             commentDataEntity,
