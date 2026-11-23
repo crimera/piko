@@ -851,9 +851,12 @@ class NewXResolverLinterTest {
     fun `inline layout discovery and kind hook follow receiver churn and reject unproven staging`() {
         val field = ImmutableFieldReference("Lfixture/Entry;", "action", "Lfixture/Action;")
         val decoy = inlineKindLayoutFixture(3, unrelatedField = true)
+        val fieldReadOnly = inlineKindLayoutFixture(2, readsKind = false)
+        fun resolve(vararg methods: Method): Method =
+            resolveInlineActionKindLayoutMethod(methods.toList(), field) { it == "Lfixture/Kind;" }
         listOf(2, 3).forEach { arity ->
             val source = inlineKindLayoutFixture(arity)
-            val resolved = resolveInlineActionKindLayoutMethod(listOf(decoy, source), field)
+            val resolved = resolve(decoy, fieldReadOnly, source)
             val instructions = resolved.instructions.toList()
             val constructor = instructions.indices.single { index ->
                 isInlineActionKindModelConstructor(instructions[index]) { it == "Lfixture/Kind;" }
@@ -861,12 +864,12 @@ class NewXResolverLinterTest {
             // Exercises the same semantic selection and render proof used before production emission.
             assertEquals(instructions.lastIndex - 1, resolveInlineActionKindRenderCall(resolved, constructor, 2, "Lfixture/Entry;"))
         }
-        assertFailsWith<PatchException> { resolveInlineActionKindLayoutMethod(listOf(decoy), field) }
+        assertFailsWith<PatchException> { resolve(decoy, fieldReadOnly) }
         assertFailsWith<PatchException> {
-            resolveInlineActionKindLayoutMethod(listOf(inlineKindLayoutFixture(2), inlineKindLayoutFixture(3)), field)
+            resolve(inlineKindLayoutFixture(2), inlineKindLayoutFixture(3))
         }
         listOf("overwrite", "wideOverwrite", "incoming", "outgoing").forEach { failure ->
-            val source = resolveInlineActionKindLayoutMethod(listOf(inlineKindLayoutFixture(3, failure)), field)
+            val source = resolve(inlineKindLayoutFixture(3, failure))
             val instructions = source.instructions.toList()
             val constructor = instructions.indices.single { index ->
                 isInlineActionKindModelConstructor(instructions[index]) { it == "Lfixture/Kind;" }
@@ -881,6 +884,7 @@ class NewXResolverLinterTest {
         arity: Int,
         failure: String? = null,
         unrelatedField: Boolean = false,
+        readsKind: Boolean = true,
     ): Method {
         val implementation = MethodImplementationBuilder(24)
         fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
@@ -890,8 +894,10 @@ class NewXResolverLinterTest {
         if (failure == "incoming") {
             implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 9, implementation.getLabel("render")))
         }
-        add("new-instance v14, Lfixture/ParentData;")
-        add("invoke-direct {v14, v11, v4, v12}, Lfixture/ParentData;-><init>(ZZLfixture/Kind;)V")
+        if (readsKind) {
+            add("new-instance v14, Lfixture/ParentData;")
+            add("invoke-direct {v14, v11, v4, v12}, Lfixture/ParentData;-><init>(ZZLfixture/Kind;)V")
+        }
         if (arity == 3) {
             // Actual 12.37 staging: preserve the old v1, copy entry, then overwrite entry's register.
             add("move-object v12, v1")

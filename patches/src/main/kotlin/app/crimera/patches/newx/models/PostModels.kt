@@ -1070,8 +1070,8 @@ private fun resolveInlineActionKindLayoutLambda(
             definingClass = INLINE_ACTION_BAR_SCOPE,
             name = "invoke",
             returnType = "Ljava/lang/Object;",
-            // The lambda may acquire a layout receiver. Consumers depend on the entry field
-            // read and the uniquely validated kind construction below, not its erased arity.
+            // The lambda may acquire a layout receiver. Resolve it by the entry field read
+            // and the kind model it constructs, independently of erased arity.
             filters = listOf(
                 fieldAccess(
                     opcode = Opcode.IGET_OBJECT,
@@ -1080,20 +1080,28 @@ private fun resolveInlineActionKindLayoutLambda(
             ),
         ).scopedMatchAll().map { it.originalMethod },
         entryModels.inlineActionTypeField,
-    )
+    ) { descriptor ->
+        classDefByOrNull(descriptor)?.let { kindClass ->
+            AccessFlags.ENUM.isSet(kindClass.accessFlags) &&
+                kindClass.fields.any { it.name == "IconOnly" && it.type == descriptor }
+        } == true
+    }
 
 internal fun resolveInlineActionKindLayoutMethod(
     methods: Collection<Method>,
     actionTypeField: FieldReference,
+    isKindEnum: (String) -> Boolean,
 ): Method = requireExactlyOne(
     "NewX inline-action kind layout lambda",
     methods.filter { method ->
+        val instructions = method.implementation?.instructions?.toList().orEmpty()
         method.definingClass.startsWith(INLINE_ACTION_BAR_SCOPE) &&
             method.name == "invoke" && method.returnType == "Ljava/lang/Object;" &&
-            method.implementation?.instructions?.any { instruction ->
+            instructions.any { instruction ->
                 instruction.opcode == Opcode.IGET_OBJECT &&
                     instruction.getReference<FieldReference>()?.toString() == actionTypeField.toString()
-            } == true
+            } &&
+            instructions.any { isInlineActionKindModelConstructor(it, isKindEnum) }
     },
 )
 

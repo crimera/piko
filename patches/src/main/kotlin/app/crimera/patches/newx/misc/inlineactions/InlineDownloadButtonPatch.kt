@@ -958,20 +958,17 @@ private fun resolveInlineLongPressEventType(
             it.name == "<init>" && it.parameterTypes.map(CharSequence::toString) == listOf(actionEntryDescriptor)
         },
     )
-    requireExactlyOne(
-        "NewX inline-action long-press callback dispatch",
-        Fingerprint(
-            // The callback constructs the event and immediately sends it to Function1.
-            filters = listOf(
-                newInstance(constructor.definingClass),
-                methodCall(reference = constructor, location = MatchAfterImmediately()),
-                methodCall(
-                    smali = "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;",
-                    location = MatchAfterImmediately(),
-                ),
+    // Multiple native renderers can dispatch the same event. The hook is in their shared consumer.
+    Fingerprint(
+        filters = listOf(
+            newInstance(constructor.definingClass),
+            methodCall(reference = constructor, location = MatchAfterImmediately()),
+            methodCall(
+                smali = "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;",
+                location = MatchAfterImmediately(),
             ),
-        ).scopedMatchAll(),
-    )
+        ),
+    ).scopedMatchAll()
     return eventClass.type
 }
 
