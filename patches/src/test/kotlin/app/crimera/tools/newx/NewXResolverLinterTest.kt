@@ -79,6 +79,9 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import app.crimera.patches.newx.misc.dynamiccolor.factoryResultFeedsStore
+import app.crimera.patches.newx.misc.dynamiccolor.injectActivatedLikeTint
+import app.crimera.patches.newx.misc.dynamiccolor.isTabSlotColors
 
 class NewXResolverLinterTest {
     @Test
@@ -840,6 +843,86 @@ class NewXResolverLinterTest {
             add("return-void")
         }
         return MutableMethod(renderer) to mapOf(sizing to sizingClass(sizing, true), auxiliary to sizingClass(auxiliary, false))
+    }
+
+    @Test
+    fun `palette cache keeps the factory argument when the Lazy constructor gains an auxiliary value`() {
+        val lazyType = "Lfixture/Lazy;"
+        val factoryType = "Lkotlin/jvm/functions/Function0;"
+        for (hasAuxiliary in listOf(false, true)) {
+            val code = MethodImplementationBuilder(3).apply {
+                addInstruction("invoke-direct {v0}, Lfixture/Factory;-><init>()V".toInstruction())
+                addInstruction("new-instance v1, $lazyType".toInstruction())
+                val constructor = if (hasAuxiliary) {
+                    "invoke-direct {v1, v0, v2}, $lazyType-><init>(${factoryType}Ljava/util/concurrent/ConcurrentHashMap;)V"
+                } else {
+                    "invoke-direct {v1, v0}, $lazyType-><init>($factoryType)V"
+                }
+                addInstruction(constructor.toInstruction())
+                addInstruction("sput-object v1, Lfixture/Theme;->standard:$lazyType".toInstruction())
+                addInstruction("return-void".toInstruction())
+            }
+            val initializer = MutableMethod(ImmutableMethod(
+                "Lfixture/Theme;", "<clinit>", emptyList(), "V", AccessFlags.STATIC.value,
+                emptySet(), emptySet(), code.methodImplementation,
+            ))
+            assertTrue(initializer.factoryResultFeedsStore(0, 3, 1, 0, lazyType))
+            assertFalse(initializer.factoryResultFeedsStore(0, 3, 1, 0, "Lfixture/Other;"))
+        }
+    }
+
+    @Test
+    fun `like tint follows a merged active flag across an unrelated instruction`() {
+        for (hasInterveningRead in listOf(false, true)) {
+            val code = MethodImplementationBuilder(9).apply {
+                addInstruction("sget-object v1, Lfixture/Action;->Unfavorite:Lfixture/Action;".toInstruction())
+                addInstruction(BuilderInstruction22t(Opcode.IF_NE, 0, 1, getLabel("inactive")))
+                addInstruction("const/4 v2, 0x1".toInstruction())
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("join")))
+                addLabel("inactive")
+                addInstruction("const/4 v2, 0x0".toInstruction())
+                addLabel("join")
+                if (hasInterveningRead) {
+                    addInstruction("iget-object v6, v0, Lfixture/Action;->modifier:Landroidx/compose/ui/Modifier;".toInstruction())
+                }
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, getLabel("normal")))
+                addInstruction("sget-wide v3, Lfixture/Colors;->active:J".toInstruction())
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("render")))
+                addLabel("normal")
+                addInstruction("const-wide/16 v3, 0x0".toInstruction())
+                addLabel("render")
+                addInstruction(
+                    "invoke-static {v5, v6, v3, v4}, Lcom/fixture/Icons;->render(Ljava/lang/String;Landroidx/compose/ui/Modifier;J)V"
+                        .toInstruction(),
+                )
+                addInstruction("return-void".toInstruction())
+            }
+            val method = MutableMethod(ImmutableMethod(
+                "Lfixture/Like;", "render", emptyList(), "V", AccessFlags.STATIC.value,
+                emptySet(), emptySet(), code.methodImplementation,
+            ))
+            assertEquals("active", method.injectActivatedLikeTint(0).field.name)
+        }
+    }
+
+    @Test
+    fun `tab slot tints require two palette fields rather than repeated reads of one capture`() {
+        for (secondary in listOf("primary", "secondary")) {
+            val implementation = MethodImplementationBuilder(8).apply {
+                addInstruction("iget-wide v0, v7, Lfixture/Palette;->primary:J".toInstruction())
+                addInstruction("iget-wide v2, v7, Lfixture/Palette;->$secondary:J".toInstruction())
+                addInstruction(
+                    "invoke-static {v6, v0, v1, v2, v3}, Lcom/x/ui/common/tabs/Fixture;->render(Ljava/lang/String;JJ)V"
+                        .toInstruction(),
+                )
+                addInstruction("return-void".toInstruction())
+            }
+            val slot = ImmutableMethod(
+                "Lcom/x/ui/common/tabs/Fixture;", "slot", emptyList(), "V", AccessFlags.STATIC.value,
+                emptySet(), emptySet(), implementation.methodImplementation,
+            )
+            assertEquals(secondary != "primary", isTabSlotColors(slot, "Lfixture/Horizon;"))
+        }
     }
 
     @Test
