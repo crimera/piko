@@ -16,9 +16,16 @@ import app.morphe.patcher.util.numberOfParameterRegisters
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
 import app.crimera.patches.common.destinationRegisterOrNull
+import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
+import app.crimera.patches.newx.misc.inlineactions.normalControlFlowSuccessors
+import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
+import app.crimera.patches.newx.misc.inlineactions.reachableIndicesFrom
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderSwitchElement
 import com.android.tools.smali.dexlib2.iface.Method
@@ -53,14 +60,14 @@ internal val NAV_BAR_NATIVE_TAB_OPTIONS =
 
 internal data class NavBarItemContentTarget(
     val method: MutableMethod,
-    val navigationField: FieldReference,
+    val navigationField: FieldReference?,
     val iconType: String,
     val tabDataValueType: String,
     val rendererCallIndex: Int,
     val iconRegister: Int,
     val labelRegister: Int,
     val tabDataValueRegister: Int,
-    val thisRegister: Int,
+    val navigationRegister: Int,
     val tabIconFields: Map<String, FieldReference>,
 )
 
@@ -421,6 +428,22 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
         requireExactlyOne("NewX navigation bar item renderer", rendererCandidates) { it.toString() }
     val rendererDescriptor = renderer.toSmaliDescriptor()
 
+    val directCallers = rendererCalls.filter { match ->
+        val method = match.originalMethod
+        AccessFlags.STATIC.isSet(method.accessFlags) &&
+            method.parameterTypes.count { it == tabData.navigationType } == 1 &&
+            tabData.tabDataValueType in method.parameterTypes &&
+            COMPOSER_DESCRIPTOR in method.parameterTypes &&
+            method.instructions.any { it.referencesMethod(rendererDescriptor) }
+    }.distinctBy { it.originalMethod.toString() }
+    val direct = requireAtMostOne("NewX direct navigation bar content", directCallers)
+    if (direct != null) {
+        if (contentClasses.isNotEmpty()) {
+            throw PatchException("NewX navigation bar has both captured and direct item content")
+        }
+        return direct.method.resolveDirectNavBarContent(tabData, renderer)
+    }
+
     // The merged constructor shape is shared by unrelated lambdas, so the constructor alone is
     // no longer unique. Keep only shape candidates that actually invoke the resolved renderer;
     // the caller scan is scoped to those candidates rather than the whole dex.
@@ -504,9 +527,109 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
         iconRegister = iconRegister,
         labelRegister = labelRegister,
         tabDataValueRegister = tabDataValueRegister,
-        thisRegister = originalRegisterCount,
+        navigationRegister = originalRegisterCount,
         tabIconFields = consumerMethod.resolveNavigationTabIcons(tabData.navigationType, iconRegister),
     )
+}
+
+/** Direct Compose content takes the tab enum and calls separate icon mappers for each selection. */
+private fun MutableMethod.resolveDirectNavBarContent(
+    tabData: NewXNavBarTabData,
+    renderer: MethodReference,
+): NavBarItemContentTarget {
+    val code = instructions.toList()
+    val rendererIndex = requireExactlyOne(
+        "NewX direct navigation bar renderer call in $this",
+        code.indices.filter { code[it].referencesMethod(renderer.toSmaliDescriptor()) },
+    )
+    val call = code[rendererIndex] as? Instruction35c
+        ?: throw PatchException("NewX direct navigation bar renderer is not a 5-register invoke")
+    val parameterRegisters = parameterTypes.map(CharSequence::toString)
+        .runningFold(p0Register) { register, type -> register + if (type == "J" || type == "D") 2 else 1 }
+    val navigationRegister = parameterRegisters[parameterTypes.indexOf(tabData.navigationType)]
+    if (!provesParameterValue(rendererIndex, navigationRegister, navigationRegister)) {
+        throw PatchException("NewX direct navigation tab is no longer live at its renderer in $this")
+    }
+
+    val iconType = renderer.parameterTypes.first().toString()
+    val iconCalls = code.withIndex().mapNotNull { (index, instruction) ->
+        if (index + 1 >= rendererIndex ||
+            instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)
+        ) return@mapNotNull null
+        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+        if (reference.returnType != iconType ||
+            reference.parameterTypes.map(CharSequence::toString) != listOf(tabData.navigationType)
+        ) return@mapNotNull null
+        val tabArgument = instruction.registersUsed.singleOrNull() ?: return@mapNotNull null
+        val result = code[index + 1] as? OneRegisterInstruction ?: return@mapNotNull null
+        (index to reference).takeIf {
+            result.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                provesParameterValue(index, tabArgument, navigationRegister) &&
+                provesValueFromInstructionOnSourcePaths(index + 1, result.registerA, rendererIndex, call.registerC)
+        }
+    }.toMap()
+    if (iconCalls.size != 2) {
+        throw PatchException("Expected two NewX icon mappers reaching the renderer in $this: $iconCalls")
+    }
+    val successors = normalControlFlowSuccessors()
+        ?: throw PatchException("Unsupported NewX direct navigation bar control flow in $this")
+    val booleanParameters = parameterTypes.indices.filter { parameterTypes[it] == "Z" }.map(parameterRegisters::get)
+    val unselected = requireExactlyOne(
+        "NewX unselected navigation icon mapper in $this",
+        code.withIndex().mapNotNull { (index, instruction) ->
+            if (instruction.opcode !in setOf(Opcode.IF_EQZ, Opcode.IF_NEZ)) return@mapNotNull null
+            val condition = (instruction as OneRegisterInstruction).registerA
+            if (booleanParameters.none { provesParameterValue(index, condition, it) }) return@mapNotNull null
+            val target = (instruction as? BuilderOffsetInstruction)?.target?.location?.index ?: return@mapNotNull null
+            val (whenFalse, whenTrue) = if (instruction.opcode == Opcode.IF_EQZ) target to index + 1 else index + 1 to target
+            val falseIcons = iconCalls.keys.intersect(successors.reachableIndicesFrom(whenFalse).orEmpty())
+            val trueIcons = iconCalls.keys.intersect(successors.reachableIndicesFrom(whenTrue).orEmpty())
+            if (falseIcons.size != 1 || trueIcons.size != 1 || falseIcons == trueIcons) return@mapNotNull null
+            iconCalls.getValue(falseIcons.single())
+        }.distinct(),
+    )
+    val iconMapper = requireExactlyOne(
+        "NewX direct navigation icon mapper $unselected",
+        mutableClassDefBy(unselected.definingClass).methods.filter { it.toSmaliDescriptor() == unselected.toSmaliDescriptor() },
+    )
+    return NavBarItemContentTarget(
+        method = this,
+        navigationField = null,
+        iconType = iconType,
+        tabDataValueType = tabData.tabDataValueType,
+        rendererCallIndex = rendererIndex,
+        iconRegister = call.registerC,
+        labelRegister = call.registerD,
+        tabDataValueRegister = call.registerE,
+        navigationRegister = navigationRegister,
+        tabIconFields = iconMapper.resolveReturnedTabIcons(tabData.navigationType, iconType),
+    )
+}
+
+private fun MutableMethod.resolveReturnedTabIcons(navigationType: String, iconType: String): Map<String, FieldReference> {
+    val code = instructions.toList()
+    val mappingField = requireExactlyOne(
+        "NewX direct navigation icon enum mapping in $this",
+        code.mapNotNull { instruction ->
+            instruction.getReference<FieldReference>()?.takeIf {
+                instruction.opcode == Opcode.SGET_OBJECT && it.type == "[I"
+            }
+        }.distinct(),
+    )
+    val enumCases = resolveEnumSwitchCases(navigationType, mappingField)
+    val switch = requireExactlyOne("NewX direct navigation icon switch", code.indices.filter { code[it].opcode == Opcode.PACKED_SWITCH })
+    val cases = packedSwitchCases(switch)
+    return NAV_BAR_NATIVE_TAB_OPTIONS.associate { (name, _) ->
+        val key = enumCases[name] ?: throw PatchException("NewX navigation icon mapping has no case for $name")
+        val case = requireExactlyOne("NewX direct navigation icon case for $name", cases.filter { it.key == key })
+        val load = code.getOrNull(case.startIndex) as? OneRegisterInstruction
+        val result = code.getOrNull(case.startIndex + 1) as? OneRegisterInstruction
+        val icon = load?.getReference<FieldReference>()
+        if (load?.opcode != Opcode.SGET_OBJECT || icon?.type != iconType ||
+            result?.opcode != Opcode.RETURN_OBJECT || result.registerA != load.registerA
+        ) throw PatchException("NewX direct navigation icon case for $name does not return an icon field")
+        name to icon
+    }
 }
 
 internal data class PackedSwitchCase(

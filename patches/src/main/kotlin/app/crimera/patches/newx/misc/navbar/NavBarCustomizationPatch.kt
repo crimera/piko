@@ -246,29 +246,28 @@ private fun NavBarItemContentTarget.injectReplacementOverride(tabDataConstructor
     val paramTypes = tabDataConstructor.parameterTypes.map(CharSequence::toString)
     method.insertHook(
         index = rendererCallIndex,
-        excludedRegisters = listOf(iconRegister, labelRegister, tabDataValueRegister, thisRegister),
+        excludedRegisters = listOf(iconRegister, labelRegister, tabDataValueRegister, navigationRegister),
         // The label switch jumps straight at the renderer call, so every case has to run the hook.
         relocateBranchTargets = true,
     ) {
         val instanceRegister = scratchRegister()
         val workRegister = scratchRegister()
 
-        // The receiver is preserved in a local above the original frame, so it is moved into the
-        // four-bit work register before every field read (format 22c cannot encode the receiver).
-        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
-        iget(workRegister, workRegister, navigationField)
+        // Captured content keeps its receiver in a high local; direct content keeps the tab itself.
+        move(workRegister, navigationRegister, OBJECT_DESCRIPTOR)
+        navigationField?.let { iget(workRegister, workRegister, it) }
         invokeStatic(methodReference(OVERRIDE_ICON_DESCRIPTOR), workRegister, iconRegister)
         moveResult(workRegister, iconType)
         checkCast(workRegister, iconType)
         move(iconRegister, workRegister, OBJECT_DESCRIPTOR)
 
-        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
-        iget(workRegister, workRegister, navigationField)
+        move(workRegister, navigationRegister, OBJECT_DESCRIPTOR)
+        navigationField?.let { iget(workRegister, workRegister, it) }
         invokeStatic(methodReference(OVERRIDE_LABEL_DESCRIPTOR), workRegister, labelRegister)
         moveResult(labelRegister, STRING_DESCRIPTOR)
 
-        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
-        iget(workRegister, workRegister, navigationField)
+        move(workRegister, navigationRegister, OBJECT_DESCRIPTOR)
+        navigationField?.let { iget(workRegister, workRegister, it) }
         invokeStatic(methodReference(SHOULD_CLEAR_BADGE_DESCRIPTOR), workRegister)
         moveResult(workRegister, "Z")
         ifEqz(workRegister, Target.Original)
@@ -285,7 +284,11 @@ private fun NavBarItemContentTarget.injectReplacementOverride(tabDataConstructor
 
     // Preserve the receiver before the compiler reuses the parameter registers for the icon and
     // the resolved label. Inserted last so the renderer call index above stayed valid.
-    method.insertHook(index = 0, relocateBranchTargets = false) { move(thisRegister, method.p0Register, OBJECT_DESCRIPTOR) }
+    if (navigationField != null) {
+        method.insertHook(index = 0, relocateBranchTargets = false) {
+            move(navigationRegister, method.p0Register, OBJECT_DESCRIPTOR)
+        }
+    }
 }
 
 private data class DrawerRowCall(
