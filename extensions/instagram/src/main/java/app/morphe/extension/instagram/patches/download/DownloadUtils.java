@@ -79,25 +79,26 @@ public class DownloadUtils {
         return VideoResolution.group(videos);
     }
 
+    private static List<? extends MediaInterface> menuResolutions(MediaData media, MediaType type) {
+        try {
+            return type == MediaType.VIDEO ? videoResolutions(media) : ImageResolution.group(media.getImageVariants());
+        } catch (Exception | LinkageError e) {
+            Logger.printException(() -> "Could not read download resolutions for " + type, e);
+            return Collections.emptyList();
+        }
+    }
+
     private static void buildVariantDialogBox(
             Context context,
             MediaData mediaInfo,
             int position,
             int filenameIndex,
-            MediaType mediaType,
+            String title,
+            List<? extends MediaInterface> variantList,
             DialogInterface.OnDismissListener onDismiss
     ) throws Exception {
         MediaData currentMediaData = mediaInfo.getMediaAt(position);
         String username = mediaInfo.getUserData().getUsername();
-        List<MediaInterface> variantList;
-        String title = "";
-        if(mediaType.equals(MediaType.VIDEO)){
-            title = str("piko_video_variants");
-            variantList = new ArrayList<>(videoResolutions(currentMediaData));
-        }else{
-            title = str("piko_image_variants");
-            variantList = new ArrayList<>(ImageResolution.group(currentMediaData.getImageVariants()));
-        }
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
         ArrayList<String> options = new ArrayList<>();
@@ -155,17 +156,20 @@ public class DownloadUtils {
         int filenameIndex = group.currentFilenameIndex(position);
         Boolean isCurrentMediaVideo = currentMediaData.isVideo();
         Boolean currentMediaHasAudio = currentMediaData.hasAudio();
+        List<? extends MediaInterface> images = menuResolutions(currentMediaData, MediaType.IMAGE);
+        List<? extends MediaInterface> videos = isCurrentMediaVideo
+                ? menuResolutions(currentMediaData, MediaType.VIDEO) : Collections.emptyList();
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         ArrayList<String> options = new ArrayList<>();
         options.add(str("piko_download_current_media"));
-        options.add(str("piko_download_as_image"));
+        if (isCurrentMediaVideo) options.add(str("piko_download_as_image"));
         if (currentMediaHasAudio) options.add(str("piko_download_audio"));
         options.add(str("piko_copy_media_link"));
-        options.add(str("piko_image_variants"));
+        if (!images.isEmpty()) options.add(str("piko_image_variants"));
         if (isCurrentMediaVideo) {
-            options.add(str("piko_video_variants"));
+            if (!videos.isEmpty()) options.add(str("piko_video_variants"));
             options.add(str("piko_open_video_externally"));
         } else {
             options.add(str("piko_open_image_externally"));
@@ -210,11 +214,11 @@ public class DownloadUtils {
                         downloadMedia(context, mediaInfo, position, MediaType.AUDIO);
 
                     } else if (selectedOption.equals(str("piko_video_variants"))) {
-                        buildVariantDialogBox(context, mediaInfo, position, filenameIndex, MediaType.VIDEO, onDismiss);
+                        buildVariantDialogBox(context, mediaInfo, position, filenameIndex, selectedOption, videos, onDismiss);
                         childDialogShown[0] = true;
 
                     } else if (selectedOption.equals(str("piko_image_variants"))) {
-                        buildVariantDialogBox(context, mediaInfo, position, filenameIndex, MediaType.IMAGE, onDismiss);
+                        buildVariantDialogBox(context, mediaInfo, position, filenameIndex, selectedOption, images, onDismiss);
                         childDialogShown[0] = true;
 
                     }
