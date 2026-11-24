@@ -43,6 +43,7 @@ public final class DmNotificationAllowlistPref extends BaseSharedPref {
 
     private static final String THREAD_MARKER = "thread_id:";
     private static final Pattern THREAD_KEY_PATTERN = Pattern.compile("mThreadId='([^']*)'");
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("[a-z0-9._]{1,30}");
 
     private DmNotificationAllowlistPref() {
         super("piko_dm_notif_cache");
@@ -251,10 +252,11 @@ public final class DmNotificationAllowlistPref extends BaseSharedPref {
         while (value.startsWith("@")) {
             value = value.substring(1).trim();
         }
-        if (value.isEmpty() || value.contains(" ") || value.contains("\n") || value.contains("\r")) {
+        String lower = value.toLowerCase(Locale.ROOT);
+        if (!USERNAME_PATTERN.matcher(lower).matches()) {
             return "";
         }
-        return value.toLowerCase(Locale.ROOT);
+        return lower;
     }
 
     /** Extracts a bare thread id from "<userId>;thread_id:<chatId>", DirectThreadKey.toString(), or a bare id. */
@@ -599,7 +601,7 @@ public final class DmNotificationAllowlistPref extends BaseSharedPref {
     }
 
     public static synchronized Map<String, UserDirEntry> loadUserDir() {
-        Map<String, UserDirEntry> map = new HashMap<>();
+        Map<String, UserDirEntry> map = new LinkedHashMap<>();
         try {
             JSONObject obj = new JSONObject(CACHE.getString(KEY_USER_DIR, "{}"));
             for (Iterator<String> keys = obj.keys(); keys.hasNext(); ) {
@@ -632,6 +634,7 @@ public final class DmNotificationAllowlistPref extends BaseSharedPref {
             String mergedName = !value.fullName.isEmpty() ? value.fullName
                     : (existing != null ? existing.fullName : "");
             if (existing == null || !mergedUser.equals(existing.username) || !mergedName.equals(existing.fullName)) {
+                dir.remove(uid);
                 dir.put(uid, new UserDirEntry(mergedUser, mergedName));
                 changed = true;
             }
@@ -639,10 +642,14 @@ public final class DmNotificationAllowlistPref extends BaseSharedPref {
         }
         if (!changed) return;
 
+        Iterator<String> evict = dir.keySet().iterator();
+        while (dir.size() > MAX_USER_DIR_ENTRIES && evict.hasNext()) {
+            evict.next();
+            evict.remove();
+        }
+
         JSONObject root = new JSONObject();
-        int count = 0;
         for (Map.Entry<String, UserDirEntry> entry : dir.entrySet()) {
-            if (count++ >= MAX_USER_DIR_ENTRIES) break;
             try {
                 JSONObject item = new JSONObject();
                 if (!entry.getValue().username.isEmpty()) item.put("u", entry.getValue().username);

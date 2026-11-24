@@ -444,7 +444,9 @@ public final class DmNotificationAllowlistActivity {
 
             EditText input = new EditText(dialogCtx);
             input.setHint(str("piko_dm_notif_add_username_hint"));
-            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            input.setInputType(InputType.TYPE_CLASS_TEXT
+                    | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             input.setSingleLine(false);
             input.setMaxLines(4);
             container.addView(input, new LinearLayout.LayoutParams(

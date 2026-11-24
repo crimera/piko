@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import app.morphe.extension.instagram.entity.UserData;
-import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 
@@ -55,14 +54,15 @@ public final class DmNotificationAllowlist {
     private static final Map<Class<?>, Field[]> keyPaths = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Field[]> sessionPaths = new ConcurrentHashMap<>();
     private static final Map<String, Long> recentAllowedThreads = new ConcurrentHashMap<>();
+    private static final Map<String, Long> pendingUnknownThreads = new ConcurrentHashMap<>();
     private static final Map<Long, List<String>> originalNotificationSenders = new ConcurrentHashMap<>();
 
-    private static volatile long pendingUnknownAt;
-    private static volatile String pendingUnknownThreadId = "";
+    private static volatile long pendingUnknownUntaggedAt;
     private static volatile long lastUnknownMutedAt;
 
     private static HandlerThread workerThread;
     private static Handler workerHandler;
+    private static Runnable pendingInboxJob;
 
     private DmNotificationAllowlist() {
     }
@@ -74,6 +74,16 @@ public final class DmNotificationAllowlist {
             workerHandler = new Handler(workerThread.getLooper());
         }
         return workerHandler;
+    }
+
+    private static synchronized void scheduleInboxSnapshot(UserSession session, List<Object> snapshot) {
+        Handler worker = getWorker();
+        if (pendingInboxJob != null) {
+            worker.removeCallbacks(pendingInboxJob);
+        }
+        Runnable job = () -> processInboxSnapshot(session, snapshot);
+        pendingInboxJob = job;
+        worker.post(job);
     }
 
     /** Replaced with Instagram's session-scoped UserCache lookup at patch time. */
@@ -125,8 +135,13 @@ public final class DmNotificationAllowlist {
             }
 
             // Defer to Gate 2 (NotifyFingerprint) so we can match the notification's sender name/handle.
-            pendingUnknownThreadId = cleanId;
-            pendingUnknownAt = System.currentTimeMillis();
+            long now = System.currentTimeMillis();
+            pruneExpiredPendingUnknowns(now);
+            if (!cleanId.isEmpty()) {
+                pendingUnknownThreads.put(cleanId, now);
+            } else {
+                pendingUnknownUntaggedAt = now;
+            }
             return false;
         } catch (Throwable t) {
             Logger.printException(() -> "DmNotificationAllowlist.shouldMuteNotification failed", t);
@@ -164,9 +179,11 @@ public final class DmNotificationAllowlist {
             long now = System.currentTimeMillis();
 
             String tagThreadId = DmNotificationAllowlistPref.extractCleanThreadId(tag);
+            boolean hasExplicitTagThreadId = tag != null && tag.contains("thread_id:") && !tagThreadId.isEmpty();
             if (!tagThreadId.isEmpty()) {
                 if (isRecentlyAllowed(tagThreadId, now)) return false;
-                if (!tagThreadId.equals(pendingUnknownThreadId)
+                if (hasExplicitTagThreadId
+                        && !pendingUnknownThreads.containsKey(tagThreadId)
                         && DmNotificationAllowlistPref.evaluateThreadDecision(
                         tagThreadId, Pref.dmNotificationAllowlistGroups())
                         == DmNotificationAllowlistPref.Decision.ALLOW) {
@@ -180,12 +197,9 @@ public final class DmNotificationAllowlist {
             }
 
             // Only filter here when Gate 1 explicitly deferred an unseen thread.
-            if (pendingUnknownAt == 0 || (now - pendingUnknownAt) > DECISION_TTL_MS) {
+            if (!consumePendingUnknown(tagThreadId, hasExplicitTagThreadId, now)) {
                 return false;
             }
-            // Consume the pending slot once inspected so unrelated notifications aren't affected.
-            pendingUnknownAt = 0;
-            pendingUnknownThreadId = "";
 
             List<String> candidates = new ArrayList<>();
             List<String> preRedaction = originalNotificationSenders.remove(notification.when);
@@ -231,7 +245,7 @@ public final class DmNotificationAllowlist {
     @SuppressWarnings("unchecked")
     public static void indexInboxRows(Object task) {
         try {
-            if (!SettingsStatus.dmNotificationAllowlist || task == null) return;
+            if (!Pref.dmNotificationAllowlist() || task == null) return;
 
             List<Object> list = null;
             for (Field field : task.getClass().getDeclaredFields()) {
@@ -246,8 +260,7 @@ public final class DmNotificationAllowlist {
             if (session == null) return;
 
             final List<Object> snapshot = new ArrayList<>(list);
-            final UserSession capturedSession = session;
-            getWorker().post(() -> processInboxSnapshot(capturedSession, snapshot));
+            scheduleInboxSnapshot(session, snapshot);
         } catch (Throwable t) {
             Logger.printException(() -> "DmNotificationAllowlist.indexInboxRows failed", t);
         }
@@ -255,7 +268,7 @@ public final class DmNotificationAllowlist {
 
     /** Harvests participant userId -> (username, fullName) mappings from REST thread deserialization. */
     public static void noteThreadUser(Object user) {
-        if (!SettingsStatus.dmNotificationAllowlist || user == null) return;
+        if (!Pref.dmNotificationAllowlist() || user == null) return;
         getWorker().post(() -> {
             try {
                 UserData data = new UserData(user);
@@ -537,6 +550,44 @@ public final class DmNotificationAllowlist {
     private static boolean isRecentlyAllowed(String threadId, long now) {
         Long ts = recentAllowedThreads.get(threadId);
         return ts != null && (now - ts) <= DECISION_TTL_MS;
+    }
+
+    private static void pruneExpiredPendingUnknowns(long now) {
+        for (Map.Entry<String, Long> entry : pendingUnknownThreads.entrySet()) {
+            if ((now - entry.getValue()) > DECISION_TTL_MS) {
+                pendingUnknownThreads.remove(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private static boolean consumePendingUnknown(String tagThreadId, boolean hasExplicitTagThreadId, long now) {
+        pruneExpiredPendingUnknowns(now);
+        if (!tagThreadId.isEmpty()) {
+            Long pendingAt = pendingUnknownThreads.remove(tagThreadId);
+            if (pendingAt != null && (now - pendingAt) <= DECISION_TTL_MS) {
+                return true;
+            }
+        }
+        if (pendingUnknownUntaggedAt > 0 && (now - pendingUnknownUntaggedAt) <= DECISION_TTL_MS) {
+            pendingUnknownUntaggedAt = 0;
+            return true;
+        }
+        if (!hasExplicitTagThreadId && !pendingUnknownThreads.isEmpty()) {
+            String oldestKey = null;
+            Long oldestTs = null;
+            for (Map.Entry<String, Long> entry : pendingUnknownThreads.entrySet()) {
+                Long ts = entry.getValue();
+                if (ts != null && (now - ts) <= DECISION_TTL_MS
+                        && (oldestTs == null || ts < oldestTs)) {
+                    oldestKey = entry.getKey();
+                    oldestTs = ts;
+                }
+            }
+            if (oldestKey != null && pendingUnknownThreads.remove(oldestKey, oldestTs)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void pruneOldEntries(Map<Long, List<String>> map, long now) {
