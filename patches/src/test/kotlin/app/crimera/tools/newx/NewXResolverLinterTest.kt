@@ -92,6 +92,19 @@ import app.crimera.patches.newx.misc.dynamiccolor.isTabSlotColors
 import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsRowDelegate
 import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsRowIconConsumer
 import app.crimera.patches.newx.timeline.resolveProvenForYouCurrentPageRefreshBridges
+import app.crimera.patches.newx.misc.drawer.resolveDrawerItemModel
+import app.crimera.patches.newx.misc.drawer.requireRegistersDeadAt
+import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
+
+private const val DRAWER_OWNER = "Lcom/x/main/drawer/Owner;"
+private const val DRAWER_ITEM = "Lcom/x/main/drawer/Item;"
+private const val DRAWER_PROFILE = "Lcom/x/main/drawer/ItemProfile;"
+private const val DRAWER_NESTED = "Lcom/x/main/drawer/ItemNested;"
+private const val DRAWER_ICONS = "Lcom/x/icons/Icons;"
+private const val DRAWER_COMPOSER = "Landroidx/compose/runtime/Composer;"
+private const val FUNCTION0_FIXTURE = "Lkotlin/jvm/functions/Function0;"
+private const val DRAWER_PROFILE_ID = 0x7f140001
+private const val DRAWER_NESTED_ID = 0x7f140002
 
 class NewXResolverLinterTest {
     @Test
@@ -860,24 +873,37 @@ class NewXResolverLinterTest {
         val lazyType = "Lfixture/Lazy;"
         val factoryType = "Lkotlin/jvm/functions/Function0;"
         for (hasAuxiliary in listOf(false, true)) {
-            val code = MethodImplementationBuilder(3).apply {
-                addInstruction("invoke-direct {v0}, Lfixture/Factory;-><init>()V".toInstruction())
-                addInstruction("new-instance v1, $lazyType".toInstruction())
-                val constructor = if (hasAuxiliary) {
-                    "invoke-direct {v1, v0, v2}, $lazyType-><init>(${factoryType}Ljava/util/concurrent/ConcurrentHashMap;)V"
-                } else {
-                    "invoke-direct {v1, v0}, $lazyType-><init>($factoryType)V"
+            for (interveningCopy in listOf(false, true)) {
+                val code = MethodImplementationBuilder(4).apply {
+                    addInstruction("new-instance v0, Lfixture/Factory;".toInstruction())
+                    addInstruction("invoke-direct {v0}, Lfixture/Factory;-><init>()V".toInstruction())
+                    addInstruction("new-instance v1, $lazyType".toInstruction())
+                    val constructor = if (hasAuxiliary) {
+                        "invoke-direct {v1, v0, v2}, $lazyType-><init>(${factoryType}Ljava/util/concurrent/ConcurrentHashMap;)V"
+                    } else {
+                        "invoke-direct {v1, v0}, $lazyType-><init>($factoryType)V"
+                    }
+                    addInstruction(constructor.toInstruction())
+                    // An intervening copy and an unrelated constant must not break the store's provenance.
+                    if (interveningCopy) {
+                        addInstruction("move-object v2, v1".toInstruction())
+                        addInstruction("const/4 v3, 0x0".toInstruction())
+                    }
+                    addInstruction("sput-object v${if (interveningCopy) 2 else 1}, Lfixture/Theme;->standard:$lazyType".toInstruction())
+                    addInstruction("return-void".toInstruction())
                 }
-                addInstruction(constructor.toInstruction())
-                addInstruction("sput-object v1, Lfixture/Theme;->standard:$lazyType".toInstruction())
-                addInstruction("return-void".toInstruction())
+                val initializer = MutableMethod(ImmutableMethod(
+                    "Lfixture/Theme;", "<clinit>", emptyList(), "V", AccessFlags.STATIC.value,
+                    emptySet(), emptySet(), code.methodImplementation,
+                ))
+                val storeIndex = initializer.instructions.indexOfFirst { it.opcode == Opcode.SPUT_OBJECT }
+                val storeRegister = if (interveningCopy) 2 else 1
+                assertTrue(
+                    initializer.factoryResultFeedsStore(0, 1, storeIndex, storeRegister, 0, lazyType),
+                    "hasAuxiliary=$hasAuxiliary interveningCopy=$interveningCopy",
+                )
+                assertFalse(initializer.factoryResultFeedsStore(0, 1, storeIndex, storeRegister, 0, "Lfixture/Other;"))
             }
-            val initializer = MutableMethod(ImmutableMethod(
-                "Lfixture/Theme;", "<clinit>", emptyList(), "V", AccessFlags.STATIC.value,
-                emptySet(), emptySet(), code.methodImplementation,
-            ))
-            assertTrue(initializer.factoryResultFeedsStore(0, 3, 1, 0, lazyType))
-            assertFalse(initializer.factoryResultFeedsStore(0, 3, 1, 0, "Lfixture/Other;"))
         }
     }
 
@@ -1060,9 +1086,164 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `drawer item model resolves singleton and instance branches titles icons and row calls end to end`() {
+        val owner = drawerItemOwner(clobberTitleAfterMapper = false)
+        val model = resolveDrawerItemModel(listOf(owner), DRAWER_PROFILE_ID)
+        assertTrue(model != null)
+        fun method(name: String) = owner.methods.single { it.name == name }.toSmaliDescriptor()
+        assertEquals(DRAWER_OWNER, model.ownerClass)
+        assertEquals(method("item"), model.itemRenderer.toSmaliDescriptor())
+        assertEquals(0, model.itemParameterIndex)
+        assertEquals(2, model.clickParameterIndex)
+        assertEquals(DRAWER_PROFILE, model.branchesWithTitle(DRAWER_PROFILE_ID).single().itemType)
+        assertEquals(DRAWER_NESTED, model.branchesWithNestedTitle(DRAWER_NESTED_ID).single().itemType)
+        assertEquals(
+            "Lcom/x/icons/Icons;->profile:Lcom/x/icons/Icons;",
+            model.uniqueIconFieldForTitle(DRAWER_PROFILE_ID, "profile").toString(),
+        )
+        assertEquals(listOf(method("row")), model.titledRenderers.map { it.toSmaliDescriptor() })
+        val anchor = model.anchorRowCalls.single()
+        assertEquals(method("anchors"), anchor.method.toSmaliDescriptor())
+        assertEquals(0, anchor.rendererCallOrdinal)
+        assertEquals(method("row"), anchor.renderer.toSmaliDescriptor())
+    }
+
+    @Test
+    fun `window registers rewritten before any read are dead after the anchor`() {
+        fun method(vararg body: String): MutableMethod = MutableMethod(
+            ImmutableMethod(
+                DRAWER_OWNER, "anchor", emptyList(), "V", AccessFlags.STATIC.value, emptySet(), emptySet(),
+                MethodImplementationBuilder(24).apply {
+                    body.forEach { addInstruction(it.toInstruction()) }
+                }.methodImplementation,
+            ),
+        )
+        // Index 0 is the anchor call; index 1 is the insertion point. v8 is rewritten by move/from16 first.
+        method(
+            "invoke-static {v8}, $DRAWER_OWNER->a(Ljava/lang/String;)V",
+            "move-object/from16 v8, v20",
+            "invoke-static {v8}, $DRAWER_OWNER->b(Ljava/lang/String;)V",
+            "return-void",
+        ).requireRegistersDeadAt(1, listOf(8), "test")
+        // A read of v9 before any write keeps it live at the insertion point.
+        assertFailsWith<PatchException> {
+            method(
+                "invoke-static {v9}, $DRAWER_OWNER->a(Ljava/lang/String;)V",
+                "invoke-static {v9}, $DRAWER_OWNER->b(Ljava/lang/String;)V",
+                "return-void",
+            ).requireRegistersDeadAt(1, listOf(9), "test")
+        }
+    }
+
+    @Test
+    fun `drawer item title clobbered before the titled renderer is rejected`() {
+        assertFailsWith<PatchException> {
+            resolveDrawerItemModel(listOf(drawerItemOwner(clobberTitleAfterMapper = true)), DRAWER_PROFILE_ID)
+        }
+    }
+
+    private fun drawerItemOwner(clobberTitleAfterMapper: Boolean): ImmutableClassDef {
+        val clobber = if (clobberTitleAfterMapper) "const/4 v1, 0x0" else "nop"
+        val methods = listOf(
+            drawerItemMethod("title", listOf(DRAWER_ITEM, "Z", DRAWER_COMPOSER), "Ljava/lang/String;", 6) {
+                drawerSmali("sget-object v0, $DRAWER_PROFILE->INSTANCE:$DRAWER_PROFILE")
+                drawerSmali("invoke-static {v3, v0}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z")
+                drawerSmali("move-result v1")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("nested")))
+                drawerSmali("const v2, 0x7f140001")
+                drawerSmali("return-object v2")
+                addLabel("nested")
+                drawerSmali("instance-of v1, v3, $DRAWER_NESTED")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("unknown")))
+                drawerSmali("invoke-static {v5}, $DRAWER_OWNER->nested($DRAWER_COMPOSER)Ljava/lang/String;")
+                drawerSmali("move-result-object v2")
+                drawerSmali("return-object v2")
+                addLabel("unknown")
+                drawerSmali("const/4 v2, 0x0")
+                drawerSmali("return-object v2")
+            },
+            drawerItemMethod("nested", listOf(DRAWER_COMPOSER), "Ljava/lang/String;", 2) {
+                drawerSmali("const v0, 0x7f140002")
+                drawerSmali("return-object v0")
+            },
+            drawerItemMethod("icon", listOf(DRAWER_ITEM), DRAWER_ICONS, 3) {
+                drawerSmali("sget-object v0, $DRAWER_PROFILE->INSTANCE:$DRAWER_PROFILE")
+                drawerSmali("invoke-static {v2, v0}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z")
+                drawerSmali("move-result v1")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("none")))
+                drawerSmali("sget-object v0, $DRAWER_ICONS->profile:$DRAWER_ICONS")
+                drawerSmali("return-object v0")
+                addLabel("none")
+                drawerSmali("const/4 v0, 0x0")
+                drawerSmali("return-object v0")
+            },
+            drawerItemMethod("list", listOf(DRAWER_ITEM, FUNCTION0_FIXTURE, DRAWER_COMPOSER), "V", 5) {
+                drawerSmali("const/4 v0, 0x0")
+                drawerSmali("invoke-static {v2, v0, v4}, $DRAWER_OWNER->title($DRAWER_ITEM" + "Z$DRAWER_COMPOSER)Ljava/lang/String;")
+                drawerSmali("move-result-object v1")
+                drawerSmali(clobber)
+                // A conditional between the mapper result and the titled renderer must not hide the callee.
+                addInstruction(BuilderInstruction21t(Opcode.IF_NEZ, 0, getLabel("skip")))
+                drawerSmali(
+                    "invoke-static {v2, v1, v3}, $DRAWER_OWNER->item($DRAWER_ITEM" +
+                        "Ljava/lang/String;$FUNCTION0_FIXTURE)V",
+                )
+                addLabel("skip")
+                drawerSmali("return-void")
+            },
+            drawerItemMethod("item", listOf(DRAWER_ITEM, "Ljava/lang/String;", FUNCTION0_FIXTURE), "V", 5) {
+                drawerSmali("invoke-static {v2}, $DRAWER_OWNER->icon($DRAWER_ITEM)$DRAWER_ICONS")
+                drawerSmali("move-result-object v0")
+                drawerSmali("const/4 v1, 0x0")
+                drawerSmali(
+                    "invoke-static {v3, v0, v4, v1}, $DRAWER_OWNER->row(Ljava/lang/String;$DRAWER_ICONS" +
+                        "$FUNCTION0_FIXTURE$DRAWER_COMPOSER)V",
+                )
+                drawerSmali("return-void")
+            },
+            drawerItemMethod("row", listOf("Ljava/lang/String;", DRAWER_ICONS, FUNCTION0_FIXTURE, DRAWER_COMPOSER), "V", 4) {
+                drawerSmali("return-void")
+            },
+            drawerItemMethod("anchors", listOf(DRAWER_ITEM, FUNCTION0_FIXTURE, DRAWER_COMPOSER), "V", 8) {
+                drawerSmali("invoke-static {v5}, $DRAWER_OWNER->icon($DRAWER_ITEM)$DRAWER_ICONS")
+                drawerSmali("move-result-object v2")
+                drawerSmali("const/4 v1, 0x0")
+                drawerSmali("move-object v3, v6")
+                drawerSmali("move-object v4, v7")
+                drawerSmali(
+                    "invoke-static/range {v1 .. v4}, $DRAWER_OWNER->row(Ljava/lang/String;$DRAWER_ICONS" +
+                        "$FUNCTION0_FIXTURE$DRAWER_COMPOSER)V",
+                )
+                drawerSmali("return-void")
+            },
+        )
+        return ImmutableClassDef(
+            DRAWER_OWNER, AccessFlags.PUBLIC.value, "Ljava/lang/Object;", emptyList(), null, emptySet(),
+            emptyList(), methods,
+        )
+    }
+
+    private fun drawerItemMethod(
+        name: String,
+        parameters: List<String> = emptyList(),
+        returnType: String = "V",
+        registerCount: Int = 1,
+        body: MethodImplementationBuilder.() -> Unit = {},
+    ): Method {
+        val code = MethodImplementationBuilder(registerCount).apply(body)
+        return ImmutableMethod(
+            DRAWER_OWNER, name, parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
+            returnType, AccessFlags.STATIC.value, emptySet(), emptySet(), code.methodImplementation,
+        )
+    }
+
+    private fun MethodImplementationBuilder.drawerSmali(instruction: String) =
+        addInstruction(instruction.toInstruction())
+
+    @Test
     fun `For You refresh resolves the live page index through both native lookup shapes`() {
         val event = "Lfixture/Event;"
-        fun tabHandler(safeLookup: Boolean, overwriteIndex: Boolean): Method {
+        fun tabHandler(safeLookup: Boolean, overwriteIndex: Boolean, interleaved: Boolean = false): Method {
             val code = MethodImplementationBuilder(7).apply {
                 fun add(instruction: String) = addInstruction(instruction.toInstruction())
                 add("iget-object v0, v6, Lfixture/Home;->state:Lfixture/State;")
@@ -1086,9 +1267,13 @@ class NewXResolverLinterTest {
                 add("invoke-virtual {v1}, Lfixture/Child;->component()Ljava/lang/Object;")
                 add("move-result-object v1")
                 add("instance-of v2, v1, Lfixture/ForYou;")
+                // Interleaved copies and constants keep the same page object; only the flow proves the cast.
+                if (interleaved) add("const/4 v4, 0x0")
                 addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, getLabel("done")))
-                add("check-cast v1, Lfixture/ForYou;")
-                add("iget-object v1, v1, Lfixture/ForYou;->controller:Lfixture/Controller;")
+                if (interleaved) add("move-object v3, v1")
+                val castRegister = if (interleaved) 3 else 1
+                add("check-cast v$castRegister, Lfixture/ForYou;")
+                add("iget-object v1, v$castRegister, Lfixture/ForYou;->controller:Lfixture/Controller;")
                 add("sget-object v2, Lfixture/Refresh;->INSTANCE:Lfixture/Refresh;")
                 add("invoke-interface {v1, v2}, Lfixture/Controller;->dispatch($event)V")
                 addLabel("done")
@@ -1100,10 +1285,16 @@ class NewXResolverLinterTest {
             )
         }
         for (safeLookup in listOf(false, true)) {
-            val bridge = tabHandler(safeLookup, false).resolveProvenForYouCurrentPageRefreshBridges(setOf(event)).single()
-            assertEquals("selected", bridge.pagesIndexField.name)
-            assertEquals("dispatch", bridge.refreshDispatch.name)
-            assertTrue(tabHandler(safeLookup, true).resolveProvenForYouCurrentPageRefreshBridges(setOf(event)).isEmpty())
+            for (interleaved in listOf(false, true)) {
+                val bridge = tabHandler(safeLookup, false, interleaved)
+                    .resolveProvenForYouCurrentPageRefreshBridges(setOf(event)).single()
+                assertEquals("selected", bridge.pagesIndexField.name)
+                assertEquals("dispatch", bridge.refreshDispatch.name)
+                assertTrue(
+                    tabHandler(safeLookup, true, interleaved)
+                        .resolveProvenForYouCurrentPageRefreshBridges(setOf(event)).isEmpty(),
+                )
+            }
         }
     }
 

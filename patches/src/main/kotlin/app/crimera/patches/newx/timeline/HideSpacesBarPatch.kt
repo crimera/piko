@@ -27,12 +27,6 @@ private object NewXSpacesBarFingerprint : Fingerprint(
     },
 )
 
-private val SPACES_BAR_PREFIX =
-    listOf(
-        FUNCTION_ONE_DESCRIPTOR,
-        MODIFIER_DESCRIPTOR,
-        "Z",
-    )
 private val SPACES_BAR_TAIL =
     listOf(
         COMPOSER_DESCRIPTOR,
@@ -45,14 +39,24 @@ private val SPACES_BAR_CALLBACK_DESCRIPTORS =
 // The renderer takes item callbacks followed by one or more no-argument callbacks.
 private const val MINIMUM_SPACES_BAR_CALLBACK_COUNT = 2
 
+/**
+ * Spaces bar renderer by Compose shape. No string, resource or stable `com/x/spaces` type anchors it:
+ * on 12.41, 12.43 and 12.45.1 the renderer is `j` in an obfuscated `ui/home` class whose flow, model
+ * and lambda class names change per release, and it has no const-string. The anchor is therefore the
+ * shape: a leading object, one Modifier and one Boolean option, item callbacks followed by no-argument
+ * callbacks, and the Compose `Composer, I, I` tail. Options are counted, not positioned, so reordered
+ * Compose parameters still match, and exact cardinality in the caller fails closed on any ambiguity.
+ */
 internal fun Method.hasKnownSpacesBarSignature(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
     if (!parameters.firstOrNull().orEmpty().isObjectDescriptor()) return false
     if (parameters.takeLast(SPACES_BAR_TAIL.size) != SPACES_BAR_TAIL) return false
 
-    val callbackStart = 1 + SPACES_BAR_PREFIX.size
-    if (parameters.drop(1).take(SPACES_BAR_PREFIX.size) != SPACES_BAR_PREFIX) return false
-    val callbacks = parameters.drop(callbackStart).dropLast(SPACES_BAR_TAIL.size)
+    val middle = parameters.drop(1).dropLast(SPACES_BAR_TAIL.size)
+    val options = middle.filter { it == MODIFIER_DESCRIPTOR || it == "Z" }
+    if (options.count { it == MODIFIER_DESCRIPTOR } != 1 || options.count { it == "Z" } != 1) return false
+    val callbacks = middle.filterNot { it == MODIFIER_DESCRIPTOR || it == "Z" }
+    if (callbacks.any { it !in SPACES_BAR_CALLBACK_DESCRIPTORS && it != FUNCTION_ZERO_DESCRIPTOR }) return false
     val itemCallbacks = callbacks.dropLastWhile { it == FUNCTION_ZERO_DESCRIPTOR }
     return itemCallbacks.size < callbacks.size &&
         itemCallbacks.size >= MINIMUM_SPACES_BAR_CALLBACK_COUNT &&

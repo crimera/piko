@@ -16,6 +16,7 @@ import app.crimera.patches.newx.settings.resolveSettingsIconField
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.misc.navbar.NewXNavBarTabData
+import app.crimera.patches.newx.misc.inlineactions.controlFlowEdges
 import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.misc.navbar.NewXTabDataFingerprint
@@ -78,6 +79,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22x
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -1034,6 +1036,13 @@ private fun MutableMethod.injectIconGatedDrawerRows(call: DrawerItemRowCall, blo
     val titleRegister = startRegister + titleIndex
     val iconRegister = startRegister + iconIndex
     val clickRegister = startRegister + clickIndex
+    // The gated rows overwrite the anchor's title, icon and click slots, and every block exits to the
+    // original call. Fail closed if the original code reads any of those slots after the anchor.
+    requireRegistersDeadAt(
+        index = callIndex + 1,
+        registers = listOf(titleRegister, iconRegister, clickRegister),
+        label = "NewX drawer gated rows",
+    )
     val lastBlock = blocks.lastIndex
     fun gateLabel(blockIndex: Int) = "${blocks[blockIndex].labelPrefix}_gate"
     insertHook(
@@ -1079,6 +1088,82 @@ private fun MutableMethod.injectIconGatedDrawerRows(call: DrawerItemRowCall, blo
             // The icon register now holds this block's item icon, so later gates must not run.
             if (blockIndex < lastBlock) goto(Target.Original)
         }
+    }
+}
+
+/**
+ * Fails closed unless none of [registers] can be read at [index] before being rewritten on any path.
+ * Backward liveness over the method's CFG; exception edges carry pre-instruction state (leaving
+ * before any destination write), so a throwing write cannot kill a register read in its handler.
+ * A pure write (const, move-result, sget, new-instance, move, iget) kills its destination without
+ * reading it.
+ */
+internal fun MutableMethod.requireRegistersDeadAt(index: Int, registers: List<Int>, label: String) {
+    val code = instructions.toList()
+    val edges = code.controlFlowEdges(implementation?.tryBlocks.orEmpty())
+        ?: throw PatchException("$label: control flow of $this is not analyzable")
+    val liveIn = MutableList<Set<Int>>(code.size) { emptySet() }
+    var changed = true
+    while (changed) {
+        changed = false
+        for (current in code.indices.reversed()) {
+            val instruction = code[current]
+            val normalOut = mutableSetOf<Int>()
+            val exceptionalOut = mutableSetOf<Int>()
+            edges[current].forEach { edge ->
+                if (edge.exceptional) exceptionalOut += liveIn[edge.target] else normalOut += liveIn[edge.target]
+            }
+            val next = instruction.readRegisters() + (normalOut - instruction.killedRegisters()) + exceptionalOut
+            if (next != liveIn[current]) {
+                liveIn[current] = next
+                changed = true
+            }
+        }
+    }
+    val live = liveIn.getOrElse(index) { emptySet() }.intersect(registers.toSet())
+    if (live.isNotEmpty()) {
+        throw PatchException(
+            "$label overwrites ${live.sorted().joinToString { "v$it" }} still read after index $index in $this",
+        )
+    }
+}
+
+/**
+ * Registers an instruction reads. A pure write reads its source register (if any) and never its
+ * destination, unless source and destination overlap (e.g. `iget v0, v0` or overlapping wide move).
+ */
+private fun Instruction.readRegisters(): Set<Int> {
+    if (pureWriteDestination() == null) return registersUsed.toSet()
+    val isWide = opcode.setsWideRegister()
+    val source = (this as? TwoRegisterInstruction)?.registerB
+    return when {
+        source == null -> emptySet()
+        isWide && opcode in WIDE_MOVE_OPCODES -> setOf(source, source + 1)
+        else -> setOf(source)
+    }
+}
+
+private val WIDE_MOVE_OPCODES = setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16)
+
+/** Registers an instruction overwrites without reading them (the destination of a pure write). */
+private fun Instruction.killedRegisters(): Set<Int> {
+    val destination = pureWriteDestination() ?: return emptySet()
+    return if (opcode.setsWideRegister()) setOf(destination, destination + 1) else setOf(destination)
+}
+
+/** Destination of an instruction that only writes it: constants, static/instance reads, moves, results. */
+private fun Instruction.pureWriteDestination(): Int? {
+    // dexlib2 names opcodes in smali form ("move-object/from16"); compare against the enum spelling.
+    val name = opcode.name.uppercase().replace('-', '_').replace('/', '_')
+    val pure =
+        name.startsWith("CONST") || name.startsWith("SGET") || name.startsWith("IGET") ||
+            name == "NEW_INSTANCE" || name.startsWith("MOVE")
+    if (!pure) return null
+    return when (this) {
+        is Instruction22x -> registerA
+        is TwoRegisterInstruction -> registerA
+        is OneRegisterInstruction -> registerA
+        else -> null
     }
 }
 

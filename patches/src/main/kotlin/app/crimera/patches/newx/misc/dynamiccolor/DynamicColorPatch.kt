@@ -716,6 +716,7 @@ private fun resolveFactory(
         }
         if (selectorLiterals.size != 1) return@mapNotNull null
         if (!initializer.factoryResultFeedsStore(
+                allocationIndex = allocation.index,
                 constructorIndex = constructor.index,
                 storeIndex = storeIndex,
                 storeRegister = storeRegister,
@@ -766,7 +767,13 @@ private fun Instruction.receiverRegister(): Int? =
         else -> null
     }
 
+/**
+ * True when exactly one consumer receives the factory allocated at [allocationIndex] and its result
+ * reaches [storeIndex] in [storeRegister]. Both links are CFG provenance, not literal register or
+ * adjacency checks: moves, check-casts and unrelated instructions between them are tolerated.
+ */
 internal fun MutableMethod.factoryResultFeedsStore(
+    allocationIndex: Int,
     constructorIndex: Int,
     storeIndex: Int,
     storeRegister: Int,
@@ -784,30 +791,60 @@ internal fun MutableMethod.factoryResultFeedsStore(
                     Opcode.INVOKE_STATIC,
                     Opcode.INVOKE_STATIC_RANGE,
                     -> {
+                        val factoryArgument = registers.getOrNull(functionParameter) ?: return@let false
                         reference.returnType.startsWith("L") &&
-                            registers.getOrNull(functionParameter) == allocationRegister &&
+                            provesValueFromInstruction(allocationIndex, allocationRegister, indexed.index, factoryArgument) &&
                             instructions.getOrNull(indexed.index + 1)?.let { result ->
                                 result.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                                    (result as? OneRegisterInstruction)?.registerA == storeRegister
+                                    provesValueFromInstruction(
+                                        indexed.index + 1,
+                                        (result as OneRegisterInstruction).registerA,
+                                        storeIndex,
+                                        storeRegister,
+                                    )
                             } == true
                     }
                     Opcode.INVOKE_DIRECT,
                     Opcode.INVOKE_DIRECT_RANGE,
                     -> {
-                        // The Lazy implementation can take auxiliary arguments after its factory.
+                        // Register 0 is the receiver; the Lazy implementation can take auxiliary arguments after its factory.
+                        val factoryArgument = registers.getOrNull(1) ?: return@let false
+                        val receiver = registers.firstOrNull() ?: return@let false
                         reference.name == "<init>" &&
                             reference.returnType == "V" &&
                             reference.definingClass == cacheFieldType &&
                             functionParameter == 0 &&
-                            registers.getOrNull(1) == allocationRegister &&
-                            registers.firstOrNull() == storeRegister &&
-                            indexed.index + 1 == storeIndex
+                            provesValueFromInstruction(allocationIndex, allocationRegister, indexed.index, factoryArgument) &&
+                            cacheObjectReachesStore(indexed.index, receiver, storeIndex, storeRegister, cacheFieldType)
                     }
                     else -> false
                 }
             } == true
     }
     return consumers.size == 1
+}
+
+/**
+ * The cache object built by the `<init>` at [initIndex] (receiver [receiver]) is the value that
+ * [storeRegister] holds at [storeIndex]. The unique `new-instance` of [cacheFieldType] that proves
+ * the receiver at the constructor is the origin; the store must prove the same object.
+ */
+private fun MutableMethod.cacheObjectReachesStore(
+    initIndex: Int,
+    receiver: Int,
+    storeIndex: Int,
+    storeRegister: Int,
+    cacheFieldType: String,
+): Boolean {
+    val origins = instructions.withIndex().filter { (index, instruction) ->
+        index < initIndex &&
+            instruction.opcode == Opcode.NEW_INSTANCE &&
+            instruction.getReference<TypeReference>()?.type == cacheFieldType &&
+            provesValueFromInstruction(index, (instruction as OneRegisterInstruction).registerA, initIndex, receiver)
+    }
+    val origin = origins.singleOrNull() ?: return false
+    val originRegister = (origin.value as OneRegisterInstruction).registerA
+    return provesValueFromInstruction(origin.index, originRegister, storeIndex, storeRegister)
 }
 
 private fun MutableMethod.resolvePaletteAllocationIndex(
@@ -2527,12 +2564,19 @@ private fun MutableMethod.resolveLikeIconComposable(unfavoriteIndex: Int): Mutab
                 val allocatedRegister = (allocation.value as OneRegisterInstruction).registerA
                 val wrapped = code.withIndex().drop(index + 1).any { (callIndex, call) ->
                     val factory = call.getReference<MethodReference>() ?: return@any false
-                    val callback = call.registersUsed.getOrNull(1) ?: return@any false
-                    call.opcode == Opcode.INVOKE_STATIC &&
-                        factory.definingClass.startsWith("Landroidx/compose/runtime/internal/") &&
-                        factory.parameterTypes.map(CharSequence::toString) ==
-                            listOf("I", "Lkotlin/Function;", COMPOSER_DESCRIPTOR) &&
-                        outer.provesValueFromInstruction(allocation.index, allocatedRegister, callIndex, callback)
+                    val parameters = factory.parameterTypes.map(CharSequence::toString)
+                    val arguments = call.registersUsed
+                    // One register per parameter; a wide parameter would shift the mapping, so none is allowed.
+                    if (call.opcode != Opcode.INVOKE_STATIC || arguments.size != parameters.size ||
+                        parameters.any { it == "J" || it == "D" }
+                    ) return@any false
+                    factory.definingClass.startsWith("Landroidx/compose/runtime/internal/") &&
+                        parameters.indices.any { slot ->
+                            parameters[slot] in COMPOSE_CALLBACK_PARAMETER_TYPES &&
+                                outer.provesValueFromInstruction(
+                                    allocation.index, allocatedRegister, callIndex, arguments[slot],
+                                )
+                        }
                 }
                 if (!wrapped) return@mapNotNull null
                 constructor.definingClass.resolveComposableLambdaInvoke()?.takeIf {
@@ -2553,6 +2597,9 @@ private fun MethodReference.resolveMutableMethod(label: String): MutableMethod =
 
 private val WIDE_MOVE_OPCODES =
     setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16)
+
+/** Parameter types that can carry a Compose content lambda into a runtime-internal factory. */
+private val COMPOSE_CALLBACK_PARAMETER_TYPES = setOf("Lkotlin/Function;", "Ljava/lang/Object;")
 
 private val BOOLEAN_NORMALIZATION_OPCODES =
     setOf(
@@ -2731,21 +2778,39 @@ private fun List<Instruction>.resolveBooleanNormalizationValue(
     return resolveLatestLiteral(write.index, move.registerB)
 }
 
+/**
+ * Compose lottie renderer by shape, not by slot: one Lottie animation, one Function0, one Modifier,
+ * one String, one Composer, exactly two Boolean flags, and trailing Int defaults. Slot order and the
+ * optional trailing Int count are not part of the contract.
+ */
 private fun MutableMethod.lottieRendererCalls(): List<IndexedValue<Instruction>> =
     instructions.withIndex().filter { indexed ->
         val reference = indexed.value.getReference<MethodReference>() ?: return@filter false
-        if (reference.parameterTypes.size !in 8..9 || reference.returnType != "V") return@filter false
-        val parameters = reference.parameterTypes
-        parameters[0] == "Z" &&
-            parameters[1].startsWith("Lcom/x/lottie/") &&
-            parameters[2] == "Z" &&
-            parameters[3] == FUNCTION0_DESCRIPTOR &&
-            parameters[4] == COMPOSE_MODIFIER_DESCRIPTOR &&
-            parameters[5] == "Ljava/lang/String;" &&
-            parameters[6] == "Landroidx/compose/runtime/Composer;" &&
-            parameters[7] == "I" &&
-            (parameters.size == 8 || parameters[8] == "I")
+        if (reference.parameterTypes.size !in 8..10 || reference.returnType != "V") return@filter false
+        val parameters = reference.parameterTypes.map(CharSequence::toString)
+        val allowed = parameters.all { type ->
+            type == "Z" || type == "I" || type.startsWith("Lcom/x/lottie/") ||
+                type == FUNCTION0_DESCRIPTOR || type == COMPOSE_MODIFIER_DESCRIPTOR ||
+                type == "Ljava/lang/String;" || type == COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR
+        }
+        allowed &&
+            parameters.count { it.startsWith("Lcom/x/lottie/") } == 1 &&
+            parameters.count { it == FUNCTION0_DESCRIPTOR } == 1 &&
+            parameters.count { it == COMPOSE_MODIFIER_DESCRIPTOR } == 1 &&
+            parameters.count { it == "Ljava/lang/String;" } == 1 &&
+            parameters.count { it == COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR } == 1 &&
+            parameters.count { it == "Z" } == 2 &&
+            parameters.count { it == "I" } >= 1
     }
+
+/** Register slot of the animation flag: the second Boolean, which the inline hook overwrites. */
+private fun MethodReference.lottieAnimationFlagSlot(): Int {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    val flags = parameters.indices.filter { parameters[it] == "Z" }
+    if (flags.size != 2) throw PatchException("NewX Lottie renderer must take exactly two Boolean flags: $this")
+    return flags[1]
+}
+
 private fun MutableMethod.resolveLottieRenderer(): ResolvedLottieRenderer {
     val candidate = requireExactlyOne("NewX like Lottie renderer call", lottieRendererCalls())
     val reference = candidate.value.getReference<MethodReference>()
@@ -2764,7 +2829,9 @@ private fun patchLikeIconComposable(
     val lottieRenderer = composable.resolveLottieRenderer()
     val rangeInstruction = lottieRenderer.instruction as? RegisterRangeInstruction
         ?: throw PatchException("NewX like Lottie renderer is not an invoke-range: $composable")
-    val animationRegister = rangeInstruction.startRegister + 2
+    val renderer = lottieRenderer.instruction.getReference<MethodReference>()
+        ?: throw PatchException("NewX like Lottie renderer reference is missing: $composable")
+    val animationRegister = rangeInstruction.startRegister + renderer.lottieAnimationFlagSlot()
 
     composable.insertHook(
         index = lottieRenderer.index,

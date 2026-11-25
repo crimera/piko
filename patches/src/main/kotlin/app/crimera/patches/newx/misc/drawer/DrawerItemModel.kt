@@ -1,11 +1,12 @@
 package app.crimera.patches.newx.misc.drawer
 
-import app.crimera.patches.common.OBJECT_MOVE_OPCODES
 import app.crimera.patches.common.destinationRegisterOrNull
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
 import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -226,7 +227,7 @@ internal fun resolveDrawerItemModel(
                 val result = code.getOrNull(index + 1)
                     ?.takeIf { it.opcode == Opcode.MOVE_RESULT_OBJECT } as? OneRegisterInstruction
                     ?: return@flatMap emptyList()
-                layout.forwardStringArgumentCallees(index + 1, result.registerA)
+                layout.forwardStringArgumentCallees(method, index + 1, result.registerA)
             }
         }.distinctBy { it.toSmaliDescriptor() }
             .filter { callee ->
@@ -250,8 +251,7 @@ internal fun resolveDrawerItemModel(
             val method = methodsByDescriptor[callee.toSmaliDescriptor()] ?: return@mapNotNull null
             val layout = CodeLayout(method.code())
             val code = layout.instructions
-            val titleParameterIndex =
-                callee.parameterTypes.indexOfFirst { it.toString() == STRING_DESCRIPTOR }
+            val titleParameterIndex = callee.parameterDescriptorList().indexOf(STRING_DESCRIPTOR)
             val itemParameterIndices =
                 code.indices.mapNotNull { index ->
                     val instruction = code[index]
@@ -273,8 +273,9 @@ internal fun resolveDrawerItemModel(
                     if (!renderer.definingClass.startsWith(DRAWER_SCOPE) || renderer.returnType != "V") {
                         return@mapNotNull null
                     }
-                    val titleSlot = renderer.parameterTypes.indexOfFirst { it == STRING_DESCRIPTOR }
-                    if (titleSlot < 0 || renderer.parameterTypes.count { it == STRING_DESCRIPTOR } != 1) {
+                    val rendererParameters = renderer.parameterDescriptorList()
+                    val titleSlot = rendererParameters.indexOf(STRING_DESCRIPTOR)
+                    if (titleSlot < 0 || rendererParameters.count { it == STRING_DESCRIPTOR } != 1) {
                         return@mapNotNull null
                     }
                     val argumentRegisters = instruction.argumentRegisters(renderer) ?: return@mapNotNull null
@@ -288,8 +289,9 @@ internal fun resolveDrawerItemModel(
             if (innerCalls.isEmpty()) return@mapNotNull null
             val clickParameterIndices =
                 innerCalls.mapNotNull { (index, renderer, argumentRegisters) ->
-                    val clickSlot = renderer.parameterTypes.indexOfFirst { it == FUNCTION0_DESCRIPTOR }
-                    if (clickSlot < 0 || renderer.parameterTypes.count { it == FUNCTION0_DESCRIPTOR } != 1) {
+                    val rendererParameters = renderer.parameterDescriptorList()
+                    val clickSlot = rendererParameters.indexOf(FUNCTION0_DESCRIPTOR)
+                    if (clickSlot < 0 || rendererParameters.count { it == FUNCTION0_DESCRIPTOR } != 1) {
                         return@mapNotNull null
                     }
                     (layout.traceObjectSource(index, argumentRegisters[clickSlot], method) as? ObjectSource.Parameter)
@@ -429,8 +431,11 @@ private fun Method.reference(): MethodReference =
 private fun MethodReference.toImmutableReference(): MethodReference =
     ImmutableMethodReference(definingClass, name, parameterTypes.map(CharSequence::toString), returnType)
 
+/** Parameter descriptors as Strings; dexlib2 exposes them as CharSequence, which `==` does not match. */
+private fun MethodReference.parameterDescriptorList(): List<String> = parameterTypes.map(CharSequence::toString)
+
 private fun MethodReference.parameterIndices(type: String): List<Int> =
-    parameterTypes.indices.filter { parameterTypes[it].toString() == type }
+    parameterDescriptorList().indices.filter { parameterDescriptorList()[it] == type }
 
 private fun callerParameterType(method: MethodReference, index: Int): String =
     method.parameterTypes[index].toString()
@@ -479,82 +484,83 @@ private class CodeLayout(val instructions: List<Instruction>) {
 }
 
 /**
- * Collects static callees that receive [register] (or a moved copy) as a String argument on the
- * fallthrough/goto path. Conditional branches are not followed; gotos are, once.
+ * Static callees that receive the value produced at [originIndex] (held in [register]) as a String
+ * argument. Each candidate is proven with source-path provenance, so every branch edge is followed:
+ * a null or skip check between the mapper result and the renderer does not hide the callee, while
+ * any path that overwrites the value stops it from being attributed.
  */
-private fun CodeLayout.forwardStringArgumentCallees(startIndex: Int, register: Int): List<MethodReference> {
-    val aliases = mutableSetOf(register)
-    val callees = mutableListOf<MethodReference>()
-    val visited = mutableSetOf<Int>()
-    var index = startIndex + 1
-    while (index in instructions.indices && aliases.isNotEmpty() && visited.add(index)) {
+private fun CodeLayout.forwardStringArgumentCallees(
+    method: Method,
+    originIndex: Int,
+    register: Int,
+): List<MethodReference> =
+    instructions.indices.mapNotNull { index ->
         val instruction = instructions[index]
-        if (instruction.isStaticInvoke()) {
-            val reference = instruction.getReference<MethodReference>()
-            val arguments = reference?.let { instruction.argumentRegisters(it) }
-            if (reference != null && arguments != null &&
-                reference.parameterIndices(STRING_DESCRIPTOR).any { arguments[it] in aliases }
-            ) {
-                callees += reference
+        if (!instruction.isStaticInvoke()) return@mapNotNull null
+        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+        val arguments = instruction.argumentRegisters(reference) ?: return@mapNotNull null
+        val receivesValue =
+            reference.parameterIndices(STRING_DESCRIPTOR).any { slot ->
+                method.provesValueFromInstructionOnSourcePaths(originIndex, register, index, arguments[slot])
             }
-        }
-        when {
-            instruction.opcode in OBJECT_MOVE_OPCODES -> {
-                val move = instruction as TwoRegisterInstruction
-                if (move.registerB in aliases) aliases += move.registerA else aliases -= move.registerA
-            }
-            else -> aliases -= instruction.writtenRegisters().toSet()
-        }
-        when {
-            instruction.opcode == Opcode.GOTO || instruction.opcode == Opcode.GOTO_16 ||
-                instruction.opcode == Opcode.GOTO_32 ->
-                index = branchTargetIndex(index) ?: return callees
-            !instruction.opcode.canContinue() ->
-                return callees
-            else -> index++
-        }
+        reference.takeIf { receivesValue }
     }
-    return callees
-}
 
 /**
- * Traces an object register backward through object moves. A `move-result-object r` followed by
- * `if-nez r` and a static fallback `sget-object r` is treated as the invoke result (null fallback).
+ * Proves which source [register] at [callIndex] holds on every path from method entry: a method
+ * parameter, or the result of one invoke. Object moves and check-casts are followed by the
+ * provenance dataflow, so branches and interleaved copies do not hide the source.
+ *
+ * A `move-result-object r` whose `if-nez r` skips a static fallback `sget-object r` (the null
+ * fallback) is accepted by shape: the non-null path carries the invoke result, the null path the
+ * fallback singleton, and no later write to [register] is reachable from the join.
  */
 private fun CodeLayout.traceObjectSource(callIndex: Int, register: Int, method: Method): ObjectSource {
-    var current = register
-    for (index in callIndex - 1 downTo 0) {
-        val instruction = instructions[index]
-        if (current !in instruction.writtenRegisters()) continue
-        when {
-            // check-cast narrows the static type of the same value.
-            instruction.opcode == Opcode.CHECK_CAST -> continue
-            instruction.opcode in OBJECT_MOVE_OPCODES -> current = (instruction as TwoRegisterInstruction).registerB
-            instruction.opcode == Opcode.MOVE_RESULT_OBJECT ->
-                return if (index > 0) ObjectSource.Result(index - 1) else ObjectSource.Other
-            instruction.opcode == Opcode.SGET_OBJECT -> {
-                val nullCheck = instructions.getOrNull(index - 1)
-                val result = instructions.getOrNull(index - 2)
-                val isNullFallback =
-                    nullCheck?.opcode == Opcode.IF_NEZ &&
-                        (nullCheck as OneRegisterInstruction).registerA == current &&
-                        result?.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                        (result as OneRegisterInstruction).registerA == current &&
-                        branchTargetIndex(index - 1) == index + 1
-                return if (isNullFallback && index >= 3) ObjectSource.Result(index - 3) else ObjectSource.Other
-            }
-            else -> return ObjectSource.Other
-        }
-    }
     val implementation = method.implementation ?: return ObjectSource.Other
     val parameterWidths = method.parameterDescriptors().map { if (it == "J" || it == "D") 2 else 1 }
+    val parameterSources = mutableListOf<Int>()
     var parameterRegister = implementation.registerCount - parameterWidths.sum()
-    if (current < parameterRegister) return ObjectSource.Other
     parameterWidths.forEachIndexed { parameterIndex, width ->
-        if (current == parameterRegister) return ObjectSource.Parameter(parameterIndex)
+        if (method.provesParameterValue(callIndex, register, parameterRegister)) parameterSources += parameterIndex
         parameterRegister += width
     }
-    return ObjectSource.Other
+    if (parameterSources.size == 1) return ObjectSource.Parameter(parameterSources.single())
+
+    val resultSources =
+        instructions.indices.mapNotNull { moveIndex ->
+            val move = instructions[moveIndex]
+            if (move.opcode != Opcode.MOVE_RESULT_OBJECT || moveIndex == 0) return@mapNotNull null
+            val invokeIndex = moveIndex - 1
+            if (instructions[invokeIndex].getReference<MethodReference>() == null) return@mapNotNull null
+            val origin = (move as OneRegisterInstruction).registerA
+            val direct = method.provesValueFromInstruction(moveIndex, origin, callIndex, register)
+            if (direct || isNullFallbackOf(moveIndex, origin, callIndex, register, method)) invokeIndex else null
+        }.distinct()
+    val invokeIndex = requireAtMostOne("NewX drawer item object source at $callIndex in $method", resultSources)
+    return invokeIndex?.let(ObjectSource::Result) ?: ObjectSource.Other
+}
+
+/** `move-result-object r` at [moveIndex], `if-nez r` to the join, and `sget-object r` fallback. */
+private fun CodeLayout.isNullFallbackOf(
+    moveIndex: Int,
+    register: Int,
+    callIndex: Int,
+    targetRegister: Int,
+    method: Method,
+): Boolean {
+    val nullCheckIndex = moveIndex + 1
+    val fallbackIndex = moveIndex + 2
+    val nullCheck = instructions.getOrNull(nullCheckIndex) ?: return false
+    val fallback = instructions.getOrNull(fallbackIndex) ?: return false
+    val isShape =
+        nullCheck.opcode == Opcode.IF_NEZ &&
+            (nullCheck as OneRegisterInstruction).registerA == register &&
+            branchTargetIndex(nullCheckIndex) == fallbackIndex + 1 &&
+            fallback.opcode == Opcode.SGET_OBJECT &&
+            (fallback as OneRegisterInstruction).registerA == register &&
+            fallback.getReference<FieldReference>() != null
+    return isShape &&
+        method.provesValueFromInstructionOnSourcePaths(fallbackIndex, register, callIndex, targetRegister)
 }
 
 /**
@@ -589,13 +595,20 @@ internal fun parseItemBranches(mapper: Method): Map<String, List<Instruction>> {
                     val itemOperands = operands.filter { mapper.provesParameterValue(index, it, itemRegister) }
                     if (operands.size != 2 || itemOperands.size != 1) return@forEach
                     val singletonRegister = operands.single { it != itemOperands.single() }
-                    val writer =
-                        (index - 1 downTo 0).firstOrNull { previous ->
-                            singletonRegister in code[previous].writtenRegisters()
-                        } ?: return@forEach
+                    // The singleton must be the only static-field write that reaches the comparison on every path.
+                    val writers =
+                        code.indices.filter { previous ->
+                            val candidate = code[previous]
+                            candidate.opcode == Opcode.SGET_OBJECT &&
+                                mapper.provesValueFromInstruction(
+                                    previous,
+                                    (candidate as OneRegisterInstruction).registerA,
+                                    index,
+                                    singletonRegister,
+                                )
+                        }
                     val field =
-                        code[writer].takeIf { it.opcode == Opcode.SGET_OBJECT }
-                            ?.getReference<FieldReference>()
+                        writers.singleOrNull()?.let { code[it].getReference<FieldReference>() }
                             ?.takeIf { it.definingClass == it.type }
                             ?: return@forEach
                     val result = code.getOrNull(index + 1)

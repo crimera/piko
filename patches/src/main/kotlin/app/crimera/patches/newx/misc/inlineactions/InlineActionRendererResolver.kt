@@ -550,14 +550,14 @@ private val MOVE_OPCODES = setOf(
     Opcode.MOVE_WIDE_16,
 )
 
-private data class FlowEdge(val target: Int, val exceptional: Boolean)
+internal data class FlowEdge(val target: Int, val exceptional: Boolean)
 
 /**
  * Decodes normal and exception edges. Each try range adds an exception edge from every
  * throwing instruction it covers to each of its handlers; those edges carry the pre-instruction
  * state. A malformed range or handler address fails closed.
  */
-private fun List<Instruction>.controlFlowEdges(
+internal fun List<Instruction>.controlFlowEdges(
     tryBlocks: List<TryBlock<out ExceptionHandler>>,
 ): List<List<FlowEdge>>? {
     val offsets = runningFold(0) { address, instruction -> address + instruction.codeUnits }

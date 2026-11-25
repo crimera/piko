@@ -61,6 +61,14 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
+
+/** Instructions that only copy or materialize a register value, so a provenance window may pass them. */
+private val STRAIGHT_COPY_OPCODES =
+    setOf(
+        Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16,
+        Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16,
+        Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST, Opcode.CONST_HIGH16,
+    )
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
 private const val HOME_TIMELINE_PACKAGE = "Lcom/x/android/main/"
@@ -650,8 +658,10 @@ private data class PagesStateRead(
 )
 
 /**
- * The pages-state read at [readIndex], when its four instructions are adjacent and the state holder
- * is proven to be a field of this handler read from the receiver.
+ * The pages-state read at [readIndex]. The state getter's result must reach the read's receiver by
+ * provenance (moves and interleaved instructions tolerated), and a `check-cast` to the pages type must
+ * sit on that value's path. The state holder is proven to be a field of this handler read from the
+ * receiver.
  */
 private fun Method.pagesStateReadAt(
     code: List<Instruction>,
@@ -659,32 +669,38 @@ private fun Method.pagesStateReadAt(
     readOpcode: Opcode,
     fieldType: String,
 ): PagesStateRead? {
-    if (readIndex < 3) return null
+    if (readIndex < 1) return null
     val read = code[readIndex]
     if (read.opcode != readOpcode) return null
     val pagesField = read.getReference<FieldReference>()?.takeIf { it.type == fieldType } ?: return null
     val pagesRegister = (read as? TwoRegisterInstruction)?.registerB ?: return null
-    val cast = code[readIndex - 1]
-    if (cast.opcode != Opcode.CHECK_CAST ||
-        cast.getReference<TypeReference>()?.type != pagesField.definingClass ||
-        (cast as? OneRegisterInstruction)?.registerA != pagesRegister
-    ) {
-        return null
+    val getterIndices = code.indices.filter { getterIndex ->
+        getterIndex + 1 < readIndex &&
+            code[getterIndex].opcode == Opcode.INVOKE_VIRTUAL &&
+            code[getterIndex] is FiveRegisterInstruction &&
+            (code[getterIndex] as FiveRegisterInstruction).registerCount == 1 &&
+            code[getterIndex].getReference<MethodReference>()?.let { getter ->
+                getter.returnType == OBJECT_DESCRIPTOR && getter.parameterTypes.isEmpty()
+            } == true &&
+            code[getterIndex + 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
+            run {
+                val resultRegister = (code[getterIndex + 1] as OneRegisterInstruction).registerA
+                provesValueFromInstruction(getterIndex + 1, resultRegister, readIndex, pagesRegister) &&
+                    (getterIndex + 2 until readIndex).any { castIndex ->
+                        code[castIndex].opcode == Opcode.CHECK_CAST &&
+                            code[castIndex].getReference<TypeReference>()?.type == pagesField.definingClass &&
+                            provesValueFromInstruction(
+                                getterIndex + 1,
+                                resultRegister,
+                                castIndex,
+                                (code[castIndex] as OneRegisterInstruction).registerA,
+                            )
+                    }
+            }
     }
-    val result = code[readIndex - 2]
-    if (result.opcode != Opcode.MOVE_RESULT_OBJECT || (result as? OneRegisterInstruction)?.registerA != pagesRegister) {
-        return null
-    }
-    val getterIndex = readIndex - 3
-    val getterCall = code[getterIndex] as? FiveRegisterInstruction ?: return null
+    val getterIndex = requireAtMostOne("NewX For You pages state getter in $this", getterIndices) ?: return null
+    val getterCall = code[getterIndex] as FiveRegisterInstruction
     val getter = code[getterIndex].getReference<MethodReference>() ?: return null
-    if (code[getterIndex].opcode != Opcode.INVOKE_VIRTUAL ||
-        getterCall.registerCount != 1 ||
-        getter.returnType != OBJECT_DESCRIPTOR ||
-        getter.parameterTypes.isNotEmpty()
-    ) {
-        return null
-    }
     val stateReads = code.withIndex().filter { (index, instruction) ->
         instruction.opcode == Opcode.IGET_OBJECT &&
             instruction.getReference<FieldReference>()?.let { field ->
@@ -816,8 +832,13 @@ internal fun Method.resolveProvenForYouCurrentPageRefreshBridges(
 }
 
 /**
- * From the page instance produced at [instanceIndex]: `instance-of t, o, Page; if-eqz t; check-cast o, Page`,
+ * From the page instance produced at [instanceIndex]: `instance-of t, o, Page; if-eqz t; check-cast p, Page`,
  * a read of a `Page` controller field from that cast, and a one-event interface dispatch on the controller.
+ *
+ * Only moves and constants may sit between the test, its branch and the cast. The cast's object and the
+ * tested object are both proven to be the page instance, so the test guards the cast by data flow rather
+ * than by the literal register or adjacency. Flipped `if-nez` polarity is not matched: its cast sits at
+ * the branch target, which this linear window does not reach.
  */
 private fun Method.resolveProvenForYouControllerDispatches(
     code: List<Instruction>,
@@ -830,24 +851,34 @@ private fun Method.resolveProvenForYouControllerDispatches(
         val instanceOf = code[instanceOfIndex] as? TwoRegisterInstruction ?: continue
         if (code[instanceOfIndex].opcode != Opcode.INSTANCE_OF) continue
         val pageType = code[instanceOfIndex].getReference<TypeReference>()?.type ?: continue
-        val branch = code[instanceOfIndex + 1]
-        val cast = code[instanceOfIndex + 2]
-        if (branch.opcode != Opcode.IF_EQZ ||
-            (branch as OneRegisterInstruction).registerA != instanceOf.registerA ||
-            cast.opcode != Opcode.CHECK_CAST ||
-            (cast as OneRegisterInstruction).registerA != instanceOf.registerB ||
-            cast.getReference<TypeReference>()?.type != pageType ||
-            !provesValueFromInstructionOnSourcePaths(instanceIndex, instanceRegister, instanceOfIndex, instanceOf.registerB)
+        if (!provesValueFromInstructionOnSourcePaths(instanceIndex, instanceRegister, instanceOfIndex, instanceOf.registerB)) {
+            continue
+        }
+        val branchIndex =
+            (instanceOfIndex + 1..minOf(instanceOfIndex + 2, code.lastIndex)).firstOrNull { index ->
+                code[index].opcode == Opcode.IF_EQZ &&
+                    (code[index] as OneRegisterInstruction).registerA == instanceOf.registerA
+            } ?: continue
+        if ((instanceOfIndex + 1 until branchIndex).any { index ->
+                code[index].opcode !in STRAIGHT_COPY_OPCODES ||
+                    (code[index] as? OneRegisterInstruction)?.registerA == instanceOf.registerA
+            }
         ) {
             continue
         }
-        val castIndex = instanceOfIndex + 2
+        val castIndex =
+            (branchIndex + 1..minOf(branchIndex + 3, code.lastIndex)).firstOrNull { index ->
+                code[index].opcode == Opcode.CHECK_CAST && code[index].getReference<TypeReference>()?.type == pageType
+            } ?: continue
+        if ((branchIndex + 1 until castIndex).any { index -> code[index].opcode !in STRAIGHT_COPY_OPCODES }) continue
+        val castRegister = (code[castIndex] as OneRegisterInstruction).registerA
+        if (!provesValueFromInstructionOnSourcePaths(instanceIndex, instanceRegister, castIndex, castRegister)) continue
         for ((controllerReadIndex, controllerRead) in code.withIndex().drop(castIndex + 1)) {
             if (controllerRead.opcode != Opcode.IGET_OBJECT) continue
             val controllerField = controllerRead.getReference<FieldReference>() ?: continue
             if (controllerField.definingClass != pageType) continue
             val read = controllerRead as TwoRegisterInstruction
-            if (!provesValueFromInstructionOnSourcePaths(castIndex, instanceOf.registerB, controllerReadIndex, read.registerB)) {
+            if (!provesValueFromInstructionOnSourcePaths(castIndex, castRegister, controllerReadIndex, read.registerB)) {
                 continue
             }
             for ((dispatchIndex, dispatch) in code.withIndex().drop(controllerReadIndex + 1)) {
@@ -891,12 +922,10 @@ private fun Block.emitForYouCurrentPageRefresh(
     val doneLabel = "piko_for_you_refresh_current_page_done"
     iget(0, receiverRegister, bridge.stateField)
     invokeVirtual(bridge.stateGetter, 0)
-    moveResult(1, bridge.pagesType)
-    checkCast(1, bridge.pagesType)
-    iget(1, 1, bridge.pagesListField)
-    invokeVirtual(bridge.stateGetter, 0)
     moveResult(0, bridge.pagesType)
     checkCast(0, bridge.pagesType)
+    // One getter call snapshots Pages in v0: the list is read into v1 and the index replaces v0 from that snapshot.
+    iget(1, 0, bridge.pagesListField)
     iget(0, 0, bridge.pagesIndexField)
     // 12.45 looks the page up with getOrNull, so an index outside the list leaves the bridge idle.
     ifLtz(0, Target.Local(doneLabel))
