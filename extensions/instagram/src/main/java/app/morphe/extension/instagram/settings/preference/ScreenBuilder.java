@@ -850,6 +850,24 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.roundedPostCorners) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_rounded_post_corners"),
+                            str("piko_rounded_post_corners_desc"),
+                            Settings.ROUNDED_POST_CORNERS
+                    )
+            );
+        }
+        if (SettingsStatus.carouselPeek) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_carousel_peek"),
+                            str("piko_carousel_peek_desc"),
+                            Settings.CAROUSEL_PEEK
+                    )
+            );
+        }
     }
 
     private void buildReelsSection() {
@@ -1224,6 +1242,15 @@ public class ScreenBuilder {
                     new StoryRingSizePreference(context,
                             str("piko_customise_story_ring_size"),
                             str("piko_customise_story_ring_size_desc")
+                    )
+            );
+        }
+        if (SettingsStatus.roundedStoryCorners) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_rounded_story_corners"),
+                            str("piko_rounded_story_corners_desc"),
+                            Settings.ROUNDED_STORY_CORNERS
                     )
             );
         }

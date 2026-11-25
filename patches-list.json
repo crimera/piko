@@ -5333,6 +5333,35 @@
       "options": []
     },
     {
+      "name": "Rounded corners",
+      "description": "Rounds the corners of feed post media and stories, and lets the next carousel page peek in from the right. Starts off. Turn the switches on in piko settings > Story and > Misc.",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "456.0.0.53.78",
+              "versionCodes": {
+                "ARM64_V8A": 386214534
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Sanitize share links",
       "description": null,
       "default": true,

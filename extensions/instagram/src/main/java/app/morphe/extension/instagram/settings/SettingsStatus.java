@@ -104,12 +104,14 @@ public class SettingsStatus {
     }
     public static boolean customiseStoryRingSize = false;
     public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
+    public static boolean roundedStoryCorners = false;
+    public static void roundedStoryCorners() { roundedStoryCorners = true; }
     public static boolean hideStoryFollowButton = false;
     public static void hideStoryFollowButton() {
         hideStoryFollowButton = true;
     }
     public static boolean storySection() {
-        return (customiseStoryTimestamp || viewStoryMentions || disableStoryFlipping || loopStory || customiseStoryRingSize || hideStoryFollowButton);
+        return (customiseStoryTimestamp || viewStoryMentions || disableStoryFlipping || loopStory || customiseStoryRingSize || hideStoryFollowButton || roundedStoryCorners);
     }
 
     //Links section.
@@ -233,6 +235,10 @@ public class SettingsStatus {
     public static void removeEmptyBottomSpace() {
         removeEmptyBottomSpace = true;
     }
+    public static boolean roundedPostCorners = false;
+    public static void roundedPostCorners() { roundedPostCorners = true; }
+    public static boolean carouselPeek = false;
+    public static void carouselPeek() { carouselPeek = true; }
     public static boolean moreOptionsOnPost = false;
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
@@ -245,7 +251,7 @@ public class SettingsStatus {
         return followBackIndicator || followListNonFollowerBadge;
     }
     public static boolean postsSection() {
-        return moreOptionsOnPost || improveImageViewing || copyCommentButton;
+        return moreOptionsOnPost || improveImageViewing || copyCommentButton || roundedPostCorners || carouselPeek;
     }
 
     //Font section.

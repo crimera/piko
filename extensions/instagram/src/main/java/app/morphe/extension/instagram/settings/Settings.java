@@ -51,6 +51,7 @@ public class Settings {
     public static final BooleanSetting DISABLE_STORY_FLIPPING = new BooleanSetting("disable_story_flipping", false, NOT_REQUIRED);
     public static final BooleanSetting LOOP_STORY = new BooleanSetting("loop_story", false, NOT_REQUIRED);
     public static final BooleanSetting HIDE_STORY_FOLLOW_BUTTON = new BooleanSetting("hide_story_follow_button", false, NOT_REQUIRED);
+    public static final BooleanSetting ROUNDED_STORY_CORNERS = new BooleanSetting("rounded_story_corners", false, NOT_REQUIRED);
     public static final StringSetting CUSTOMISE_STORY_TIMESTAMP = new StringSetting("customise_story_timestamp", "default", REQUIRED);
     public static final BooleanSetting UNLIMITED_REPLAYS = new BooleanSetting("unlimited_replays", false, REQUIRED);
     public static final BooleanSetting DISABLE_DISAPPEARING_MESSAGES_GESTURE = new BooleanSetting("disable_disappearing_messages_gesture", false, REQUIRED);
@@ -83,6 +84,8 @@ public class Settings {
     // Epoch millis of the pending unlock request. "0" means none.
     public static final StringSetting FOCUS_LOCK_UNLOCK_REQUESTED_AT = new StringSetting("focus_lock_unlock_requested_at", "0", NOT_REQUIRED);
     public static final BooleanSetting REMOVE_EMPTY_BOTTOM_SPACE = new BooleanSetting("remove_empty_bottom_space", true, REQUIRED);
+    public static final BooleanSetting ROUNDED_POST_CORNERS = new BooleanSetting("rounded_post_corners", false, NOT_REQUIRED);
+    public static final BooleanSetting CAROUSEL_PEEK = new BooleanSetting("carousel_peek", false, NOT_REQUIRED);
     public static final BooleanSetting DISABLE_TYPING_STATUS = new BooleanSetting("disable_typing_status", false, NOT_REQUIRED);
     public static final BooleanSetting HIDE_NOTES_TRAY = new BooleanSetting("hide_notes_tray", false, REQUIRED);
     public static final BooleanSetting DISABLE_VIDEO_AUTOPLAY = new BooleanSetting("disable_video_autoplay", false, NOT_REQUIRED);

@@ -146,6 +146,12 @@
     <string name="piko_copied">Copied</string>
     <string name="piko_more_profile_options">More profile options</string>
     <string name="piko_remove_empty_bottom_space">Remove empty bottom space</string>
+    <string name="piko_rounded_story_corners">Rounded story corners</string>
+    <string name="piko_rounded_story_corners_desc">Rounds the corners of story photos and videos</string>
+    <string name="piko_rounded_post_corners">Enable rounded corners on posts</string>
+    <string name="piko_rounded_post_corners_desc">Rounds the corners of post photos and carousel pages in the feed</string>
+    <string name="piko_carousel_peek">Enable carousel peek</string>
+    <string name="piko_carousel_peek_desc">Shows the next carousel page peeking in from the right edge of the screen</string>
     <string name="piko_inbox_lock">Inbox lock</string>
     <string name="piko_inbox_lock_desc">Hides your inbox behind your fingerprint, face or screen lock every time you open the app</string>
     <string name="piko_inbox_lock_notifications">Block notifications</string>
