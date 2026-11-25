@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.style.TypefaceSpan;
 
 import org.junit.Test;
@@ -57,8 +58,16 @@ public class EmojiFontTest {
     }
 
     @Test
-    public void adjacentEmojiShareOneRun() {
-        assertEquals("[😂🔥]", runs("😂🔥"));
+    public void adjacentEmojiKeepSeparateWidths() {
+        String pair = "😂🔥";
+        Spanned text = (Spanned) EmojiFont.applySpans(pair, 0, pair.length(), Typeface.SERIF, false);
+        assertEquals(2, text.getSpans(0, pair.length(), TypefaceSpan.class).length);
+        TypefaceSpan first = text.getSpans(0, 2, TypefaceSpan.class)[0];
+        TypefaceSpan second = text.getSpans(2, 4, TypefaceSpan.class)[0];
+        assertEquals(2, text.getSpanEnd(first));
+        assertEquals(2, text.getSpanStart(second));
+        assertOriginalAdvance(first, "😂", 30);
+        assertOriginalAdvance(second, "🔥", 20);
     }
 
     @Test
@@ -90,11 +99,52 @@ public class EmojiFontTest {
 
     @Test
     public void flag() {
-        assertEquals("[🇯🇵]", runs("from 🇯🇵!"));
+        assertEquals("[🇯🇵][🇬🇧]", runs("from 🇯🇵🇬🇧!"));
     }
 
     private static CharSequence layout(CharSequence text) {
         return EmojiFont.applySpans(text, 0, text.length(), Typeface.DEFAULT, false);
+    }
+
+    @Test
+    public void customEmojiKeepsOriginalAdvanceForLayoutAndDrawing() {
+        String comment = "a😭b😭";
+        Spanned text = (Spanned) EmojiFont.applySpans(comment, 0, comment.length(), Typeface.SERIF, false);
+        TypefaceSpan[] spans = text.getSpans(0, text.length(), TypefaceSpan.class);
+        assertEquals(2, spans.length);
+        for (TypefaceSpan span : spans) {
+            assertOriginalAdvance(span, "😭", 24);
+        }
+    }
+
+    @Test
+    public void quickReactionEmojiKeepOriginalTextAdvance() {
+        for (String emoji : new String[]{"❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", "😂"}) {
+            Spanned text = (Spanned) EmojiFont.applySpans(emoji, 0, emoji.length(), Typeface.SERIF, false);
+            TypefaceSpan[] spans = text.getSpans(0, text.length(), TypefaceSpan.class);
+            assertEquals(emoji, 1, spans.length);
+            assertOriginalAdvance(spans[0], emoji, 24);
+        }
+    }
+
+    private static void assertOriginalAdvance(TypefaceSpan span, String emoji, float customWidth) {
+        TextPaint paint = new TextPaint() {
+            @Override
+            public float getRunAdvance(CharSequence run, int start, int end, int contextStart,
+                                       int contextEnd, boolean rtl, int offset) {
+                assertEquals(emoji, run.subSequence(start, offset).toString());
+                return (getTypeface() == Typeface.SERIF ? customWidth : 20) * getTextScaleX();
+            }
+        };
+        paint.setTextScaleX(1.2f);
+        span.updateMeasureState(paint);
+        assertSame(Typeface.SERIF, paint.getTypeface());
+        assertEquals(emoji, 20 * 1.2f, customWidth * paint.getTextScaleX(), 0.0001f);
+        paint.setTypeface(null);
+        paint.setTextScaleX(1.2f);
+        span.updateDrawState(paint);
+        assertSame(Typeface.SERIF, paint.getTypeface());
+        assertEquals(emoji, 20 * 1.2f, customWidth * paint.getTextScaleX(), 0.0001f);
     }
 
     @Test

@@ -15,6 +15,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.text.style.TypefaceSpan;
 
 import androidx.annotation.RequiresApi;
@@ -39,8 +40,35 @@ public final class EmojiFont {
     /** Marks the spans this class adds, so text processed twice does not collect duplicates. */
     @RequiresApi(Build.VERSION_CODES.P)
     private static final class EmojiTypefaceSpan extends TypefaceSpan {
-        EmojiTypefaceSpan(Typeface typeface) {
+        private final String emoji;
+
+        EmojiTypefaceSpan(Typeface typeface, String emoji) {
             super(typeface);
+            this.emoji = emoji;
+        }
+
+        @Override
+        public void updateMeasureState(TextPaint paint) {
+            applyTypeface(paint);
+        }
+
+        @Override
+        public void updateDrawState(TextPaint paint) {
+            applyTypeface(paint);
+        }
+
+        private void applyTypeface(TextPaint paint) {
+            // Instagram can size the layout from the original text before this span is installed.
+            float originalWidth = advance(paint);
+            super.updateMeasureState(paint);
+            float customWidth = advance(paint);
+            if (originalWidth > 0 && customWidth > 0 && customWidth != originalWidth) {
+                paint.setTextScaleX(paint.getTextScaleX() * (originalWidth / customWidth));
+            }
+        }
+
+        private float advance(TextPaint paint) {
+            return paint.getRunAdvance(emoji, 0, emoji.length(), 0, emoji.length(), false, emoji.length());
         }
     }
 
@@ -150,7 +178,10 @@ public final class EmojiFont {
             if (stale != null && !stale.isEmpty()) {
                 for (EmojiTypefaceSpan span : source.getSpans(i, runEnd, EmojiTypefaceSpan.class)) {
                     if (Math.max(start, source.getSpanStart(span)) == i
-                            && Math.min(end, source.getSpanEnd(span)) == runEnd && stale.remove(span)) {
+                            && Math.min(end, source.getSpanEnd(span)) == runEnd
+                            && span.emoji.length() == source.getSpanEnd(span) - source.getSpanStart(span)
+                            && TextUtils.regionMatches(text, source.getSpanStart(span), span.emoji, 0, span.emoji.length())
+                            && stale.remove(span)) {
                         matched = true;
                         break;
                     }
@@ -158,7 +189,8 @@ public final class EmojiFont {
             }
             if (!matched) {
                 if (out == null) out = new SpannableString(text);
-                out.setSpan(new EmojiTypefaceSpan(font), i, runEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                out.setSpan(new EmojiTypefaceSpan(font, TextUtils.substring(text, i, runEnd)),
+                        i, runEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             if (runEnd == end) break;
             i = nextEmoji(text, runEnd);
@@ -191,10 +223,17 @@ public final class EmojiFont {
         return -1;
     }
 
-    /** End of the emoji (and any emoji directly after it) that starts at {@code start}. */
+    /** End of one emoji, including the code points that form a single glyph. */
     static int emojiEnd(CharSequence text, int start) {
         int length = text.length();
-        int i = start + Character.charCount(Character.codePointAt(text, start));
+        int first = Character.codePointAt(text, start);
+        int i = start + Character.charCount(first);
+        if (UCharacter.hasBinaryProperty(first, UProperty.REGIONAL_INDICATOR) && i < length) {
+            int second = Character.codePointAt(text, i);
+            if (UCharacter.hasBinaryProperty(second, UProperty.REGIONAL_INDICATOR) && startsEmoji(text, i, second)) {
+                i += Character.charCount(second);
+            }
+        }
         while (i < length) {
             int cp = Character.codePointAt(text, i);
             if (isModifier(cp)) {
@@ -208,10 +247,6 @@ public final class EmojiFont {
                 if (!UCharacter.hasBinaryProperty(joined, UProperty.EMOJI)
                         || (after < length && text.charAt(after) == 0xFE0E)) break;
                 i = after;
-                continue;
-            }
-            if (startsEmoji(text, i, cp)) {
-                i += Character.charCount(cp);
                 continue;
             }
             break;
