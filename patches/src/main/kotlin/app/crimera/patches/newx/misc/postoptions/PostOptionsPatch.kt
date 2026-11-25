@@ -1,9 +1,11 @@
 package app.crimera.patches.newx.misc.postoptions
 
 import app.crimera.patches.common.ApkScoped
+import app.crimera.patches.common.OBJECT_MOVE_OPCODES
+import app.crimera.patches.common.destinationRegisterOrNull
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
-import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
+import app.crimera.patches.newx.misc.inlineactions.normalControlFlowSuccessors
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
@@ -17,6 +19,7 @@ import app.crimera.patches.common.isObjectDescriptor
 import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.common.requireAtMostOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchDefinition
 import app.morphe.patcher.patch.mutableClassDefBy
@@ -42,7 +45,6 @@ import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -555,11 +557,9 @@ internal fun resolvePostOptionsRowDelegate(
     postActionType: String,
 ): MethodReference {
     val code = method.instructions.toList()
-    val actionDefinitionIndex =
-        (lookup.callIndex - 1 downTo 0).firstOrNull { index ->
-            code[index].writtenRegisterOrNull() == lookup.actionRegister
-        } ?: throw PatchException(
-            "NewX post-options action v${lookup.actionRegister} has no definition before the feedback lookup",
+    val actionOrigin = method.registerOriginAt(lookup.callIndex, lookup.actionRegister)
+        ?: throw PatchException(
+            "NewX post-options action v${lookup.actionRegister} has no single proven source at the feedback lookup",
         )
     val delegates =
         ((lookup.resultIndex + 1) until code.size).mapNotNull { index ->
@@ -567,19 +567,113 @@ internal fun resolvePostOptionsRowDelegate(
             if (call.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) return@mapNotNull null
             val reference = call.getReference<MethodReference>() ?: return@mapNotNull null
             val parameters = reference.parameterTypes.map(CharSequence::toString)
-            if (parameters.take(2) != listOf(postActionType, STRING_DESCRIPTOR)) return@mapNotNull null
-            val (actionArgument, labelArgument) = call.parameterSlotRegisters(reference) ?: return@mapNotNull null
-            if (labelArgument != lookup.labelRegister) return@mapNotNull null
-            if (!method.provesValueFromInstruction(
-                    sourceIndex = actionDefinitionIndex,
-                    sourceRegister = lookup.actionRegister,
-                    targetIndex = index,
-                    targetRegister = actionArgument,
-                )
-            ) return@mapNotNull null
-            reference
+            val slots = call.parameterSlotRegisters(reference) ?: return@mapNotNull null
+            // The action and label slots are located by type, then by which slot carries the proven value.
+            val hasActionSlot = requireAtMostOne(
+                label = "NewX post-options row action slot in $reference",
+                candidates = parameters.indices.filter { slot ->
+                    parameters[slot] == postActionType &&
+                        method.originProvesRegister(actionOrigin, lookup.actionRegister, index, slots[slot])
+                },
+            ) != null
+            // The rewritten label must reach the row on the path that carries it. The row also receives
+            // a fallback label on other paths, so the label slot is required to carry the value on some path.
+            val hasLabelSlot = requireAtMostOne(
+                label = "NewX post-options row label slot in $reference",
+                candidates = parameters.indices.filter { slot ->
+                    parameters[slot] == STRING_DESCRIPTOR &&
+                        method.valueReachesOnSomePath(lookup.resultIndex, lookup.labelRegister, index, slots[slot])
+                },
+            ) != null
+            reference.takeIf { hasActionSlot && hasLabelSlot }
         }
     return requireExactlyOne("NewX post-options row delegate", delegates.distinctBy(MethodReference::toString))
+}
+
+/**
+ * Where a register's value comes from at an index: the single instruction that defines it on every
+ * path there, or the method entry when the register still holds its parameter.
+ */
+private sealed interface RegisterOrigin {
+    data class Definition(val index: Int) : RegisterOrigin
+    object Parameter : RegisterOrigin
+}
+
+/**
+ * The unique origin of [register] at [index], or null when no single origin holds on every path.
+ * A definition is the origin when its value reaches [index] on every path leaving it, so a loop
+ * that redefines the register leaves only its last definition on the path to [index].
+ */
+private fun Method.registerOriginAt(index: Int, register: Int): RegisterOrigin? {
+    val code = implementation?.instructions?.toList() ?: return null
+    val definitions = code.indices.filter { definition ->
+        // A check-cast narrows the type of the same value, so the value's origin is upstream of it.
+        definition < index &&
+            code[definition].opcode != Opcode.CHECK_CAST &&
+            code[definition].destinationRegisterOrNull() == register &&
+            provesValueFromInstructionOnSourcePaths(definition, register, index, register)
+    }.map { RegisterOrigin.Definition(it) }
+    val parameter = if (register >= p0Register && provesParameterValue(index, register, register)) {
+        listOf(RegisterOrigin.Parameter)
+    } else {
+        emptyList()
+    }
+    return (definitions + parameter).singleOrNull()
+}
+
+/**
+ * Whether [targetRegister] at [targetIndex] holds the value that [originRegister] received at
+ * [originIndex] on some path that leaves the origin. Unlike the must-proofs above, a join where
+ * another path overwrites the register does not refute it: a rewrite reaches a consumer when it
+ * reaches it on any path.
+ */
+private fun Method.valueReachesOnSomePath(
+    originIndex: Int,
+    originRegister: Int,
+    targetIndex: Int,
+    targetRegister: Int,
+): Boolean {
+    val code = implementation?.instructions?.toList() ?: return false
+    val successors = normalControlFlowSuccessors() ?: return false
+    val pending = ArrayDeque<Pair<Int, Set<Int>>>()
+    successors.getOrNull(originIndex)?.forEach { pending += it to setOf(originRegister) }
+    val visited = HashSet<Pair<Int, Set<Int>>>()
+    while (pending.isNotEmpty()) {
+        val state = pending.removeFirst()
+        if (!visited.add(state)) continue
+        val (index, holders) = state
+        if (index == targetIndex) {
+            if (targetRegister in holders) return true
+            continue
+        }
+        if (index !in code.indices) continue
+        val instruction = code[index]
+        val holding = holders.toMutableSet()
+        val destination = instruction.destinationRegisterOrNull()
+        // check-cast narrows the type of the same value, so it keeps every holder as it is.
+        if (destination != null && instruction.opcode != Opcode.CHECK_CAST) {
+            val copiesHolder = instruction.opcode in OBJECT_MOVE_OPCODES &&
+                (instruction as TwoRegisterInstruction).registerB in holders
+            holding.remove(destination)
+            if (instruction.opcode.setsWideRegister()) holding.remove(destination + 1)
+            if (copiesHolder) holding += destination
+        }
+        if (holding.isEmpty()) continue
+        successors.getOrNull(index)?.forEach { pending += it to holding }
+    }
+    return false
+}
+
+/** Whether [targetRegister] at [targetIndex] holds the value [origin] gave [originRegister]. */
+private fun Method.originProvesRegister(
+    origin: RegisterOrigin,
+    originRegister: Int,
+    targetIndex: Int,
+    targetRegister: Int,
+): Boolean = when (origin) {
+    is RegisterOrigin.Definition ->
+        provesValueFromInstructionOnSourcePaths(origin.index, originRegister, targetIndex, targetRegister)
+    RegisterOrigin.Parameter -> provesParameterValue(targetIndex, targetRegister, originRegister)
 }
 
 internal data class PostOptionsRowIconConsumer(
@@ -609,13 +703,25 @@ internal fun resolvePostOptionsRowIconConsumer(method: Method): PostOptionsRowIc
         if (call.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE)) return@mapNotNull null
         val reference = call.getReference<MethodReference>() ?: return@mapNotNull null
         val parameters = reference.parameterTypes.map(CharSequence::toString)
-        val iconType = parameters.getOrNull(1) ?: return@mapNotNull null
+        // The icon is the one icon-typed parameter, wherever the constructor places it.
+        val iconSlot = requireAtMostOne(
+            label = "NewX post-options row icon parameter in $reference",
+            candidates = parameters.indices.filter { parameters[it].startsWith("Lcom/x/icons/") },
+        ) ?: return@mapNotNull null
+        val iconType = parameters[iconSlot]
         if (reference.name != "<init>" || !reference.definingClass.startsWith("Lcom/x/ui/common/sheets/") ||
-            !iconType.startsWith("Lcom/x/icons/") ||
-            parameters.take(3) != listOf(OBJECT_DESCRIPTOR, iconType, STRING_DESCRIPTOR)
+            STRING_DESCRIPTOR !in parameters
         ) return@mapNotNull null
-        val (actionRegister, iconRegister) = call.parameterSlotRegisters(reference) ?: return@mapNotNull null
-        if (!method.provesParameterValue(index, actionRegister, actionParameter)) return@mapNotNull null
+        val slots = call.parameterSlotRegisters(reference) ?: return@mapNotNull null
+        // The action is the Object slot that carries the row helper's action parameter.
+        val actionSlot = requireAtMostOne(
+            label = "NewX post-options row action parameter in $reference",
+            candidates = parameters.indices.filter { slot ->
+                parameters[slot] == OBJECT_DESCRIPTOR && method.provesParameterValue(index, slots[slot], actionParameter)
+            },
+        ) ?: return@mapNotNull null
+        val actionRegister = slots[actionSlot]
+        val iconRegister = slots[iconSlot]
         val rendersNativeIcon = code.take(index).withIndex().any { (loadIndex, load) ->
             load.opcode == Opcode.SGET_OBJECT && load.getReference<FieldReference>()?.type == iconType &&
                 method.provesValueFromInstructionOnSourcePaths(
@@ -675,16 +781,6 @@ private fun injectDelegatedRowIcons(row: MethodReference, contributions: List<Po
             )
             sget(consumer.iconRegister, iconFields.getValue(contribution))
         }
-    }
-}
-
-private fun Instruction.writtenRegisterOrNull(): Int? {
-    if (!opcode.setsRegister()) return null
-    return when (this) {
-        is ThreeRegisterInstruction -> registerA
-        is TwoRegisterInstruction -> registerA
-        is OneRegisterInstruction -> registerA
-        else -> null
     }
 }
 

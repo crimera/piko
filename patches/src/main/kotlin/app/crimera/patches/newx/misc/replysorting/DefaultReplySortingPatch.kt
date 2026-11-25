@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.replysorting
 
+import app.crimera.patches.newx.misc.inlineactions.argumentRegister
 import app.crimera.patches.newx.misc.inlineactions.normalControlFlowSuccessors
 import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
@@ -87,13 +88,23 @@ private fun isComposeStateInitializer(instructions: List<Instruction>, sgetIndex
 }
 
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+
+/** Kotlin coroutine StateFlow factories; the PostDetail InstanceKeeper stores the flow built here. */
+private const val FLOW_PACKAGE = "Lkotlinx/coroutines/flow/"
+
+/** A `Relevance` read of the resolved enum, with the register that holds its value after the read. */
+internal data class ReplySortingSeed(val index: Int, val register: Int)
+
+/** A resolved insertion to run after every resolver has finished. Applied in descending [index]. */
+private class PlannedReplySortingHook(val index: Int, val applyHook: () -> Unit)
 
 /**
  * Replaces the resolved `Relevance` seed in [register] with the configured default ranking mode
  * after [sgetIndex]. The register keeps its original type, so the consuming instruction range is
  * unchanged.
  */
-private fun MutableMethod.insertReplySortingDefault(
+internal fun MutableMethod.insertReplySortingDefault(
     sgetIndex: Int,
     register: Int,
     enumClass: String,
@@ -116,6 +127,52 @@ private fun MutableMethod.insertReplySortingDefault(
         checkCast(register, enumClass)
     }
 }
+
+/**
+ * True when the value that [seedRegister] holds after [seedIndex] is proven, on every path, to be
+ * the argument of an invoke that [accepts] at that parameter. Branch joins, clobbers and copies made
+ * on only some paths fail the proof, so a moved or shadowed register cannot stand in for the seed.
+ */
+private fun Method.seedFlowsIntoInvoke(
+    seedIndex: Int,
+    seedRegister: Int,
+    accepts: (MethodReference, Int) -> Boolean,
+): Boolean {
+    val code = implementation?.instructions?.toList() ?: return false
+    return code.withIndex().any { (index, instruction) ->
+        val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+            ?: return@any false
+        reference.parameterTypes.indices.any { parameterIndex ->
+            if (!accepts(reference, parameterIndex)) return@any false
+            val register = instruction.argumentRegister(reference, parameterIndex) ?: return@any false
+            provesValueFromInstruction(seedIndex, seedRegister, index, register)
+        }
+    }
+}
+
+/**
+ * Every `Relevance` read of [enumClass] in this method whose value is proven to reach an argument
+ * accepted by [accepts]. Returns the seeds in instruction order; callers decide the cardinality.
+ */
+internal fun Method.enumSeeds(
+    enumClass: String,
+    accepts: (MethodReference, Int) -> Boolean,
+): List<ReplySortingSeed> {
+    val code = implementation?.instructions?.toList().orEmpty()
+    return code.withIndex().mapNotNull { (index, instruction) ->
+        if (!isRelevanceSget(instruction) ||
+            instruction.getReference<FieldReference>()?.definingClass != enumClass
+        ) {
+            return@mapNotNull null
+        }
+        val register = (instruction as OneRegisterInstruction).registerA
+        ReplySortingSeed(index, register).takeIf { seedFlowsIntoInvoke(index, register, accepts) }
+    }
+}
+
+/** Stable identity for a method across the distinct wrappers a fingerprint match can return. */
+private fun Method.signatureKey(): String =
+    "$definingClass->$name(${parameterTypes.joinToString("")})$returnType"
 
 /**
  * Targets the NewX Compose post-detail timeline repository initialization that seeds
@@ -169,8 +226,25 @@ private fun replySortingSelectionMethodFingerprint(enumClass: String) = Fingerpr
 )
 
 /**
+ * Targets the PostDetail constructor that owns the reply-sorting UI state on 12.45.1+. The state is
+ * an InstanceKeeper entry keyed by `post_detail_reply_ranking_mode` and holds a StateFlow seeded
+ * from `TimelineRankingMode.Relevance`. Absent on 12.41 and 12.43, where the Compose state path
+ * below is used instead.
+ */
+private object NewXPostDetailReplyRankingModeFingerprint : Fingerprint(
+    definingClass = "Lcom/x/postdetail/",
+    name = "<init>",
+    returnType = "V",
+    filters =
+        listOf(
+            string("post_detail_reply_ranking_mode"),
+        ),
+)
+
+/**
  * Targets the Compose state initializer that seeds the reply-sorting sheet with
- * `mutableStateOf(TimelineRankingMode.Relevance)`.
+ * `mutableStateOf(TimelineRankingMode.Relevance)`. Used only when the InstanceKeeper-backed
+ * PostDetail state is absent, since the Compose toast/sheet shape also matches unrelated initializers.
  */
 private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
     name = "invoke",
@@ -196,12 +270,10 @@ private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
 )
 
 /**
- * Targets the post-detail conversation prefetch seed added in 12.29. The ViewModel constructor
- * issues the initial conversation request with `TimelineRankingMode.Relevance` before the timeline
- * repository exists, so the repository seed is not authoritative on the first load. The capability
- * is identified by its feature-switch name rather than by an obfuscated owner.
+ * Targets the legacy post-detail conversation prefetch seed added in 12.29 and gated by a rollout
+ * flag. The flag was retired in 12.41, so this only matches older releases.
  */
-private object NewXComposeReplySortingPrefetchFingerprint : Fingerprint(
+private object NewXComposeReplySortingLegacyPrefetchFingerprint : Fingerprint(
     name = "<init>",
     returnType = "V",
     filters =
@@ -210,44 +282,36 @@ private object NewXComposeReplySortingPrefetchFingerprint : Fingerprint(
         ),
 )
 
-private val OBJECT_MOVE_OPCODES =
-    setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
-
 /**
- * The 12.30 prefetch request runs through a coroutine worker lambda: the seed enum is copied into
- * a parameter register with `move-object/from16` before the range constructor call, so the request
- * invoke no longer consumes the seed register directly. Propagate object moves from the seed and
- * accept a request that consumes any propagated register.
+ * Targets the unconditional PostDetail constructor prefetch that replaced the flagged path. Its
+ * request is built from the `TimelineRankingMode.Relevance` seed and logged with these two strings,
+ * so they identify the inlined capability without relying on a rollout flag or an obfuscated owner.
  */
-private fun seedFeedsRequest(
-    method: MutableMethod,
-    seedIndex: Int,
-    seedRegister: Int,
-    enumClass: String,
-): Boolean {
-    val seededRegisters = mutableSetOf(seedRegister)
-    method.instructions.drop(seedIndex + 1).forEach { instruction ->
-        val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
-        if (reference != null &&
-            reference.parameterTypes.any { it.toString() == enumClass } &&
-            instruction.registersUsed.any { register -> register in seededRegisters }
-        ) {
-            return true
-        }
-        if (instruction.opcode in OBJECT_MOVE_OPCODES) {
-            val move = instruction as? TwoRegisterInstruction
-            if (move != null && move.registerB in seededRegisters) {
-                seededRegisters += move.registerA
-            }
-        }
-    }
-    return false
-}
+private object NewXComposeReplySortingPrefetchFingerprint : Fingerprint(
+    definingClass = "Lcom/x/postdetail/",
+    name = "<init>",
+    returnType = "V",
+    // Filters match in instruction order: the supersede log precedes the request it builds.
+    filters =
+        listOf(
+            string("superseded by post "),
+            string("PrefetchedConversationRequest"),
+        ),
+)
 
 /**
- * A validated selection: the check-cast that narrows the selected callback parameter to the
- * resolved ranking enum, and the field store of that same value. [register] is the store's value
- * register, which holds the chosen enum on every incoming path to [storeIndex].
+ * Accepts the coroutine StateFlow factory (`(Object) -> StateFlow`) that wraps the InstanceKeeper
+ * UI state. Proving the seed reaches this argument separates it from the prefetch request seed.
+ */
+internal fun isStateFlowFactoryArgument(reference: MethodReference, parameterIndex: Int): Boolean =
+    reference.definingClass.startsWith(FLOW_PACKAGE) &&
+        reference.returnType.startsWith(FLOW_PACKAGE) &&
+        reference.parameterTypes[parameterIndex].toString() == OBJECT_DESCRIPTOR
+
+/**
+ * Validated selection: the check-cast that narrows the selected callback parameter to the resolved
+ * ranking enum, and the field store of that same value. [register] is the store's value register,
+ * which holds the chosen enum on every incoming path to [storeIndex].
  */
 internal data class ReplySortingSelectionSite(
     val castIndex: Int?,
@@ -270,7 +334,7 @@ internal fun resolveReplySortingSelectionSite(
         ?: throw PatchException("Reply sorting selection handler has no implementation")
     val parameterType = method.parameterTypes.singleOrNull()?.toString()
     if (AccessFlags.STATIC.isSet(method.accessFlags) ||
-        parameterType != "Ljava/lang/Object;" && parameterType != enumClass
+        parameterType != OBJECT_DESCRIPTOR && parameterType != enumClass
     ) {
         throw PatchException(
             "Unexpected reply sorting selection handler parameters: ${method.parameterTypes}",
@@ -314,7 +378,7 @@ internal fun resolveReplySortingSelectionSite(
             if (instruction.opcode != Opcode.IPUT_OBJECT) return@mapNotNull null
             val store = instruction as? TwoRegisterInstruction ?: return@mapNotNull null
             val fieldType = instruction.getReference<FieldReference>()?.type
-            if (fieldType != "Ljava/lang/Object;" && fieldType != enumClass) return@mapNotNull null
+            if (fieldType != OBJECT_DESCRIPTOR && fieldType != enumClass) return@mapNotNull null
             // A store in an unrelated returning arm cannot feed the boundary, so it is not a selection.
             if (defaultUrtIndex !in successors.reachableIndicesFrom(storeIndex).orEmpty()) {
                 return@mapNotNull null
@@ -392,20 +456,24 @@ val newXDefaultReplySortingPatch =
         }
 
         execute {
-            // Patch the Compose post-detail timeline repository initialization.
+            // Resolve every seed before mutating anything. Several seeds can live in one method
+            // (12.45.1's PostDetail constructor holds both the UI state and the prefetch), so each
+            // hook is planned against the untouched instruction indices and applied last.
+            val hooks = mutableListOf<PlannedReplySortingHook>()
+
+            // Repository seed: the timeline repository initialization in invokeSuspend.
             val match =
                 requireExactlyOne(
                     label = "NewX Compose reply sorting initializer",
                     candidates = NewXComposeReplySortingFingerprint.matchAllOrNull().orEmpty(),
                 )
-            val method = match.method
-            val targetSgetCandidates = match.instructionMatches.filter { matchedInstruction ->
-                isRelevanceSget(matchedInstruction.instruction)
-            }
+            val repositoryMethod = match.method
             val targetSget =
                 requireExactlyOne(
                     label = "reply sorting initializer Relevance sget-object",
-                    candidates = targetSgetCandidates,
+                    candidates = match.instructionMatches.filter { matchedInstruction ->
+                        isRelevanceSget(matchedInstruction.instruction)
+                    },
                 )
             val targetSgetIndex = targetSget.index
             val sgetInstruction = targetSget.instruction as? OneRegisterInstruction
@@ -423,55 +491,103 @@ val newXDefaultReplySortingPatch =
                         "superclass=${enumDefinition.superclass}",
                 )
             }
+            hooks += PlannedReplySortingHook(targetSgetIndex) {
+                repositoryMethod.insertReplySortingDefault(targetSgetIndex, sortRegister, enumClass)
+            }
 
-            method.insertReplySortingDefault(targetSgetIndex, sortRegister, enumClass)
+            // UI state. 12.45.1+ keeps the sheet state in a PostDetail InstanceKeeper StateFlow; the
+            // Compose mutableStateOf initializer is the 12.41/12.43 shape and is never used when the
+            // InstanceKeeper state exists (its Compose match then lands on unrelated code).
+            val instanceKeeperMatch =
+                requireAtMostOne(
+                    label = "NewX PostDetail reply ranking mode InstanceKeeper constructor",
+                    candidates = NewXPostDetailReplyRankingModeFingerprint.scopedMatchAllOrNull().orEmpty(),
+                )
+            if (instanceKeeperMatch != null) {
+                val instanceKeeperMethod = instanceKeeperMatch.method
+                val instanceKeeperSeed =
+                    requireExactlyOne(
+                        label = "NewX PostDetail reply ranking mode StateFlow seed for $enumClass",
+                        candidates = instanceKeeperMethod.enumSeeds(enumClass, ::isStateFlowFactoryArgument),
+                    )
+                hooks += PlannedReplySortingHook(instanceKeeperSeed.index) {
+                    instanceKeeperMethod.insertReplySortingDefault(
+                        instanceKeeperSeed.index,
+                        instanceKeeperSeed.register,
+                        enumClass,
+                    )
+                }
+            } else {
+                val uiStateMatches = NewXComposeReplySortingUiStateFingerprint
+                    .matchAllOrNull()
+                    .orEmpty()
+                val uiStateCandidates =
+                    uiStateMatches.flatMap { candidate ->
+                        candidate.instructionMatches
+                            .filter { matchedInstruction ->
+                                val field = matchedInstruction.instruction.getReference<FieldReference>()
+                                field?.definingClass == enumClass &&
+                                    isComposeStateInitializer(
+                                        candidate.method.instructions,
+                                        matchedInstruction.index,
+                                    )
+                            }
+                            .map { matchedInstruction -> candidate to matchedInstruction }
+                    }
+                val uiStateCandidate =
+                    requireExactlyOne(
+                        label = "NewX Compose reply sorting UI state Relevance initializer for $enumClass",
+                        candidates = uiStateCandidates,
+                    )
+                val uiStateMethod = uiStateCandidate.first.method
+                val uiStateIndex = uiStateCandidate.second.index
+                val uiStateInstruction = uiStateCandidate.second.instruction as? OneRegisterInstruction
+                    ?: throw PatchException("Reply sorting UI state Relevance sget-object has no register")
+                val uiStateRegister = uiStateInstruction.registerA
+                val uiStateField = uiStateInstruction.getReference<FieldReference>()
+                    ?: throw PatchException("Missing field reference in reply sorting UI state sget-object")
+                if (uiStateField.definingClass != enumClass || !isRelevanceSget(uiStateInstruction)) {
+                    throw PatchException(
+                        "Reply sorting UI state field $uiStateField does not match resolved " +
+                            "reply ranking enum $enumClass",
+                    )
+                }
+                hooks += PlannedReplySortingHook(uiStateIndex) {
+                    uiStateMethod.insertReplySortingDefault(uiStateIndex, uiStateRegister, enumClass)
+                }
+            }
 
-            // Patch the 12.29 conversation prefetch seed when the capability is present. Older
-            // releases issue the initial conversation request through the repository seed alone.
+            // Conversation prefetch. The legacy flag path (12.29–12.40) and the unconditional
+            // constructor path (12.41+) are both accepted; whichever is present must resolve to one
+            // method. The seed must reach an enum-typed request argument.
             val prefetchMatch =
                 requireAtMostOne(
                     label = "NewX Compose reply sorting conversation prefetch method",
-                    candidates = NewXComposeReplySortingPrefetchFingerprint
-                        .scopedMatchAllOrNull()
-                        .orEmpty(),
+                    candidates = (
+                        NewXComposeReplySortingLegacyPrefetchFingerprint.scopedMatchAllOrNull().orEmpty() +
+                            NewXComposeReplySortingPrefetchFingerprint.scopedMatchAllOrNull().orEmpty()
+                        ).distinctBy { it.method.signatureKey() },
+                    describe = { it.method.signatureKey() },
                 )
             if (prefetchMatch != null) {
                 val prefetchMethod = prefetchMatch.method
-                val prefetchSeeds =
-                    prefetchMethod.instructions.withIndex().filter { (_, instruction) ->
-                        val field = instruction.getReference<FieldReference>()
-                        field?.definingClass == enumClass && isRelevanceSget(instruction)
-                    }
                 val prefetchSeed =
                     requireExactlyOne(
                         label = "NewX Compose reply sorting conversation prefetch seed for $enumClass",
-                        candidates = prefetchSeeds,
+                        candidates = prefetchMethod.enumSeeds(enumClass) { reference, parameterIndex ->
+                            reference.parameterTypes[parameterIndex].toString() == enumClass
+                        },
                     )
-                val prefetchSget = prefetchSeed.value as? OneRegisterInstruction
-                    ?: throw PatchException("Reply sorting conversation prefetch seed has no register")
-                val prefetchRegister = prefetchSget.registerA
-                val feedsPrefetchRequest =
-                    seedFeedsRequest(
-                        method = prefetchMethod,
-                        seedIndex = prefetchSeed.index,
-                        seedRegister = prefetchRegister,
-                        enumClass = enumClass,
-                    )
-                if (!feedsPrefetchRequest) {
-                    throw PatchException(
-                        "Reply sorting conversation prefetch seed v$prefetchRegister does not feed a " +
-                            "request whose parameters include $enumClass",
+                hooks += PlannedReplySortingHook(prefetchSeed.index) {
+                    prefetchMethod.insertReplySortingDefault(
+                        prefetchSeed.index,
+                        prefetchSeed.register,
+                        enumClass,
                     )
                 }
-
-                prefetchMethod.insertReplySortingDefault(
-                    prefetchSeed.index,
-                    prefetchRegister,
-                    enumClass,
-                )
             }
 
-            // Patch the Compose reply-sorting selection handler to remember the last choice.
+            // Selection: remember the last choice. Resolved against the untouched selection method.
             val selectionMatch =
                 requireExactlyOne(
                     label = "NewX Compose reply sorting selection handler",
@@ -479,16 +595,12 @@ val newXDefaultReplySortingPatch =
                         replySortingSelectionMethodFingerprint(enumClass).scopedMatchAllOrNull().orEmpty(),
                 )
             val selectionMethod = selectionMatch.method
-            // Resolve the anchor from the live method rather than the cached match indexes, so earlier
-            // mutations to this method cannot leave the boundary stale.
-            val defaultUrtCandidates =
-                selectionMethod.instructions.withIndex().filter { (_, instruction) ->
-                    instruction.getReference<StringReference>()?.string == "defaultUrtTimelineComponent"
-                }
             val defaultUrtAnchor =
                 requireExactlyOne(
                     label = "selection handler defaultUrtTimelineComponent anchor",
-                    candidates = defaultUrtCandidates,
+                    candidates = selectionMethod.instructions.withIndex().filter { (_, instruction) ->
+                        instruction.getReference<StringReference>()?.string == "defaultUrtTimelineComponent"
+                    },
                 )
             val selectionSite =
                 resolveReplySortingSelectionSite(
@@ -496,46 +608,12 @@ val newXDefaultReplySortingPatch =
                     enumClass = enumClass,
                     defaultUrtIndex = defaultUrtAnchor.index,
                 )
-            selectionMethod.installReplySortingSelectionHook(selectionSite)
-
-            // Patch the Compose reply sorting UI state initializer so the button label
-            // and sheet selection reflect the configured default instead of Relevance.
-            val uiStateMatches = NewXComposeReplySortingUiStateFingerprint
-                .matchAllOrNull()
-                .orEmpty()
-            val uiStateCandidates =
-                uiStateMatches.flatMap { candidate ->
-                    candidate.instructionMatches
-                        .filter { matchedInstruction ->
-                            val field = matchedInstruction.instruction.getReference<FieldReference>()
-                            field?.definingClass == enumClass &&
-                                isComposeStateInitializer(
-                                    candidate.method.instructions,
-                                    matchedInstruction.index,
-                                )
-                        }
-                        .map { matchedInstruction -> candidate to matchedInstruction }
-                }
-            val uiStateCandidate =
-                requireExactlyOne(
-                    label = "NewX Compose reply sorting UI state Relevance initializer for $enumClass",
-                    candidates = uiStateCandidates,
-                )
-            val uiStateMatch = uiStateCandidate.first
-            val uiStateMethod = uiStateMatch.method
-            val uiStateIndex = uiStateCandidate.second.index
-            val uiStateInstruction = uiStateCandidate.second.instruction as? OneRegisterInstruction
-                ?: throw PatchException("Reply sorting UI state Relevance sget-object has no register")
-            val uiStateRegister = uiStateInstruction.registerA
-            val uiStateField = uiStateInstruction.getReference<FieldReference>()
-                ?: throw PatchException("Missing field reference in reply sorting UI state sget-object")
-            if (uiStateField.definingClass != enumClass || !isRelevanceSget(uiStateInstruction)) {
-                throw PatchException(
-                    "Reply sorting UI state field ${uiStateField} does not match resolved " +
-                        "reply ranking enum $enumClass",
-                )
+            hooks += PlannedReplySortingHook(selectionSite.storeIndex) {
+                selectionMethod.installReplySortingSelectionHook(selectionSite)
             }
 
-            uiStateMethod.insertReplySortingDefault(uiStateIndex, uiStateRegister, enumClass)
+            // Descending order keeps every planned index valid while earlier insertions shift the
+            // instructions after them, including when two hooks share one method.
+            hooks.sortedByDescending { it.index }.forEach { it.applyHook() }
         }
     }

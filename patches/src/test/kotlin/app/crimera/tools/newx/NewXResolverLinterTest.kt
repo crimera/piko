@@ -51,6 +51,11 @@ import app.crimera.patches.newx.timeline.readsArrayListFromParameter
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
 import app.crimera.patches.newx.misc.dynamiccolor.resolveTabIndicatorTintSite
 import app.crimera.patches.newx.misc.replysorting.installReplySortingSelectionHook
+import app.crimera.patches.newx.misc.replysorting.ReplySortingSeed
+import app.crimera.patches.newx.misc.replysorting.enumSeeds
+import app.crimera.patches.newx.misc.replysorting.insertReplySortingDefault
+import app.crimera.patches.newx.misc.replysorting.isStateFlowFactoryArgument
+import app.crimera.patches.newx.misc.drawer.isItemTitleMapperShape
 import app.crimera.patches.newx.misc.replysorting.resolveReplySortingSelectionSite
 import app.crimera.tools.lint.ResolverLinter
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
@@ -2545,6 +2550,163 @@ class NewXResolverLinterTest {
         assertEquals(site.register, (code[store] as TwoRegisterInstruction).registerA)
         val branch = code.first { it.opcode == Opcode.IF_EQZ } as BuilderOffsetInstruction
         assertEquals(store - 1, branch.target.location.index, "the incoming branch must run remember before the store")
+    }
+
+    private val flowStateFactory = "Lkotlinx/coroutines/flow/a3;->c(Ljava/lang/Object;)Lkotlinx/coroutines/flow/z2;"
+
+    /**
+     * PostDetail constructor shaped like 12.45.1: the InstanceKeeper StateFlow seed (index 0) and the
+     * unconditional prefetch request seed (index 3) share one method. With [clobberOnOnePath] the
+     * request copy is overwritten on the alternate branch before the request.
+     */
+    private fun replyRankingConstructorFixture(clobberOnOnePath: Boolean = false): ImmutableMethod {
+        val implementation = MethodImplementationBuilder(6).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            add("sget-object v0, $replyEnum->Relevance:$replyEnum")
+            add("invoke-static {v0}, $flowStateFactory")
+            add("move-result-object v1")
+            add("sget-object v2, $replyEnum->Relevance:$replyEnum")
+            add("new-instance v4, Lfixture/PrefetchRequest;")
+            if (clobberOnOnePath) {
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("alternate")))
+                add("move-object v3, v2")
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("join")))
+                addLabel("alternate")
+                add("const/4 v3, 0x0")
+                addLabel("join")
+            } else {
+                add("move-object v3, v2")
+            }
+            add("invoke-direct {v4, v3}, Lfixture/PrefetchRequest;-><init>($replyEnum)V")
+            add("return-void")
+        }
+        return ImmutableMethod(
+            "Lcom/x/postdetail/r;", "<init>",
+            listOf(ImmutableMethodParameter("Lfixture/Param;", emptySet(), null)),
+            "V", AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation.methodImplementation,
+        )
+    }
+
+    private val requestEnumSeed: (MethodReference, Int) -> Boolean =
+        { reference, parameter -> reference.parameterTypes[parameter].toString() == replyEnum }
+
+    @Test
+    fun `reply ranking seeds in one constructor are told apart by their data flow`() {
+        val method = replyRankingConstructorFixture()
+
+        // The StateFlow seed reaches the flow factory; the request seed reaches the enum argument.
+        assertEquals(listOf(ReplySortingSeed(0, 0)), method.enumSeeds(replyEnum, ::isStateFlowFactoryArgument))
+        assertEquals(listOf(ReplySortingSeed(3, 2)), method.enumSeeds(replyEnum, requestEnumSeed))
+    }
+
+    @Test
+    fun `a request seed copy overwritten on one branch is not proven to reach the request`() {
+        val method = replyRankingConstructorFixture(clobberOnOnePath = true)
+
+        assertEquals(emptyList(), method.enumSeeds(replyEnum, requestEnumSeed))
+        // The StateFlow seed does not pass through the clobbered copy and stays proven.
+        assertEquals(listOf(ReplySortingSeed(0, 0)), method.enumSeeds(replyEnum, ::isStateFlowFactoryArgument))
+    }
+
+    @Test
+    fun `constructor seeds receive the default when inserted in descending index order`() {
+        val method = MutableMethod(replyRankingConstructorFixture())
+        val stateSeed = method.enumSeeds(replyEnum, ::isStateFlowFactoryArgument).single()
+        val requestSeed = method.enumSeeds(replyEnum, requestEnumSeed).single()
+
+        // The patch applies later seeds first, so the earlier seed's index stays valid.
+        listOf(stateSeed, requestSeed).sortedByDescending { it.index }.forEach { seed ->
+            method.insertReplySortingDefault(seed.index, seed.register, replyEnum)
+        }
+
+        val code = method.instructions.toList()
+        // Both seeds are still Relevance reads, each now followed by its own default hook.
+        val seeds = code.withIndex().filter { (_, instruction) ->
+            instruction.opcode == Opcode.SGET_OBJECT &&
+                ((instruction as ReferenceInstruction).reference as FieldReference).name == "Relevance"
+        }
+        assertEquals(2, seeds.size)
+        seeds.forEach { (index, _) -> assertEquals(Opcode.CONST_CLASS, code[index + 1].opcode) }
+        assertEquals(
+            2,
+            code.count { instruction ->
+                ((instruction as? ReferenceInstruction)?.reference as? MethodReference)?.name == "getEnumDefault"
+            },
+        )
+    }
+
+    private fun mapperFixture(vararg parameters: String): ImmutableMethod {
+        val implementation = MethodImplementationBuilder(parameters.size.coerceAtLeast(1)).apply {
+            addInstruction("return-object v0".toInstruction())
+        }
+        return ImmutableMethod(
+            "Lfixture/Drawer;", "title",
+            parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
+            "Ljava/lang/String;", AccessFlags.STATIC.value, emptySet(), emptySet(), implementation.methodImplementation,
+        )
+    }
+
+    @Test
+    fun `drawer title mapper shape requires a leading item and one Composer but not a fixed arity`() {
+        val composer = "Landroidx/compose/runtime/Composer;"
+        assertTrue(mapperFixture("Lfixture/Item;", "Z", composer).isItemTitleMapperShape())
+        assertTrue(mapperFixture("Lfixture/Item;", "I", composer, "I").isItemTitleMapperShape())
+        assertTrue(mapperFixture("Lfixture/Item;", composer).isItemTitleMapperShape())
+        assertFalse(mapperFixture("I", composer).isItemTitleMapperShape(), "leading parameter must be an object")
+        assertFalse(mapperFixture("Lfixture/Item;", "Z").isItemTitleMapperShape(), "a Composer is required")
+    }
+
+    @Test
+    fun `drawer item dispatch follows a moved copy of the item parameter`() {
+        val icon = "Lcom/x/icons/Fixture;"
+        val first = "Lfixture/First;"
+        val code = MethodImplementationBuilder(4).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            // The item is the only parameter, so it sits in v3; the test is made through a copy.
+            add("move-object v0, v3")
+            add("instance-of v1, v0, $first")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("unknown")))
+            add("sget-object v2, Lfixture/Icons;->first:$icon")
+            add("return-object v2")
+            addLabel("unknown")
+            add("const/4 v2, 0x0")
+            add("return-object v2")
+        }
+        val method = ImmutableMethod(
+            "Lfixture/Drawer;", "icon", listOf(ImmutableMethodParameter("Lfixture/Item;", emptySet(), null)),
+            icon, AccessFlags.STATIC.value, emptySet(), emptySet(), code.methodImplementation,
+        )
+        val fields = parseItemBranches(method).mapValues { (_, branch) ->
+            branch.filterIsInstance<ReferenceInstruction>().map { (it.reference as FieldReference).name }
+        }
+        assertEquals(mapOf(first to listOf("first")), fields)
+    }
+
+    @Test
+    fun `drawer singleton dispatch follows a moved copy of the item parameter`() {
+        val icon = "Lcom/x/icons/Fixture;"
+        val singleton = "Lfixture/Singleton;"
+        val code = MethodImplementationBuilder(5).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            add("move-object v0, v4")
+            add("sget-object v1, $singleton->INSTANCE:$singleton")
+            add("invoke-static {v0, v1}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z")
+            add("move-result v2")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, getLabel("unknown")))
+            add("sget-object v3, Lfixture/Icons;->singleton:$icon")
+            add("return-object v3")
+            addLabel("unknown")
+            add("const/4 v3, 0x0")
+            add("return-object v3")
+        }
+        val method = ImmutableMethod(
+            "Lfixture/Drawer;", "icon", listOf(ImmutableMethodParameter("Lfixture/Item;", emptySet(), null)),
+            icon, AccessFlags.STATIC.value, emptySet(), emptySet(), code.methodImplementation,
+        )
+        val fields = parseItemBranches(method).mapValues { (_, branch) ->
+            branch.filterIsInstance<ReferenceInstruction>().map { (it.reference as FieldReference).name }
+        }
+        assertEquals(mapOf(singleton to listOf("singleton")), fields)
     }
 
     private fun Method.defaultUrtIndex(): Int = implementation!!.instructions.indexOfFirst { instruction ->

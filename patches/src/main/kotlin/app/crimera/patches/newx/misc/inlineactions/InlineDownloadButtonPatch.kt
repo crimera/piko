@@ -958,8 +958,9 @@ private fun resolveInlineLongPressEventType(
             it.name == "<init>" && it.parameterTypes.map(CharSequence::toString) == listOf(actionEntryDescriptor)
         },
     )
-    // Multiple native renderers can dispatch the same event. The hook is in their shared consumer.
-    Fingerprint(
+    // Multiple native renderers can dispatch the same event. The dispatch is asserted non-empty here
+    // so a missing construct-then-Function1 shape fails with the event class named, not a generic miss.
+    val dispatches = Fingerprint(
         filters = listOf(
             newInstance(constructor.definingClass),
             methodCall(reference = constructor, location = MatchAfterImmediately()),
@@ -968,7 +969,13 @@ private fun resolveInlineLongPressEventType(
                 location = MatchAfterImmediately(),
             ),
         ),
-    ).scopedMatchAll()
+    ).scopedMatchAllOrNull().orEmpty()
+    if (dispatches.isEmpty()) {
+        throw PatchException(
+            "NewX inline-action long-press event ${eventClass.type} is constructed but never dispatched " +
+                "through Function1.invoke",
+        )
+    }
     return eventClass.type
 }
 

@@ -1,7 +1,12 @@
 package app.crimera.patches.newx.misc.drawer
 
+import app.crimera.patches.common.OBJECT_MOVE_OPCODES
+import app.crimera.patches.common.destinationRegisterOrNull
+import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
+import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.classDefForEach
@@ -140,7 +145,7 @@ internal fun resolveDrawerItemModel(
 ): DrawerItemModel? {
     val stringNamespace = profileTitleId ushr 16
     val drawerMethods = drawerClasses.flatMap { classDef -> classDef.methods.map { classDef to it } }
-    val methodsByDescriptor = drawerMethods.map { it.second }.associateBy { it.descriptor() }
+    val methodsByDescriptor = drawerMethods.map { it.second }.associateBy { it.toSmaliDescriptor() }
 
     val titleMappers =
         drawerMethods.filter { (_, method) ->
@@ -150,7 +155,7 @@ internal fun resolveDrawerItemModel(
                 method.code().any { it.narrowLiteralOrNull() == profileTitleId }
         }
     val (ownerClassDef, titleMapper) =
-        requireAtMostOne("NewX drawer item title mapper", titleMappers) { it.second.descriptor() } ?: return null
+        requireAtMostOne("NewX drawer item title mapper", titleMappers) { it.second.toSmaliDescriptor() } ?: return null
     val itemBaseType = titleMapper.parameterTypes.first().toString()
 
     val iconMappers =
@@ -168,8 +173,8 @@ internal fun resolveDrawerItemModel(
             method.isStaticMethod() &&
                 method.returnType == STRING_DESCRIPTOR &&
                 method.parameterTypes.any { it.toString() == COMPOSER_DESCRIPTOR } &&
-                method.descriptor() != titleMapper.descriptor()
-        }.associateBy { it.descriptor() }
+                method.toSmaliDescriptor() != titleMapper.toSmaliDescriptor()
+        }.associateBy { it.toSmaliDescriptor() }
 
     val itemTypes = (titleBranches.keys + iconBranches.keys).distinct()
     val branches =
@@ -182,7 +187,7 @@ internal fun resolveDrawerItemModel(
             val nested =
                 titleCode.mapNotNull { instruction ->
                     if (!instruction.isStaticInvoke()) return@mapNotNull null
-                    nestedMappers[instruction.getReference<MethodReference>()?.descriptor()]
+                    nestedMappers[instruction.getReference<MethodReference>()?.toSmaliDescriptor()]
                 }.flatMap { nestedMapper ->
                     nestedMapper.code().mapNotNull { it.narrowLiteralOrNull() }
                         .filter { it ushr 16 == stringNamespace }
@@ -210,19 +215,20 @@ internal fun resolveDrawerItemModel(
     // TITLED RENDERERS: every static call that receives the mapped title as a String argument.
     val titledCalls =
         drawerMethods.flatMap { (_, method) ->
-            val code = method.code()
+            val layout = CodeLayout(method.code())
+            val code = layout.instructions
             code.indices.flatMap { index ->
                 val instruction = code[index]
                 if (!instruction.isStaticInvoke()) return@flatMap emptyList()
-                if (instruction.getReference<MethodReference>()?.descriptor() != titleMapperRef.descriptor()) {
+                if (instruction.getReference<MethodReference>()?.toSmaliDescriptor() != titleMapperRef.toSmaliDescriptor()) {
                     return@flatMap emptyList()
                 }
                 val result = code.getOrNull(index + 1)
                     ?.takeIf { it.opcode == Opcode.MOVE_RESULT_OBJECT } as? OneRegisterInstruction
                     ?: return@flatMap emptyList()
-                code.forwardStringArgumentCallees(index + 1, result.registerA)
+                layout.forwardStringArgumentCallees(index + 1, result.registerA)
             }
-        }.distinctBy { it.descriptor() }
+        }.distinctBy { it.toSmaliDescriptor() }
             .filter { callee ->
                 callee.definingClass.startsWith(DRAWER_SCOPE) &&
                     callee.returnType == "V" &&
@@ -241,18 +247,19 @@ internal fun resolveDrawerItemModel(
     )
     val itemRendererCandidates =
         titledCalls.mapNotNull { callee ->
-            val method = methodsByDescriptor[callee.descriptor()] ?: return@mapNotNull null
-            val code = method.code()
+            val method = methodsByDescriptor[callee.toSmaliDescriptor()] ?: return@mapNotNull null
+            val layout = CodeLayout(method.code())
+            val code = layout.instructions
             val titleParameterIndex =
                 callee.parameterTypes.indexOfFirst { it.toString() == STRING_DESCRIPTOR }
             val itemParameterIndices =
                 code.indices.mapNotNull { index ->
                     val instruction = code[index]
                     if (!instruction.isStaticInvoke()) return@mapNotNull null
-                    if (instruction.getReference<MethodReference>()?.descriptor() != iconMapperRef.descriptor()) {
+                    if (instruction.getReference<MethodReference>()?.toSmaliDescriptor() != iconMapperRef.toSmaliDescriptor()) {
                         return@mapNotNull null
                     }
-                    val source = code.traceObjectSource(index, instruction.registersUsed.single(), method)
+                    val source = layout.traceObjectSource(index, instruction.registersUsed.single(), method)
                     (source as? ObjectSource.Parameter)?.index
                 }.distinct()
             val itemParameterIndex =
@@ -272,7 +279,7 @@ internal fun resolveDrawerItemModel(
                     }
                     val argumentRegisters = instruction.argumentRegisters(renderer) ?: return@mapNotNull null
                     val titleSource =
-                        code.traceObjectSource(index, argumentRegisters[titleSlot], method)
+                        layout.traceObjectSource(index, argumentRegisters[titleSlot], method)
                     if ((titleSource as? ObjectSource.Parameter)?.index != titleParameterIndex) {
                         return@mapNotNull null
                     }
@@ -285,7 +292,7 @@ internal fun resolveDrawerItemModel(
                     if (clickSlot < 0 || renderer.parameterTypes.count { it == FUNCTION0_DESCRIPTOR } != 1) {
                         return@mapNotNull null
                     }
-                    (code.traceObjectSource(index, argumentRegisters[clickSlot], method) as? ObjectSource.Parameter)
+                    (layout.traceObjectSource(index, argumentRegisters[clickSlot], method) as? ObjectSource.Parameter)
                         ?.index
                 }.distinct()
             val clickParameterIndex =
@@ -294,15 +301,15 @@ internal fun resolveDrawerItemModel(
                 method = callee,
                 itemParameterIndex = itemParameterIndex,
                 clickParameterIndex = clickParameterIndex,
-                innerRenderers = innerCalls.map { it.second }.distinctBy { it.descriptor() },
+                innerRenderers = innerCalls.map { it.second }.distinctBy { it.toSmaliDescriptor() },
             )
         }
     val itemRenderer =
         itemRendererCandidates.singleOrNull()
             ?: throw PatchException(
                 "Expected one NewX drawer item renderer, found " +
-                    itemRendererCandidates.joinToString { it.method.descriptor() }.ifEmpty { "none" } +
-                    "; titled renderers: " + titledCalls.joinToString { it.descriptor() },
+                    itemRendererCandidates.joinToString { it.method.toSmaliDescriptor() }.ifEmpty { "none" } +
+                    "; titled renderers: " + titledCalls.joinToString { it.toSmaliDescriptor() },
             )
     if (callerParameterType(itemRenderer.method, itemRenderer.itemParameterIndex)
             .let { it == STRING_DESCRIPTOR || it == FUNCTION0_DESCRIPTOR || it == COMPOSER_DESCRIPTOR }
@@ -316,29 +323,30 @@ internal fun resolveDrawerItemModel(
     // The item renderer itself is not guarded: navigation captures its click at entry, and its
     // inner row renderers receive the same title and are guarded instead.
     val titledRenderers =
-        (titledCalls.filter { it.descriptor() != itemRenderer.method.descriptor() } + itemRenderer.innerRenderers)
-            .distinctBy { it.descriptor() }
+        (titledCalls.filter { it.toSmaliDescriptor() != itemRenderer.method.toSmaliDescriptor() } + itemRenderer.innerRenderers)
+            .distinctBy { it.toSmaliDescriptor() }
 
     // ANCHOR ROWS: title/icon/click renderer calls whose icon is the icon mapper's result.
     val anchorRowCalls =
         drawerMethods.flatMap { (_, method) ->
-            val code = method.code()
+            val layout = CodeLayout(method.code())
+            val code = layout.instructions
             val ordinals = mutableMapOf<String, Int>()
             code.indices.mapNotNull { index ->
                 val instruction = code[index]
                 if (!instruction.isStaticInvoke()) return@mapNotNull null
                 val renderer = instruction.getReference<MethodReference>() ?: return@mapNotNull null
-                val ordinal = ordinals.getOrDefault(renderer.descriptor(), 0)
-                ordinals[renderer.descriptor()] = ordinal + 1
+                val ordinal = ordinals.getOrDefault(renderer.toSmaliDescriptor(), 0)
+                ordinals[renderer.toSmaliDescriptor()] = ordinal + 1
                 if (!renderer.isSnapshotRowRenderer()) return@mapNotNull null
                 if (instruction !is Instruction3rc || instruction.registerCount != renderer.parameterTypes.size) {
                     return@mapNotNull null
                 }
                 val iconSlot = renderer.parameterTypes.indexOfFirst { it.startsWith(ICONS_DESCRIPTOR_PREFIX) }
-                val source = code.traceObjectSource(index, instruction.startRegister + iconSlot, method)
+                val source = layout.traceObjectSource(index, instruction.startRegister + iconSlot, method)
                 val sourceCall = (source as? ObjectSource.Result)?.let { code[it.invokeIndex] }
                     ?: return@mapNotNull null
-                if (sourceCall.getReference<MethodReference>()?.descriptor() != iconMapperRef.descriptor()) {
+                if (sourceCall.getReference<MethodReference>()?.toSmaliDescriptor() != iconMapperRef.toSmaliDescriptor()) {
                     return@mapNotNull null
                 }
                 DrawerItemRowCall(method.reference(), ordinal, renderer.toImmutableReference())
@@ -362,9 +370,9 @@ internal fun resolveDrawerItemModel(
 /** Resolves the mutable method for a reference resolved from read-only class definitions. */
 internal fun MethodReference.mutableMethod(): MutableMethod {
     val candidates =
-        mutableClassDefBy(definingClass).methods.filter { it.descriptor() == descriptor() }
+        mutableClassDefBy(definingClass).methods.filter { it.toSmaliDescriptor() == toSmaliDescriptor() }
     return candidates.singleOrNull()
-        ?: throw PatchException("Expected one mutable NewX drawer method ${descriptor()}, found ${candidates.size}")
+        ?: throw PatchException("Expected one mutable NewX drawer method ${toSmaliDescriptor()}, found ${candidates.size}")
 }
 
 /** Index of the [DrawerItemRowCall] in the current (possibly already patched) instructions. */
@@ -372,14 +380,11 @@ internal fun MutableMethod.currentIndexOf(call: DrawerItemRowCall): Int {
     val indices =
         instructions.withIndex().filter { (_, instruction) ->
             instruction.isStaticInvoke() &&
-                instruction.getReference<MethodReference>()?.descriptor() == call.renderer.descriptor()
+                instruction.getReference<MethodReference>()?.toSmaliDescriptor() == call.renderer.toSmaliDescriptor()
         }.map { it.index }
     return indices.getOrNull(call.rendererCallOrdinal)
-        ?: throw PatchException("NewX drawer anchor row call disappeared: ${call.method.descriptor()}")
+        ?: throw PatchException("NewX drawer anchor row call disappeared: ${call.method.toSmaliDescriptor()}")
 }
-
-internal fun MethodReference.descriptor(): String =
-    "$definingClass->$name(${parameterTypes.joinToString("")})$returnType"
 
 /** Class name as returned by Class.getName() for a type descriptor. */
 internal fun String.toJavaClassName(): String = removePrefix("L").removeSuffix(";").replace('/', '.')
@@ -404,13 +409,16 @@ private sealed interface ObjectSource {
 
 private fun Method.isStaticMethod(): Boolean = AccessFlags.STATIC.isSet(accessFlags)
 
-private fun Method.isItemTitleMapperShape(): Boolean {
-    val parameters = parameterTypes.map(CharSequence::toString)
-    return parameters.size == 3 &&
+/**
+ * Leading item object plus one Composer. The arity and the Boolean flag are not part of the
+ * contract: Compose lowering adds and drops trailing parameters across releases.
+ */
+internal fun Method.isItemTitleMapperShape(): Boolean {
+    val parameters = parameterDescriptors()
+    return parameters.isNotEmpty() &&
         parameters[0].startsWith("L") &&
         parameters[0] != COMPOSER_DESCRIPTOR &&
-        parameters[1] == "Z" &&
-        parameters[2] == COMPOSER_DESCRIPTOR
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1
 }
 
 private fun Method.code(): List<Instruction> = implementation?.instructions?.toList().orEmpty()
@@ -445,36 +453,42 @@ private fun Instruction.argumentRegisters(reference: MethodReference): List<Int>
 }
 
 private fun Instruction.writtenRegisters(): List<Int> {
-    if (!opcode.setsRegister()) return emptyList()
-    val destination = (this as? OneRegisterInstruction)?.registerA ?: return emptyList()
+    val destination = destinationRegisterOrNull() ?: return emptyList()
     return if (opcode.setsWideRegister()) listOf(destination, destination + 1) else listOf(destination)
 }
 
-private val OBJECT_MOVES = setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
+/** A method's instructions with each code-unit address, built once so branch lookups are O(1). */
+private class CodeLayout(val instructions: List<Instruction>) {
+    private val addresses = IntArray(instructions.size)
+    private val indexByAddress = HashMap<Int, Int>(instructions.size * 2)
 
-private fun List<Instruction>.branchTargetIndex(index: Int): Int? {
-    val instruction = this[index] as? OffsetInstruction ?: return null
-    var address = 0
-    val addresses = IntArray(size)
-    forEachIndexed { i, it ->
-        addresses[i] = address
-        address += it.codeUnits
+    init {
+        var address = 0
+        instructions.forEachIndexed { index, instruction ->
+            addresses[index] = address
+            indexByAddress.putIfAbsent(address, index)
+            address += instruction.codeUnits
+        }
     }
-    val target = addresses[index] + instruction.codeOffset
-    return addresses.indexOfFirst { it == target }.takeIf { it >= 0 }
+
+    /** Index of the instruction an offset branch at [index] jumps to, or null for non-branches. */
+    fun branchTargetIndex(index: Int): Int? {
+        val instruction = instructions[index] as? OffsetInstruction ?: return null
+        return indexByAddress[addresses[index] + instruction.codeOffset]
+    }
 }
 
 /**
  * Collects static callees that receive [register] (or a moved copy) as a String argument on the
  * fallthrough/goto path. Conditional branches are not followed; gotos are, once.
  */
-private fun List<Instruction>.forwardStringArgumentCallees(startIndex: Int, register: Int): List<MethodReference> {
+private fun CodeLayout.forwardStringArgumentCallees(startIndex: Int, register: Int): List<MethodReference> {
     val aliases = mutableSetOf(register)
     val callees = mutableListOf<MethodReference>()
     val visited = mutableSetOf<Int>()
     var index = startIndex + 1
-    while (index in indices && aliases.isNotEmpty() && visited.add(index)) {
-        val instruction = this[index]
+    while (index in instructions.indices && aliases.isNotEmpty() && visited.add(index)) {
+        val instruction = instructions[index]
         if (instruction.isStaticInvoke()) {
             val reference = instruction.getReference<MethodReference>()
             val arguments = reference?.let { instruction.argumentRegisters(it) }
@@ -485,7 +499,7 @@ private fun List<Instruction>.forwardStringArgumentCallees(startIndex: Int, regi
             }
         }
         when {
-            instruction.opcode in OBJECT_MOVES -> {
+            instruction.opcode in OBJECT_MOVE_OPCODES -> {
                 val move = instruction as TwoRegisterInstruction
                 if (move.registerB in aliases) aliases += move.registerA else aliases -= move.registerA
             }
@@ -507,20 +521,20 @@ private fun List<Instruction>.forwardStringArgumentCallees(startIndex: Int, regi
  * Traces an object register backward through object moves. A `move-result-object r` followed by
  * `if-nez r` and a static fallback `sget-object r` is treated as the invoke result (null fallback).
  */
-private fun List<Instruction>.traceObjectSource(callIndex: Int, register: Int, method: Method): ObjectSource {
+private fun CodeLayout.traceObjectSource(callIndex: Int, register: Int, method: Method): ObjectSource {
     var current = register
     for (index in callIndex - 1 downTo 0) {
-        val instruction = this[index]
+        val instruction = instructions[index]
         if (current !in instruction.writtenRegisters()) continue
         when {
             // check-cast narrows the static type of the same value.
             instruction.opcode == Opcode.CHECK_CAST -> continue
-            instruction.opcode in OBJECT_MOVES -> current = (instruction as TwoRegisterInstruction).registerB
+            instruction.opcode in OBJECT_MOVE_OPCODES -> current = (instruction as TwoRegisterInstruction).registerB
             instruction.opcode == Opcode.MOVE_RESULT_OBJECT ->
                 return if (index > 0) ObjectSource.Result(index - 1) else ObjectSource.Other
             instruction.opcode == Opcode.SGET_OBJECT -> {
-                val nullCheck = getOrNull(index - 1)
-                val result = getOrNull(index - 2)
+                val nullCheck = instructions.getOrNull(index - 1)
+                val result = instructions.getOrNull(index - 2)
                 val isNullFallback =
                     nullCheck?.opcode == Opcode.IF_NEZ &&
                         (nullCheck as OneRegisterInstruction).registerA == current &&
@@ -533,7 +547,7 @@ private fun List<Instruction>.traceObjectSource(callIndex: Int, register: Int, m
         }
     }
     val implementation = method.implementation ?: return ObjectSource.Other
-    val parameterWidths = method.parameterTypes.map { if (it == "J" || it == "D") 2 else 1 }
+    val parameterWidths = method.parameterDescriptors().map { if (it == "J" || it == "D") 2 else 1 }
     var parameterRegister = implementation.registerCount - parameterWidths.sum()
     if (current < parameterRegister) return ObjectSource.Other
     parameterWidths.forEachIndexed { parameterIndex, width ->
@@ -550,9 +564,10 @@ private fun List<Instruction>.traceObjectSource(callIndex: Int, register: Int, m
  * edge until a return or throw.
  */
 internal fun parseItemBranches(mapper: Method): Map<String, List<Instruction>> {
-    val code = mapper.code()
+    val layout = CodeLayout(mapper.code())
+    val code = layout.instructions
     val implementation = mapper.implementation ?: return emptyMap()
-    val parameterWidth = mapper.parameterTypes.sumOf { type -> if (type == "J" || type == "D") 2 else 1 }
+    val parameterWidth = mapper.parameterDescriptors().sumOf { type -> if (type == "J" || type == "D") 2 else 1 }
     val itemRegister = implementation.registerCount - parameterWidth
     val starts = linkedMapOf<String, MutableList<Int>>()
     code.indices.forEach { index ->
@@ -562,16 +577,18 @@ internal fun parseItemBranches(mapper: Method): Map<String, List<Instruction>> {
                 // instance-of vB, item, X
                 Opcode.INSTANCE_OF -> {
                     val check = instruction as TwoRegisterInstruction
-                    if (check.registerB != itemRegister) return@forEach
+                    // The item may reach the check through moves; prove it rather than match its register.
+                    if (!mapper.provesParameterValue(index, check.registerB, itemRegister)) return@forEach
                     val type = instruction.getReference<TypeReference>()?.type ?: return@forEach
                     type to check.registerA
                 }
                 // sget-object vS, X->f:X ; invoke-static {item, vS}, Intrinsics.areEqual ; move-result vB
                 Opcode.INVOKE_STATIC -> {
-                    if (instruction.getReference<MethodReference>()?.descriptor() != INTRINSICS_ARE_EQUAL) return@forEach
+                    if (instruction.getReference<MethodReference>()?.toSmaliDescriptor() != INTRINSICS_ARE_EQUAL) return@forEach
                     val operands = instruction.registersUsed
-                    if (operands.size != 2 || itemRegister !in operands) return@forEach
-                    val singletonRegister = operands.first { it != itemRegister }
+                    val itemOperands = operands.filter { mapper.provesParameterValue(index, it, itemRegister) }
+                    if (operands.size != 2 || itemOperands.size != 1) return@forEach
+                    val singletonRegister = operands.single { it != itemOperands.single() }
                     val writer =
                         (index - 1 downTo 0).firstOrNull { previous ->
                             singletonRegister in code[previous].writtenRegisters()
@@ -607,7 +624,7 @@ internal fun parseItemBranches(mapper: Method): Map<String, List<Instruction>> {
         val start =
             when (code[conditionIndex].opcode) {
                 Opcode.IF_EQZ -> conditionIndex + 1
-                else -> code.branchTargetIndex(conditionIndex) ?: return@forEach
+                else -> layout.branchTargetIndex(conditionIndex) ?: return@forEach
             }
         starts.getOrPut(itemType) { mutableListOf() } += start
     }
@@ -621,10 +638,10 @@ internal fun parseItemBranches(mapper: Method): Map<String, List<Instruction>> {
             val opcode = instruction.opcode
             when {
                 opcode == Opcode.GOTO || opcode == Opcode.GOTO_16 || opcode == Opcode.GOTO_32 ->
-                    code.branchTargetIndex(index)?.let(pending::add)
+                    layout.branchTargetIndex(index)?.let(pending::add)
                 opcode.format == Format.Format21t || opcode.format == Format.Format22t -> {
                     pending += index + 1
-                    code.branchTargetIndex(index)?.let(pending::add)
+                    layout.branchTargetIndex(index)?.let(pending::add)
                 }
                 instruction is OffsetInstruction ->
                     throw PatchException("Unsupported NewX drawer item mapper branch $opcode in $mapper")

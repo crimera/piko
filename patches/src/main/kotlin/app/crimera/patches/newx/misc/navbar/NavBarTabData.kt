@@ -36,6 +36,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -192,7 +193,7 @@ internal fun resolveNewXNavBarFilterTarget(match: Match): TabDataFilterTarget {
     if (mapPutInstruction?.opcode != Opcode.INVOKE_INTERFACE ||
         mapPutReference?.definingClass != MAP_DESCRIPTOR ||
         mapPutReference.name != "put" ||
-        mapPutReference.parameterTypes.map { it.toString() } !=
+        mapPutReference.parameterTypes.map(CharSequence::toString) !=
             listOf("Ljava/lang/Object;", "Ljava/lang/Object;") ||
         mapPutReference.returnType != "Ljava/lang/Object;"
     ) {
@@ -240,7 +241,7 @@ internal fun MutableMethod.findTabDataWrapperInitIndex(
 
                 val invoke = instruction as? Instruction35c ?: return@mapNotNull null
                 val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
-                val parameters = reference.parameterTypes.map { it.toString() }
+                val parameters = reference.parameterTypes.map(CharSequence::toString)
                 if (reference.name != "<init>" ||
                     reference.returnType != "V" ||
                     LINKED_HASH_MAP_DESCRIPTOR !in parameters
@@ -329,7 +330,7 @@ internal fun resolveTabDataValueConstructor(tabDataValueType: String): MethodRef
     val fieldTypes = instanceFields.map { it.type }.sorted()
     
     val primaryConstructors = classDef.methods.filter { method ->
-        method.name == "<init>" && method.parameterTypes.map { it.toString() }.sorted() == fieldTypes
+        method.name == "<init>" && method.parameterTypes.map(CharSequence::toString).sorted() == fieldTypes
     }
     
     val constructor = requireExactlyOne("NewX TabDataValueType primary constructor", primaryConstructors)
@@ -430,10 +431,11 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
 
     val directCallers = rendererCalls.filter { match ->
         val method = match.originalMethod
+        val parameters = method.parameterTypes.map(CharSequence::toString)
         AccessFlags.STATIC.isSet(method.accessFlags) &&
-            method.parameterTypes.count { it == tabData.navigationType } == 1 &&
-            tabData.tabDataValueType in method.parameterTypes &&
-            COMPOSER_DESCRIPTOR in method.parameterTypes &&
+            parameters.count { it == tabData.navigationType } == 1 &&
+            tabData.tabDataValueType in parameters &&
+            COMPOSER_DESCRIPTOR in parameters &&
             method.instructions.any { it.referencesMethod(rendererDescriptor) }
     }.distinctBy { it.originalMethod.toString() }
     val direct = requireAtMostOne("NewX direct navigation bar content", directCallers)
@@ -542,11 +544,19 @@ private fun MutableMethod.resolveDirectNavBarContent(
         "NewX direct navigation bar renderer call in $this",
         code.indices.filter { code[it].referencesMethod(renderer.toSmaliDescriptor()) },
     )
-    val call = code[rendererIndex] as? Instruction35c
-        ?: throw PatchException("NewX direct navigation bar renderer is not a 5-register invoke")
-    val parameterRegisters = parameterTypes.map(CharSequence::toString)
+    val call = code[rendererIndex]
+    // A 35c and a range invoke carry the same argument list; registersUsed normalises both forms.
+    if (call !is Instruction35c && call !is Instruction3rc) {
+        throw PatchException("NewX direct navigation bar renderer is not an invoke: $call")
+    }
+    val callRegisters = call.registersUsed
+    if (callRegisters.size < 3) {
+        throw PatchException("NewX direct navigation bar renderer passes ${callRegisters.size} registers, expected 3+")
+    }
+    val parameterDescriptors = parameterTypes.map(CharSequence::toString)
+    val parameterRegisters = parameterDescriptors
         .runningFold(p0Register) { register, type -> register + if (type == "J" || type == "D") 2 else 1 }
-    val navigationRegister = parameterRegisters[parameterTypes.indexOf(tabData.navigationType)]
+    val navigationRegister = parameterRegisters[parameterDescriptors.indexOf(tabData.navigationType)]
     if (!provesParameterValue(rendererIndex, navigationRegister, navigationRegister)) {
         throw PatchException("NewX direct navigation tab is no longer live at its renderer in $this")
     }
@@ -565,7 +575,7 @@ private fun MutableMethod.resolveDirectNavBarContent(
         (index to reference).takeIf {
             result.opcode == Opcode.MOVE_RESULT_OBJECT &&
                 provesParameterValue(index, tabArgument, navigationRegister) &&
-                provesValueFromInstructionOnSourcePaths(index + 1, result.registerA, rendererIndex, call.registerC)
+                provesValueFromInstructionOnSourcePaths(index + 1, result.registerA, rendererIndex, callRegisters[0])
         }
     }.toMap()
     if (iconCalls.size != 2) {
@@ -573,7 +583,7 @@ private fun MutableMethod.resolveDirectNavBarContent(
     }
     val successors = normalControlFlowSuccessors()
         ?: throw PatchException("Unsupported NewX direct navigation bar control flow in $this")
-    val booleanParameters = parameterTypes.indices.filter { parameterTypes[it] == "Z" }.map(parameterRegisters::get)
+    val booleanParameters = parameterDescriptors.indices.filter { parameterDescriptors[it] == "Z" }.map(parameterRegisters::get)
     val unselected = requireExactlyOne(
         "NewX unselected navigation icon mapper in $this",
         code.withIndex().mapNotNull { (index, instruction) ->
@@ -598,9 +608,9 @@ private fun MutableMethod.resolveDirectNavBarContent(
         iconType = iconType,
         tabDataValueType = tabData.tabDataValueType,
         rendererCallIndex = rendererIndex,
-        iconRegister = call.registerC,
-        labelRegister = call.registerD,
-        tabDataValueRegister = call.registerE,
+        iconRegister = callRegisters[0],
+        labelRegister = callRegisters[1],
+        tabDataValueRegister = callRegisters[2],
         navigationRegister = navigationRegister,
         tabIconFields = iconMapper.resolveReturnedTabIcons(tabData.navigationType, iconType),
     )
@@ -623,13 +633,26 @@ private fun MutableMethod.resolveReturnedTabIcons(navigationType: String, iconTy
         val key = enumCases[name] ?: throw PatchException("NewX navigation icon mapping has no case for $name")
         val case = requireExactlyOne("NewX direct navigation icon case for $name", cases.filter { it.key == key })
         val load = code.getOrNull(case.startIndex) as? OneRegisterInstruction
-        val result = code.getOrNull(case.startIndex + 1) as? OneRegisterInstruction
         val icon = load?.getReference<FieldReference>()
+        val result = code.returnObjectReachedFrom(case.startIndex + 1)
         if (load?.opcode != Opcode.SGET_OBJECT || icon?.type != iconType ||
-            result?.opcode != Opcode.RETURN_OBJECT || result.registerA != load.registerA
+            result == null || result.registerA != load.registerA
         ) throw PatchException("NewX direct navigation icon case for $name does not return an icon field")
         name to icon
     }
+}
+
+/**
+ * The `return-object` a case reaches from [index]: the instruction itself when it returns, or the
+ * target of a `goto` when the R8 output shares one return across cases. Null otherwise.
+ */
+private fun List<Instruction>.returnObjectReachedFrom(index: Int): OneRegisterInstruction? {
+    val instruction = getOrNull(index) ?: return null
+    if (instruction.opcode == Opcode.RETURN_OBJECT) return instruction as? OneRegisterInstruction
+    if (instruction.opcode !in setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)) return null
+    val target = (instruction as? BuilderOffsetInstruction)?.target?.location?.index ?: return null
+    val shared = getOrNull(target) ?: return null
+    return if (shared.opcode == Opcode.RETURN_OBJECT) shared as? OneRegisterInstruction else null
 }
 
 internal data class PackedSwitchCase(

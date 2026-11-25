@@ -49,7 +49,8 @@ public final class NavBarCatalog {
     private static final Map<String, Tab> TABS = new ConcurrentHashMap<>();
     private static final List<String> DESTINATION_ORDER = new CopyOnWriteArrayList<>();
     private static final List<String> TAB_ORDER = new CopyOnWriteArrayList<>();
-    private static final Map<String, List<String>> DESTINATIONS_BY_ITEM_CLASS = new ConcurrentHashMap<>();
+    private static final Map<String, CopyOnWriteArrayList<String>> DESTINATIONS_BY_ITEM_CLASS =
+            new ConcurrentHashMap<>();
     private static final Set<String> LIVE_TAB_IDS = ConcurrentHashMap.newKeySet();
     private static volatile boolean liveTabsKnown;
 
@@ -74,16 +75,16 @@ public final class NavBarCatalog {
         if (destinationId == null || itemClassName == null) {
             throw new IllegalArgumentException("Navigation bar destination item needs an id and a class");
         }
-        List<String> destinationIds =
+        CopyOnWriteArrayList<String> destinationIds =
                 DESTINATIONS_BY_ITEM_CLASS.computeIfAbsent(itemClassName, ignored -> new CopyOnWriteArrayList<>());
-        if (!destinationIds.contains(destinationId)) destinationIds.add(destinationId);
+        destinationIds.addIfAbsent(destinationId);
     }
 
     /** Destinations rendered by drawer items of this class; empty for unrelated items. */
     public static List<String> destinationsForItemClass(String itemClassName) {
         if (itemClassName == null) return Collections.emptyList();
-        List<String> destinationIds = DESTINATIONS_BY_ITEM_CLASS.get(itemClassName);
-        return destinationIds == null ? Collections.emptyList() : destinationIds;
+        CopyOnWriteArrayList<String> destinationIds = DESTINATIONS_BY_ITEM_CLASS.get(itemClassName);
+        return destinationIds == null ? Collections.emptyList() : Collections.unmodifiableList(destinationIds);
     }
 
     /** Injection point: registers one navigation tab for the editor. */

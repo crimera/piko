@@ -26,6 +26,7 @@ import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.patch.classDefForEach
 import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.hasResourceId
 import app.morphe.patcher.resource.resourceId
 import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
 import app.crimera.patches.newx.misc.navbar.validateNewXNavBarTabData
@@ -57,7 +58,6 @@ import app.crimera.patches.common.writesObjectRegister
 import app.crimera.patches.common.scopedMatchAll
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.fieldAccess
@@ -73,6 +73,7 @@ import app.morphe.patcher.util.numberOfParameterRegisters
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -95,6 +96,7 @@ private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION2_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 
 /**
  * Resolves the current APK's string entry names before the bytecode patch emits option IDs.
@@ -228,7 +230,7 @@ private object NewXDrawerIconlessRowFingerprint : Fingerprint(
  * IconButton call below is what distinguishes it. The material3 owner/param slots use
  * prefix/wildcard types because the IconButton class shifts between releases.
  */
-private fun isDrawerThemeToggleShape(method: com.android.tools.smali.dexlib2.iface.Method): Boolean =
+private fun isDrawerThemeToggleShape(method: Method): Boolean =
     method.parameterDescriptors().hasComposeShape(
         required =
             listOf(
@@ -266,27 +268,39 @@ private object NewXDrawerThemeToggleFingerprint : Fingerprint(
     filters = DRAWER_THEME_TOGGLE_FILTERS,
 )
 
-// The 4-parameter no-title ABI is the only discriminator for this optional row; widening the
-// shape matched six sibling composables on 12.29.1. Shared by both drawer paths.
-// newx-resolver-lint: allow rigid-signature
-private val DRAWER_GROK_BUTTON_PARAMETERS =
-    listOf(
-        "L",
-        "Lkotlin/jvm/functions/Function1;",
-        "Landroidx/compose/runtime/Composer;",
-        "I",
-    )
-
 /**
- * GROK PATH: dedicated "Get Grok / Open Grok" button rendered without a title parameter.
- * Title is resolved inside from drawer_get_grok / drawer_open_grok, so filter by stable ID.
+ * Resource ids of the Get/Open Grok titles. The Grok button composable loads one of them as a
+ * constant on 12.41 and 12.43, and the parameter list of that composable changed in between (12.43
+ * added a fifth parameter), so the ids are the anchor rather than the parameter shape.
  */
-private object NewXDrawerGrokButtonFingerprint : Fingerprint(
-    classFingerprint = NewXDrawerContentClassFingerprint,
-    returnType = "V",
-    // newx-resolver-lint: allow rigid-signature
-    parameters = DRAWER_GROK_BUTTON_PARAMETERS,
-)
+private fun grokTitleResourceIds(): Set<Int> =
+    listOf("drawer_get_grok", "drawer_open_grok")
+        .filter { hasResourceId(ResourceType.STRING, it) }
+        .map { resourceId(ResourceType.STRING, it).toInt() }
+        .toSet()
+
+/** Whether [method] loads any of [resourceIds] as an integer constant. */
+private fun Method.loadsAnyResourceId(resourceIds: Set<Int>): Boolean =
+    resourceIds.isNotEmpty() && implementation?.instructions?.any { instruction ->
+        instruction.opcode in NARROW_CONST_OPCODES &&
+            (instruction as? NarrowLiteralInstruction)?.narrowLiteral?.let { it in resourceIds } == true
+    } == true
+
+private val NARROW_CONST_OPCODES = setOf(Opcode.CONST, Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST_HIGH16)
+
+/** Void composable in [definingClass]-or-[classFingerprint] scope that loads a Grok title id. */
+private fun grokButtonFingerprint(
+    definingClass: String? = null,
+    classFingerprint: Fingerprint? = null,
+): Fingerprint {
+    val resourceIds = grokTitleResourceIds()
+    return Fingerprint(
+        definingClass = definingClass,
+        classFingerprint = classFingerprint,
+        returnType = "V",
+        custom = { method, _ -> method.loadsAnyResourceId(resourceIds) },
+    )
+}
 
 // Title-based filtering for rows that expose localized titles.
 // TODO: Remove this path only when no supported release uses title-based drawer rows.
@@ -962,27 +976,35 @@ private data class DrawerRowContent(
     val clickDescriptor: String,
 )
 
+/** One icon-gated row block: its rows emit only when the anchor call's icon is [gateIcon]. */
+private data class IconGatedRowBlock(
+    val gateIcon: FieldReference,
+    val rows: List<DrawerRowContent>,
+    val labelPrefix: String,
+)
+
 /**
  * ITEM-MODEL ROWS: the anchor call renders every item of a list, so the emitted rows must be
- * gated to one item. The gate compares the anchor call's icon argument with the item's static
+ * gated to one item. Each block compares the anchor call's icon argument with its item's static
  * icon (identity: icons are singletons in the icon class), which the model proved to belong to
- * exactly one item. The gate runs once before any register of the snapshot is replaced; each row
- * then skips on a null title like the title-row path.
+ * exactly one item.
+ *
+ * All blocks share one hook, and each block's gate is evaluated on the untouched icon register.
+ * A block that emits its rows jumps past the remaining gates to the original call, so a later
+ * block never runs after an earlier block has overwritten the icon register. Each row skips on a
+ * null title, like the title-row path, and exits to the original call on the block's final row.
  */
-private fun MutableMethod.injectIconGatedDrawerRows(
-    call: DrawerItemRowCall,
-    gateIcon: FieldReference,
-    rows: List<DrawerRowContent>,
-    labelPrefix: String,
-) {
-    if (rows.isEmpty()) throw PatchException("NewX drawer gated row block has no rows")
+private fun MutableMethod.injectIconGatedDrawerRows(call: DrawerItemRowCall, blocks: List<IconGatedRowBlock>) {
+    if (blocks.isEmpty() || blocks.any { it.rows.isEmpty() }) {
+        throw PatchException("NewX drawer gated row block has no rows")
+    }
     val renderer = call.renderer
     val callIndex = currentIndexOf(call)
     val anchor =
         instructions[callIndex] as? Instruction3rc
             ?: throw PatchException("NewX drawer anchor row call is not a range invoke: $this @ $callIndex")
     val parameters = renderer.parameterTypes.map(CharSequence::toString)
-    val titleIndex = parameters.indexOf("Ljava/lang/String;")
+    val titleIndex = parameters.indexOf(STRING_DESCRIPTOR)
     val clickIndex = parameters.indexOf(FUNCTION0_DESCRIPTOR)
     val iconIndex = parameters.indexOfFirst { it.startsWith("Lcom/x/icons/") }
     if (!renderer.isSnapshotRowRenderer() || anchor.registerCount != parameters.size) {
@@ -994,12 +1016,14 @@ private fun MutableMethod.injectIconGatedDrawerRows(
         throw PatchException("NewX drawer anchor row registers are outside v0..v255: v$startRegister..v$endRegister")
     }
     val iconType = parameters[iconIndex]
-    if (gateIcon.type != iconType) {
-        throw PatchException("NewX drawer gate icon type changed: renderer=$iconType, gate=$gateIcon")
-    }
-    rows.forEach { row ->
-        if (row.icon.type != iconType) {
-            throw PatchException("NewX drawer icon type changed: renderer=$iconType, icon=${row.icon}")
+    blocks.forEach { block ->
+        if (block.gateIcon.type != iconType) {
+            throw PatchException("NewX drawer gate icon type changed: renderer=$iconType, gate=${block.gateIcon}")
+        }
+        block.rows.forEach { row ->
+            if (row.icon.type != iconType) {
+                throw PatchException("NewX drawer icon type changed: renderer=$iconType, icon=${row.icon}")
+            }
         }
     }
     if (callIndex + 1 >= instructions.size) {
@@ -1010,6 +1034,8 @@ private fun MutableMethod.injectIconGatedDrawerRows(
     val titleRegister = startRegister + titleIndex
     val iconRegister = startRegister + iconIndex
     val clickRegister = startRegister + clickIndex
+    val lastBlock = blocks.lastIndex
+    fun gateLabel(blockIndex: Int) = "${blocks[blockIndex].labelPrefix}_gate"
     insertHook(
         index = callIndex + 1,
         // The rows reuse the anchor's register window, so scratch registers must avoid it.
@@ -1025,25 +1051,33 @@ private fun MutableMethod.injectIconGatedDrawerRows(
             } else {
                 scratchRegister(RegisterLimit.FOUR_BIT).also { move(it, iconRegister, OBJECT_DESCRIPTOR) }
             }
-        sget(gateRegister, gateIcon)
-        ifNe(comparedIcon, gateRegister, Target.Original)
-        rows.forEachIndexed { rowIndex, row ->
-            if (rowIndex > 0) label("${labelPrefix}_${rowIndex - 1}")
-            val skip =
-                if (rowIndex == rows.lastIndex) Target.Original else Target.Local("${labelPrefix}_$rowIndex")
-            invokeStatic(methodReference(row.titleDescriptor))
-            moveResult(titleRegister, "Ljava/lang/String;")
-            ifEqz(titleRegister, skip)
-            when (val icon = row.icon) {
-                is DrawerRowIcon.Field -> sget(iconRegister, icon.reference)
-                is DrawerRowIcon.Accessor -> {
-                    invokeStatic(icon.getter)
-                    moveResult(iconRegister, icon.type)
+        blocks.forEachIndexed { blockIndex, block ->
+            if (blockIndex > 0) label(gateLabel(blockIndex))
+            // A failed gate advances to the next block's gate; once a block matches, skipping its
+            // final row exits directly to Target.Original so no later gate sees mutated registers.
+            val nextGate = if (blockIndex == lastBlock) Target.Original else Target.Local(gateLabel(blockIndex + 1))
+            sget(gateRegister, block.gateIcon)
+            ifNe(comparedIcon, gateRegister, nextGate)
+            block.rows.forEachIndexed { rowIndex, row ->
+                if (rowIndex > 0) label("${block.labelPrefix}_${rowIndex - 1}")
+                val skip =
+                    if (rowIndex == block.rows.lastIndex) Target.Original else Target.Local("${block.labelPrefix}_$rowIndex")
+                invokeStatic(methodReference(row.titleDescriptor))
+                moveResult(titleRegister, STRING_DESCRIPTOR)
+                ifEqz(titleRegister, skip)
+                when (val icon = row.icon) {
+                    is DrawerRowIcon.Field -> sget(iconRegister, icon.reference)
+                    is DrawerRowIcon.Accessor -> {
+                        invokeStatic(icon.getter)
+                        moveResult(iconRegister, icon.type)
+                    }
                 }
+                invokeStatic(methodReference(row.clickDescriptor))
+                moveResult(clickRegister, FUNCTION0_DESCRIPTOR)
+                invokeStatic(renderer, *window.toIntArray())
             }
-            invokeStatic(methodReference(row.clickDescriptor))
-            moveResult(clickRegister, FUNCTION0_DESCRIPTOR)
-            invokeStatic(renderer, *window.toIntArray())
+            // The icon register now holds this block's item icon, so later gates must not run.
+            if (blockIndex < lastBlock) goto(Target.Original)
         }
     }
 }
@@ -1145,12 +1179,17 @@ private fun applyItemModelDrawer(
     // Which list (menu or footer) renders an item is runtime data, so every anchor row receives
     // both gated blocks; only the row of the matching item emits. Calls are injected in
     // descending ordinal so the ordinal of every remaining anchor stays valid.
-    model.anchorRowCalls.groupBy { it.method.descriptor() }.values.forEachIndexed { methodIndex, calls ->
+    model.anchorRowCalls.groupBy { it.method.toSmaliDescriptor() }.values.forEachIndexed { methodIndex, calls ->
         val method = requireExactlyOne("NewX drawer anchor method", calls.map { it.method }.distinct()).mutableMethod()
         calls.sortedByDescending { it.rendererCallOrdinal }.forEach { call ->
             val suffix = "${methodIndex}_${call.rendererCallOrdinal}"
-            method.injectIconGatedDrawerRows(call, settingsIconField, listOf(pikoRow), "piko_drawer_settings_$suffix")
-            method.injectIconGatedDrawerRows(call, profileIconField, shortcutRows, "piko_drawer_shortcuts_$suffix")
+            method.injectIconGatedDrawerRows(
+                call,
+                listOf(
+                    IconGatedRowBlock(settingsIconField, listOf(pikoRow), "piko_drawer_settings_$suffix"),
+                    IconGatedRowBlock(profileIconField, shortcutRows, "piko_drawer_shortcuts_$suffix"),
+                ),
+            )
         }
     }
 
@@ -1167,11 +1206,8 @@ private fun applyItemModelDrawer(
         candidates = themeMatches,
     )?.method?.injectFixedDrawerItemGuard(hiddenItems, "THEME_TOGGLE")
     val grokMatches =
-        Fingerprint(
-            definingClass = model.ownerClass,
-            returnType = "V",
-            parameters = DRAWER_GROK_BUTTON_PARAMETERS,
-        ).matchAllOrNull().orEmpty().distinctBy { it.originalMethod.toString() }
+        grokButtonFingerprint(definingClass = model.ownerClass).matchAllOrNull().orEmpty()
+            .distinctBy { it.originalMethod.toString() }
     requireAtMostOne(
         label = "NewX drawer Grok button",
         candidates = grokMatches,
@@ -1390,6 +1426,40 @@ private fun resolveDrawerTabNavigation(
 }
 
 /** Item-model drawers dispatch Communities from the landing component's item handler. */
+/**
+ * The `main/api` event fields an invoke's [argument] register is proven to hold at [callIndex]:
+ * each one is a static read whose value reaches the argument on every path.
+ */
+private fun Method.closeEventFields(callIndex: Int, argument: Int): List<FieldReference> {
+    val code = implementation?.instructions?.toList().orEmpty()
+    return code.take(callIndex).withIndex().mapNotNull { (index, instruction) ->
+        if (instruction.opcode != Opcode.SGET_OBJECT) return@mapNotNull null
+        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+        val load = instruction as OneRegisterInstruction
+        field.takeIf {
+            field.type.startsWith("Lcom/x/main/api/") &&
+                provesValueFromInstruction(index, load.registerA, callIndex, argument)
+        }
+    }
+}
+
+/**
+ * The drawer-close call after the tab change: the first Object-argument invoke-interface past it
+ * that receives a main/api event on every path. The event read proves the call, so the call is
+ * located by data flow rather than by its distance from the tab change.
+ */
+private fun Method.closeEventCallIndex(tabChangeIndex: Int): Int {
+    val code = implementation?.instructions?.toList().orEmpty()
+    return code.indices.firstOrNull { index ->
+        if (index <= tabChangeIndex || code[index].opcode !in INVOKE_INTERFACE_OPCODES) return@firstOrNull false
+        val reference = code[index].getReference<MethodReference>() ?: return@firstOrNull false
+        val registers = code[index].registersUsed
+        reference.parameterTypes.map(CharSequence::toString) == listOf(OBJECT_DESCRIPTOR) &&
+            reference.returnType == "V" && registers.size == 2 &&
+            closeEventFields(index, registers[1]).isNotEmpty()
+    } ?: throw PatchException("NewX drawer close call after the tab change is missing in $this")
+}
+
 private fun resolveItemDrawerTabNavigation(
     tabData: NewXNavBarTabData,
     model: DrawerItemModel,
@@ -1416,10 +1486,6 @@ private fun resolveItemDrawerTabNavigation(
                     returnType = OBJECT_DESCRIPTOR,
                     opcodes = INVOKE_INTERFACE_OPCODES,
                 ),
-                methodCall(
-                    parameters = listOf(OBJECT_DESCRIPTOR), returnType = "V",
-                    opcodes = INVOKE_INTERFACE_OPCODES, location = MatchAfterImmediately(),
-                ),
             ),
         ).scopedMatchAll(),
     )
@@ -1427,7 +1493,7 @@ private fun resolveItemDrawerTabNavigation(
     val code = method.instructions.toList()
     val enumRead = match.instructionMatches[1].index
     val tabChange = match.instructionMatches[2].index
-    val close = match.instructionMatches[3].index
+    val close = method.closeEventCallIndex(tabChange)
     val (tabFunction, tabArgument) = code[tabChange].registersUsed
     val (closeReceiver, closeArgument) = code[close].registersUsed
     val enumRegister = (code[enumRead] as OneRegisterInstruction).registerA
@@ -1451,19 +1517,11 @@ private fun resolveItemDrawerTabNavigation(
 
     val tabChangeField = componentField(tabChange, tabFunction)
     val closeField = componentField(close, closeReceiver)
-    val closeMethod = match.instructionMatches[3].methodReference
-    val closeArgumentField = requireExactlyOne(
-        "NewX drawer close event in $method",
-        code.take(close).withIndex().mapNotNull { (index, instruction) ->
-            if (instruction.opcode != Opcode.SGET_OBJECT) return@mapNotNull null
-            val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-            val load = instruction as OneRegisterInstruction
-            field.takeIf {
-                field.type.startsWith("Lcom/x/main/api/") &&
-                    method.provesValueFromInstruction(index, load.registerA, close, closeArgument)
-            }
-        },
-    )
+    val closeMethod = code[close].getReference<MethodReference>()
+        ?: throw PatchException("NewX drawer close call has no method reference in $method")
+    val closeArgumentField = method.closeEventFields(close, closeArgument).let { fields ->
+        requireExactlyOne("NewX drawer close event in $method", fields)
+    }
     if (tabChangeField.type != FUNCTION1_DESCRIPTOR || closeField.type != closeMethod.definingClass) {
         throw PatchException("NewX item drawer tab-change or close receiver has changed type in $method")
     }
@@ -1814,7 +1872,8 @@ val customizeNewXDrawerPatch =
             themeMatches.singleOrNull()?.method?.injectFixedDrawerItemGuard(hiddenItems, "THEME_TOGGLE")
 
             // GROK PATH: dedicated Get/Open Grok button; skip when the release has no Grok row.
-            val grokMatches = NewXDrawerGrokButtonFingerprint.scopedMatchAllOrNull().orEmpty()
+            val grokMatches = grokButtonFingerprint(classFingerprint = NewXDrawerContentClassFingerprint)
+                .scopedMatchAllOrNull().orEmpty()
             if (grokMatches.size > 1) {
                 throw PatchException(
                     "Expected at most one NewX drawer Grok button, found ${grokMatches.size}: " +
