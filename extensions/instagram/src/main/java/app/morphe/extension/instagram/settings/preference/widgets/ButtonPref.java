@@ -196,7 +196,7 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_LINK_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)) {
-            return UI.DRAWABLE_FRAME_CROSSED_ICON;
+            return UI.DRAWABLE_TARGET_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_APPEARANCE)) {
             return UI.DRAWABLE_APPEARANCE_ICON;
