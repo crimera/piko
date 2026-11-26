@@ -1210,6 +1210,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.fixStoryPosition) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_fix_story_position"),
+                            str("piko_fix_story_position_desc"),
+                            Settings.FIX_STORY_POSITION
+                    )
+            );
+        }
         if (SettingsStatus.customiseStoryTimestamp) {
             addPreference(
                     helper.listPreference(

@@ -51,6 +51,7 @@ public class Settings {
     public static final BooleanSetting DISABLE_STORY_FLIPPING = new BooleanSetting("disable_story_flipping", false, NOT_REQUIRED);
     public static final BooleanSetting LOOP_STORY = new BooleanSetting("loop_story", false, NOT_REQUIRED);
     public static final BooleanSetting HIDE_STORY_FOLLOW_BUTTON = new BooleanSetting("hide_story_follow_button", false, NOT_REQUIRED);
+    public static final BooleanSetting FIX_STORY_POSITION = new BooleanSetting("fix_story_position", true, NOT_REQUIRED);
     public static final StringSetting CUSTOMISE_STORY_TIMESTAMP = new StringSetting("customise_story_timestamp", "default", REQUIRED);
     public static final BooleanSetting UNLIMITED_REPLAYS = new BooleanSetting("unlimited_replays", false, REQUIRED);
     public static final BooleanSetting DISABLE_DISAPPEARING_MESSAGES_GESTURE = new BooleanSetting("disable_disappearing_messages_gesture", false, REQUIRED);

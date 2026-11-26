@@ -108,8 +108,12 @@ public class SettingsStatus {
     public static void hideStoryFollowButton() {
         hideStoryFollowButton = true;
     }
+    public static boolean fixStoryPosition = false;
+    public static void fixStoryPosition() {
+        fixStoryPosition = true;
+    }
     public static boolean storySection() {
-        return (customiseStoryTimestamp || viewStoryMentions || disableStoryFlipping || loopStory || customiseStoryRingSize || hideStoryFollowButton);
+        return (customiseStoryTimestamp || viewStoryMentions || disableStoryFlipping || loopStory || customiseStoryRingSize || hideStoryFollowButton || fixStoryPosition);
     }
 
     //Links section.
@@ -331,6 +335,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_disable_story_flipping"),SettingsStatus.disableStoryFlipping);
         FLAGS.put(str("piko_loop_story"),SettingsStatus.loopStory);
         FLAGS.put(str("piko_hide_story_follow_button"),SettingsStatus.hideStoryFollowButton);
+        FLAGS.put(str("piko_fix_story_position"),SettingsStatus.fixStoryPosition);
         FLAGS.put(str("piko_view_story_mentions"),SettingsStatus.viewStoryMentions);
         FLAGS.put(str("piko_follow_back_indicator"),SettingsStatus.followBackIndicator);
         FLAGS.put(str("piko_disable_discover_people"),SettingsStatus.disableDiscoverPeople);

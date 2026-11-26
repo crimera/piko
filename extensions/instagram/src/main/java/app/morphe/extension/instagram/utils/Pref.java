@@ -373,6 +373,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.LOOP_STORY);
     }
 
+    public static boolean fixStoryPosition() {
+        return SharedPref.getBooleanPref(Settings.FIX_STORY_POSITION);
+    }
+
     public static int storyFollowButtonState(int original) {
         return SharedPref.getBooleanPref(Settings.HIDE_STORY_FOLLOW_BUTTON) ? 0 : original;
     }
