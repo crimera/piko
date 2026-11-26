@@ -149,6 +149,18 @@ public class Pref {
 
     public static boolean redirect(TabLayout$g g) {return Utils.redirect(g);}
 
+    public static boolean appLock() {
+        return Utils.getBooleanPref(Settings.MISC_APP_LOCK);
+    }
+
+    public static long appLockTimeoutMillis() {
+        try {
+            return Math.max(0L, Long.parseLong(Utils.getStringPref(Settings.MISC_APP_LOCK_TIMEOUT).trim())) * 60_000L;
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
+    }
+
     public static void blockUpdateScreen(View view) {
         if (Utils.getBooleanPref(Settings.MISC_BLOCK_UPDATE_SCREEN) && view != null) {
             if (view.getParent() instanceof ViewGroup container &&

@@ -85,6 +85,9 @@ public class ListPref extends ListPreference {
         }else if (key == Settings.NATIVE_READER_MODE_THEME.key) {
             entries = ResourceUtils.getStringArray("piko_array_readermode_themes");
             entriesValues = ResourceUtils.getStringArray("piko_array_readermode_themes_val");
+        }else if (key == Settings.MISC_APP_LOCK_TIMEOUT.key) {
+            entries = ResourceUtils.getStringArray("piko_array_app_lock_timeout");
+            entriesValues = ResourceUtils.getStringArray("piko_array_app_lock_timeout_val");
         }
 
         setEntries(entries);
