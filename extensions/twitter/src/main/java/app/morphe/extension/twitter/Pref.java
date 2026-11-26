@@ -43,11 +43,26 @@ public class Pref {
     public static void setLatestChangelogVersion(String version){
         Utils.setStringPref(Settings.LAST_CHANGELOG_VERSION.key,version);
     }
+    /*
+     * The changelog (hundreds of KB of HTML) lives in a cache file: in the settings file it was parsed on every cold
+     * start before the first setting could be read, and rewritten with every settings change.
+     */
+    private static java.io.File changelogFile() {
+        return new java.io.File(app.morphe.extension.shared.Utils.getContext().getCacheDir(), "piko_changelog.html");
+    }
     public static String getChangelog(){
-        return Utils.getStringPref(Settings.LAST_CHANGELOG);
+        try {
+            return new String(java.nio.file.Files.readAllBytes(changelogFile().toPath()), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Throwable t) {
+            return Settings.LAST_CHANGELOG.defaultValue;
+        }
     }
     public static void setChangelog(String msg){
-        Utils.setStringPref(Settings.LAST_CHANGELOG.key,msg);
+        try {
+            java.nio.file.Files.write(changelogFile().toPath(), msg.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        } catch (Throwable t) {
+            app.morphe.extension.crimera.PikoUtils.logger(t);
+        }
     }
 
     public static float setPostFontSize() {

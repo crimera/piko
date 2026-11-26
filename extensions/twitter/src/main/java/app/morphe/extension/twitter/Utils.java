@@ -112,6 +112,10 @@ public class Utils {
         return false;
     }
 
+    public static void removePref(String key) {
+        sp.removeKey(key);
+    }
+
     public static Boolean setStringPref(String key, String val) {
         try {
             sp.saveString(key, val);
