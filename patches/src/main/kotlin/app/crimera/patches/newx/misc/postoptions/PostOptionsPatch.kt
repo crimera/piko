@@ -1,7 +1,12 @@
 package app.crimera.patches.newx.misc.postoptions
 
 import app.crimera.patches.common.ApkScoped
+import app.crimera.patches.common.OBJECT_MOVE_OPCODES
+import app.crimera.patches.common.destinationRegisterOrNull
 import app.crimera.patches.newx.misc.extension.newXInitHook
+import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
+import app.crimera.patches.newx.misc.inlineactions.normalControlFlowSuccessors
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.models.fieldForToStringLabel
@@ -14,6 +19,7 @@ import app.crimera.patches.common.isObjectDescriptor
 import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.common.requireAtMostOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchDefinition
 import app.morphe.patcher.patch.mutableClassDefBy
@@ -33,6 +39,7 @@ import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.numberOfParameterRegisters
 import app.morphe.patcher.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
@@ -390,6 +397,18 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
     val lookup = requireExactlyOne("NewX post-options feedback lookup",
         postOptionsFeedbackLookups(renderer.method, feedbackField, isMap))
     val actionRegister = lookup.actionRegister
+    val labelHookIndex = lookup.resultIndex + 1
+
+    fun app.crimera.bytecode.Block.emitLabelRewrites() {
+        contributions.forEach { contribution ->
+            invokeStatic(
+                methodReference("${contribution.handlerDescriptor}->$LABEL_FOR_SIGNATURE"),
+                actionRegister,
+                lookup.labelRegister,
+            )
+            moveResult(lookup.labelRegister, STRING_DESCRIPTOR)
+        }
+    }
 
     fun findIconAssignments(range: IntRange): List<IconAssignment> =
         renderer.method.instructions.withIndex().mapNotNull { (index, instruction) ->
@@ -413,11 +432,29 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
 
     val beforeLookup = findIconAssignments(0 until lookup.callIndex)
     val afterLookup = findIconAssignments((lookup.resultIndex + 1) until renderer.method.instructions.size)
-    if (beforeLookup.isNotEmpty() == afterLookup.isNotEmpty()) {
+    if (beforeLookup.isNotEmpty() && afterLookup.isNotEmpty()) {
         throw PatchException(
             "Expected NewX post-options icon assignments exclusively before or after lookup " +
                 "(before=${beforeLookup.size}, after=${afterLookup.size})",
         )
+    }
+    if (beforeLookup.isEmpty() && afterLookup.isEmpty()) {
+        // 12.45 moved the icon `when` out of the renderer: it hands the action and the resolved
+        // label to a row helper, which selects the icon itself. Rewrite labels here and icons there.
+        val row = resolvePostOptionsRowDelegate(
+            renderer.method,
+            lookup,
+            resolvedNewXInlineActionModels().postActionTypeDescriptor,
+        )
+        injectDelegatedRowIcons(row, contributions)
+        renderer.method.insertHook(
+            index = labelHookIndex,
+            excludedRegisters = listOf(actionRegister, lookup.labelRegister),
+            relocateBranchTargets = true,
+        ) {
+            emitLabelRewrites()
+        }
+        return
     }
     val iconAssignments = beforeLookup.ifEmpty { afterLookup }
     val iconResultRegister =
@@ -432,17 +469,6 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
         )
 
     val iconFields = contributions.associateWith { resolveIconField(it.iconResourceName, iconType) }
-
-    fun app.crimera.bytecode.Block.emitLabelRewrites() {
-        contributions.forEach { contribution ->
-            invokeStatic(
-                methodReference("${contribution.handlerDescriptor}->$LABEL_FOR_SIGNATURE"),
-                actionRegister,
-                lookup.labelRegister,
-            )
-            moveResult(lookup.labelRegister, STRING_DESCRIPTOR)
-        }
-    }
 
     fun app.crimera.bytecode.Block.emitIconRewrites() {
         // The icon checks share the reserved byte register; if-eqz and move-result both encode it.
@@ -469,7 +495,7 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
         // The label and icon rewrites land in front of the instruction that consumes the resolved
         // label, so they run with both the action and the original label live.
         renderer.method.insertHook(
-            index = lookup.resultIndex + 1,
+            index = labelHookIndex,
             excludedRegisters = listOf(actionRegister, lookup.labelRegister, iconResultRegister),
             // A branch into the label lookup must run the rewrite too, or the custom options keep
             // their upstream label and icon.
@@ -498,7 +524,7 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
                         }
                     },
             )
-        // Insert the icon hook first (higher index) so lookup.resultIndex + 1 stays valid.
+        // Insert the icon hook first so the label hook index stays valid.
         renderer.method.insertHook(
             index = sheetRowCallIndex,
             excludedRegisters =
@@ -509,13 +535,266 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
             emitIconRewrites()
         }
         renderer.method.insertHook(
-            index = lookup.resultIndex + 1,
+            index = labelHookIndex,
             excludedRegisters = listOf(actionRegister, lookup.labelRegister),
             relocateBranchTargets = true,
         ) {
             emitLabelRewrites()
         }
     }
+}
+
+/**
+ * The row helper the renderer hands each option to once it selects no icon itself (12.45+):
+ * `invoke-static {action, label, ...}, Owner->row(PostActionType;String;...)`.
+ *
+ * The action slot must be proven, on every path, to carry the value the feedback lookup used; the
+ * label slot must be the lookup's own label register, so the label rewrite reaches the row.
+ */
+internal fun resolvePostOptionsRowDelegate(
+    method: Method,
+    lookup: PostOptionsFeedbackLookup,
+    postActionType: String,
+): MethodReference {
+    val code = method.instructions.toList()
+    val actionOrigin = method.registerOriginAt(lookup.callIndex, lookup.actionRegister)
+        ?: throw PatchException(
+            "NewX post-options action v${lookup.actionRegister} has no single proven source at the feedback lookup",
+        )
+    val delegates =
+        ((lookup.resultIndex + 1) until code.size).mapNotNull { index ->
+            val call = code[index]
+            if (call.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) return@mapNotNull null
+            val reference = call.getReference<MethodReference>() ?: return@mapNotNull null
+            val parameters = reference.parameterTypes.map(CharSequence::toString)
+            val slots = call.parameterSlotRegisters(reference) ?: return@mapNotNull null
+            // The action and label slots are located by type, then by which slot carries the proven value.
+            val hasActionSlot = requireAtMostOne(
+                label = "NewX post-options row action slot in $reference",
+                candidates = parameters.indices.filter { slot ->
+                    parameters[slot] == postActionType &&
+                        method.originProvesRegister(actionOrigin, lookup.actionRegister, index, slots[slot])
+                },
+            ) != null
+            // The rewritten label must reach the row on the path that carries it. The row also receives
+            // a fallback label on other paths, so the label slot is required to carry the value on some path.
+            val hasLabelSlot = requireAtMostOne(
+                label = "NewX post-options row label slot in $reference",
+                candidates = parameters.indices.filter { slot ->
+                    parameters[slot] == STRING_DESCRIPTOR &&
+                        method.valueReachesOnSomePath(lookup.resultIndex, lookup.labelRegister, index, slots[slot])
+                },
+            ) != null
+            reference.takeIf { hasActionSlot && hasLabelSlot }
+        }
+    return requireExactlyOne("NewX post-options row delegate", delegates.distinctBy(MethodReference::toString))
+}
+
+/**
+ * Where a register's value comes from at an index: the single instruction that defines it on every
+ * path there, or the method entry when the register still holds its parameter.
+ */
+private sealed interface RegisterOrigin {
+    data class Definition(val index: Int) : RegisterOrigin
+    object Parameter : RegisterOrigin
+}
+
+/**
+ * The unique origin of [register] at [index], or null when no single origin holds on every path.
+ * A definition is the origin when its value reaches [index] on every path leaving it, so a loop
+ * that redefines the register leaves only its last definition on the path to [index].
+ */
+private fun Method.registerOriginAt(index: Int, register: Int): RegisterOrigin? {
+    val code = implementation?.instructions?.toList() ?: return null
+    val definitions = code.indices.filter { definition ->
+        // A check-cast narrows the type of the same value, so the value's origin is upstream of it.
+        definition < index &&
+            code[definition].opcode != Opcode.CHECK_CAST &&
+            code[definition].destinationRegisterOrNull() == register &&
+            provesValueFromInstructionOnSourcePaths(definition, register, index, register)
+    }.map { RegisterOrigin.Definition(it) }
+    val parameter = if (register >= p0Register && provesParameterValue(index, register, register)) {
+        listOf(RegisterOrigin.Parameter)
+    } else {
+        emptyList()
+    }
+    return (definitions + parameter).singleOrNull()
+}
+
+/**
+ * Whether [targetRegister] at [targetIndex] holds the value that [originRegister] received at
+ * [originIndex] on some path that leaves the origin. Unlike the must-proofs above, a join where
+ * another path overwrites the register does not refute it: a rewrite reaches a consumer when it
+ * reaches it on any path.
+ */
+private fun Method.valueReachesOnSomePath(
+    originIndex: Int,
+    originRegister: Int,
+    targetIndex: Int,
+    targetRegister: Int,
+): Boolean {
+    val code = implementation?.instructions?.toList() ?: return false
+    val successors = normalControlFlowSuccessors() ?: return false
+    val pending = ArrayDeque<Pair<Int, Set<Int>>>()
+    successors.getOrNull(originIndex)?.forEach { pending += it to setOf(originRegister) }
+    val visited = HashSet<Pair<Int, Set<Int>>>()
+    while (pending.isNotEmpty()) {
+        val state = pending.removeFirst()
+        if (!visited.add(state)) continue
+        val (index, holders) = state
+        if (index == targetIndex) {
+            if (targetRegister in holders) return true
+            continue
+        }
+        if (index !in code.indices) continue
+        val instruction = code[index]
+        val holding = holders.toMutableSet()
+        val destination = instruction.destinationRegisterOrNull()
+        // check-cast narrows the type of the same value, so it keeps every holder as it is.
+        if (destination != null && instruction.opcode != Opcode.CHECK_CAST) {
+            val copiesHolder = instruction.opcode in OBJECT_MOVE_OPCODES &&
+                (instruction as TwoRegisterInstruction).registerB in holders
+            holding.remove(destination)
+            if (instruction.opcode.setsWideRegister()) holding.remove(destination + 1)
+            if (copiesHolder) holding += destination
+        }
+        if (holding.isEmpty()) continue
+        successors.getOrNull(index)?.forEach { pending += it to holding }
+    }
+    return false
+}
+
+/** Whether [targetRegister] at [targetIndex] holds the value [origin] gave [originRegister]. */
+private fun Method.originProvesRegister(
+    origin: RegisterOrigin,
+    originRegister: Int,
+    targetIndex: Int,
+    targetRegister: Int,
+): Boolean = when (origin) {
+    is RegisterOrigin.Definition ->
+        provesValueFromInstructionOnSourcePaths(origin.index, originRegister, targetIndex, targetRegister)
+    RegisterOrigin.Parameter -> provesParameterValue(targetIndex, targetRegister, originRegister)
+}
+
+internal data class PostOptionsRowIconConsumer(
+    val index: Int,
+    val reference: String,
+    val iconRegister: Int,
+    val iconType: String,
+    val actionRegister: Int,
+)
+
+/**
+ * The one call in the row helper that receives the selected icon for this row.
+ *
+ * The general sheet-row constructor receives the action parameter and a selected native icon.
+ * The separate Send to Grok row passes null and does not participate in the icon selection.
+ */
+internal fun resolvePostOptionsRowIconConsumer(method: Method): PostOptionsRowIconConsumer {
+    val implementation = method.implementation
+        ?: throw PatchException("NewX post-options row helper has no implementation: $method")
+    if (!AccessFlags.STATIC.isSet(method.accessFlags) || method.parameterTypes.isEmpty()) {
+        throw PatchException("NewX post-options row helper is not a static action method: $method")
+    }
+    // Static, so the action is the first parameter register.
+    val actionParameter = implementation.registerCount - method.numberOfParameterRegisters
+    val code = method.instructions.toList()
+    val consumers = code.withIndex().mapNotNull { (index, call) ->
+        if (call.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE)) return@mapNotNull null
+        val reference = call.getReference<MethodReference>() ?: return@mapNotNull null
+        val parameters = reference.parameterTypes.map(CharSequence::toString)
+        // The icon is the one icon-typed parameter, wherever the constructor places it.
+        val iconSlot = requireAtMostOne(
+            label = "NewX post-options row icon parameter in $reference",
+            candidates = parameters.indices.filter { parameters[it].startsWith("Lcom/x/icons/") },
+        ) ?: return@mapNotNull null
+        val iconType = parameters[iconSlot]
+        if (reference.name != "<init>" || !reference.definingClass.startsWith("Lcom/x/ui/common/sheets/") ||
+            STRING_DESCRIPTOR !in parameters
+        ) return@mapNotNull null
+        val slots = call.parameterSlotRegisters(reference) ?: return@mapNotNull null
+        // The action is the Object slot that carries the row helper's action parameter.
+        val actionSlot = requireAtMostOne(
+            label = "NewX post-options row action parameter in $reference",
+            candidates = parameters.indices.filter { slot ->
+                parameters[slot] == OBJECT_DESCRIPTOR && method.provesParameterValue(index, slots[slot], actionParameter)
+            },
+        ) ?: return@mapNotNull null
+        val actionRegister = slots[actionSlot]
+        val iconRegister = slots[iconSlot]
+        val rendersNativeIcon = code.take(index).withIndex().any { (loadIndex, load) ->
+            load.opcode == Opcode.SGET_OBJECT && load.getReference<FieldReference>()?.type == iconType &&
+                method.provesValueFromInstructionOnSourcePaths(
+                    loadIndex, (load as OneRegisterInstruction).registerA, index, iconRegister,
+                )
+        }
+        PostOptionsRowIconConsumer(index, reference.toString(), iconRegister, iconType, actionRegister)
+            .takeIf { rendersNativeIcon }
+    }
+    val consumer = requireExactlyOne("NewX post-options row icon consumer in $method", consumers)
+    if (consumer.iconRegister > 255) {
+        throw PatchException("NewX post-options row icon v${consumer.iconRegister} is not byte-encodable")
+    }
+    return consumer
+}
+
+private fun injectDelegatedRowIcons(row: MethodReference, contributions: List<PostOptionContribution>) {
+    val owner = mutableClassDefBy(row.definingClass)
+    val helper = owner.methods.singleOrNull { method ->
+        method.name == row.name && method.returnType == row.returnType &&
+            method.parameterTypes.map(CharSequence::toString) == row.parameterTypes.map(CharSequence::toString)
+    } ?: throw PatchException("NewX post-options row helper was not found: $row")
+    // Prove the consumer on the untouched body: cloneParameters rewrites the parameter registers.
+    val consumer = resolvePostOptionsRowIconConsumer(helper)
+    val iconCheckRegister = helper.implementation!!.registerCount
+    if (iconCheckRegister > 255) {
+        throw PatchException("NewX post-options row icon check requires a byte-encodable register")
+    }
+    val sizeBefore = helper.instructions.size
+    val preserved = helper.cloneParameters()
+    // cloneParameters only prepends the argument copies, so every original index shifts uniformly.
+    val consumerIndex = consumer.index + (preserved.instructions.size - sizeBefore)
+    val call = preserved.instructions.getOrNull(consumerIndex)
+    if (call == null || call.getReference<MethodReference>()?.toString() != consumer.reference) {
+        throw PatchException("NewX post-options row icon consumer moved during parameter preservation: $row")
+    }
+    val iconFields = contributions.associateWith { resolveIconField(it.iconResourceName, consumer.iconType) }
+    preserved.insertHook(
+        index = consumerIndex,
+        excludedRegisters = (call.registersUsed + consumer.actionRegister).distinct(),
+        relocateBranchTargets = true,
+    ) {
+        contributions.forEachIndexed { index, contribution ->
+            if (index > 0) label(iconContinuationLabel(index))
+            invokeStatic(
+                methodReference("${contribution.handlerDescriptor}->$USES_ICON_SIGNATURE"),
+                consumer.actionRegister,
+            )
+            moveResult(iconCheckRegister, "Z")
+            ifEqz(
+                iconCheckRegister,
+                if (index == contributions.lastIndex) {
+                    Target.Original
+                } else {
+                    Target.Local(iconContinuationLabel(index + 1))
+                },
+            )
+            sget(consumer.iconRegister, iconFields.getValue(contribution))
+        }
+    }
+}
+
+/** Registers holding the declared parameters, in declaration order, or null for a malformed call. */
+private fun Instruction.parameterSlotRegisters(reference: MethodReference): List<Int>? {
+    val registers = registersUsed
+    var cursor = if (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) 0 else 1
+    val slots = mutableListOf<Int>()
+    reference.parameterTypes.forEach { type ->
+        if (cursor >= registers.size) return null
+        slots += registers[cursor]
+        cursor += if (type.toString() == "J" || type.toString() == "D") 2 else 1
+    }
+    return slots.takeIf { cursor == registers.size }
 }
 
 /** Name of the label that starts the icon check of the contribution at [index]. */
@@ -531,11 +810,18 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
                 returnType = "V",
                 // The constructor stores the presenter in its field, which the instruction index finds.
                 filters = listOf(fieldAccess(opcode = Opcode.IPUT_OBJECT, type = presenter.originalClassDef.type)),
-                custom = { method, _ ->
+                custom = { method, classDef ->
                     val parameters = method.parameterDescriptors()
-                    parameters.size == 6 &&
-                        parameters.firstOrNull() == presenter.originalClassDef.type &&
-                        parameters.drop(1).all(String::isObjectDescriptor)
+                    parameters.firstOrNull() == presenter.originalClassDef.type &&
+                        parameters.drop(1).all(String::isObjectDescriptor) &&
+                        "Lkotlin/jvm/functions/Function1;" in classDef.interfaces &&
+                        classDef.methods.any { candidate ->
+                            candidate.parameterDescriptors() == listOf(OBJECT_DESCRIPTOR) &&
+                                candidate.returnType == OBJECT_DESCRIPTOR &&
+                                candidate.implementation?.instructions?.any { instruction ->
+                                    instruction.getReference<MethodReference>()?.isEnumOrdinal() == true
+                                } == true
+                        }
                 },
             ).matchAll(),
         )
@@ -555,10 +841,7 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
     val ordinalCandidates = eventHandler.method.instructions.withIndex().filter { (_, instruction) ->
         val methodRef = instruction.getReference<MethodReference>() ?: return@filter false
         instruction.opcode == Opcode.INVOKE_VIRTUAL &&
-            methodRef.definingClass == "Ljava/lang/Enum;" &&
-            methodRef.name == "ordinal" &&
-            methodRef.parameterTypes.isEmpty() &&
-            methodRef.returnType == "I" &&
+            methodRef.isEnumOrdinal() &&
             instruction.registersUsed.size == 1
     }
     if (ordinalCandidates.size != 1) {
@@ -607,6 +890,9 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
         }
     }
 }
+
+private fun MethodReference.isEnumOrdinal(): Boolean =
+    definingClass == "Ljava/lang/Enum;" && name == "ordinal" && parameterTypes.isEmpty() && returnType == "I"
 
 /** Name of the label that starts the action check of the contribution at [index]. */
 private fun actionContinuationLabel(index: Int): String = "piko_newx_post_option_action_$index"

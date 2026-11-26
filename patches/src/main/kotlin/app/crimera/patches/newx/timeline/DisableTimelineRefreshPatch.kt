@@ -17,6 +17,7 @@ import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -97,13 +98,19 @@ private object NewXMainActivityOnNewIntentFingerprint : Fingerprint(
     returnType = "V",
 )
 
+private const val HOME_TABBED_PACKAGE = "Lcom/x/home/tabbed/"
+private const val FOREGROUND_REFRESH_TIMEOUT_KEY = "timeline_auto_refresh_on_foreground_timeout_millis"
+private const val TITLE_TAP_REFRESH_KEY = "home_timeline_navigation_tap_to_refresh_at_top_enabled"
+private const val COMPARABLE_TIME_MARK_DESCRIPTOR = "Lkotlin/time/ComparableTimeMark;"
+
+// Through 12.43 the home Back handler refreshed For You after this timeout.
 private object NewXHomeReselectFingerprint : Fingerprint(
-    definingClass = "Lcom/x/home/tabbed/",
+    definingClass = HOME_TABBED_PACKAGE,
     parameters = listOf("Z", "Z"),
     returnType = "Z",
     filters =
         listOf(
-            string("timeline_auto_refresh_on_foreground_timeout_millis"),
+            string(FOREGROUND_REFRESH_TIMEOUT_KEY),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
                 name = "getInt",
@@ -113,6 +120,75 @@ private object NewXHomeReselectFingerprint : Fingerprint(
             opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
         ),
 )
+
+private object NewXHomeBackRefreshAnalyticsFingerprint : Fingerprint(
+    filters = listOf(string("onBackRefreshForYou")),
+)
+
+// 12.45 replaced the Back timeout with a user double tap on the home title, gated by this switch.
+private object NewXHomeTitleTapRefreshFingerprint : Fingerprint(
+    definingClass = HOME_TABBED_PACKAGE,
+    returnType = "V",
+    filters =
+        listOf(
+            string(TITLE_TAP_REFRESH_KEY),
+            methodCall(
+                opcode = Opcode.INVOKE_INTERFACE,
+                name = "getBoolean",
+                parameters = listOf("Ljava/lang/String;", "Z"),
+                returnType = "Z",
+            ),
+            opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
+        ),
+)
+
+/**
+ * The Back-to-For-You handler and its analytics disappeared when explicit double taps gained
+ * their own timing window. Foreground refresh still uses the timeout in the URT refresh policy.
+ */
+private fun requireReplacedHomeBackRefresh() {
+    val backRefreshAnalytics = NewXHomeBackRefreshAnalyticsFingerprint.matchAllOrNull().orEmpty()
+    if (backRefreshAnalytics.isNotEmpty()) {
+        throw PatchException(
+            "NewX home Back refresh still has native analytics: " +
+                backRefreshAnalytics.joinToString { it.originalMethod.toString() },
+        )
+    }
+    val titleTap = requireExactlyOne(
+        "NewX home title-tap refresh handler",
+        NewXHomeTitleTapRefreshFingerprint.scopedMatchAll().map { it.originalMethod },
+    )
+    val titleTapCode = titleTap.implementation?.instructions?.toList().orEmpty()
+    val tapWindowField = requireExactlyOne(
+        "NewX home title-tap refresh window field",
+        titleTapCode.mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.IGET_OBJECT && instruction.opcode != Opcode.IPUT_OBJECT) {
+                return@mapNotNull null
+            }
+            instruction.getReference<FieldReference>()?.takeIf { field ->
+                field.definingClass == titleTap.definingClass && field.type == COMPARABLE_TIME_MARK_DESCRIPTOR
+            }
+        }.distinctBy { "${it.definingClass}->${it.name}:${it.type}" },
+    )
+    val accesses = titleTapCode.filter { instruction ->
+        instruction.getReference<FieldReference>()?.isSameField(tapWindowField) == true
+    }.map { it.opcode }.toSet()
+    if (Opcode.IGET_OBJECT !in accesses || Opcode.IPUT_OBJECT !in accesses) {
+        throw PatchException(
+            "NewX home title-tap refresh does not both read and rearm its tap window $tapWindowField",
+        )
+    }
+    val homeClass = classDefByOrNull(titleTap.definingClass)
+        ?: throw PatchException("NewX home title-tap refresh class is missing: ${titleTap.definingClass}")
+    val backHandlers = homeClass.methods.filter { method ->
+        method.returnType == "Z" && method.parameterTypes.map(CharSequence::toString) == listOf("Z", "Z")
+    }
+    if (backHandlers.isNotEmpty()) {
+        throw PatchException(
+            "NewX home class ${homeClass.type} still has a (ZZ)Z Back handler: ${backHandlers.joinToString()}",
+        )
+    }
+}
 
 private fun newXUrtRepositoryRequestFingerprint(requestCall: MethodReference) =
     Fingerprint(
@@ -242,14 +318,12 @@ val disableTimelineRefreshPatch =
                 }
             }
 
-            val homeMatches = NewXHomeReselectFingerprint.scopedMatchAll()
-            if (homeMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX home reselect handler, found ${homeMatches.size}: " +
-                        homeMatches.joinToString { it.originalMethod.toString() },
-                )
-            }
-            homeMatches.single().method.apply {
+            val homeReselect = requireAtMostOne(
+                "NewX home Back refresh handler",
+                NewXHomeReselectFingerprint.scopedMatchAllOrNull().orEmpty(),
+            )
+            if (homeReselect == null) requireReplacedHomeBackRefresh()
+            homeReselect?.method?.apply {
                 val method = this
                 val read =
                     disableTimelineRefresh.injectRead(

@@ -65,7 +65,7 @@ public final class MediaSheetFilter {
 
     /**
      * Returns the string-resource id of the row title. The placeholder body is replaced at patch
-     * time with the release-specific title getter and resource field of the target APK, so no
+     * time with the release-specific title and resource fields of the target APK, so no
      * release class is reflected at runtime.
      */
     private static int getLabelResourceId(Object item) {

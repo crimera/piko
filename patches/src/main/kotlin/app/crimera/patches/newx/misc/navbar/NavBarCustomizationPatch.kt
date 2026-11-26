@@ -1,7 +1,11 @@
 package app.crimera.patches.newx.misc.navbar
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
+import app.crimera.patches.newx.misc.drawer.DrawerItemModel
 import app.crimera.patches.newx.misc.drawer.isDrawerRowRenderer
+import app.crimera.patches.newx.misc.drawer.mutableMethod
+import app.crimera.patches.newx.misc.drawer.resolveDrawerItemModelOrNull
+import app.crimera.patches.newx.misc.drawer.toJavaClassName
 import app.crimera.patches.newx.misc.drawer.isStringResourceLookup
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
@@ -76,6 +80,10 @@ private const val REGISTER_TAB_DESCRIPTOR =
     "$NAV_BAR_CATALOG_DESCRIPTOR->registerTab($STRING_DESCRIPTOR$INT_DESCRIPTOR$STRING_DESCRIPTOR)V"
 private const val SET_DESTINATION_CLICK_DESCRIPTOR =
     "$NAV_BAR_REPLACEMENT_DESCRIPTOR->setDestinationClick($STRING_DESCRIPTOR$FUNCTION0_DESCRIPTOR)V"
+private const val REGISTER_DESTINATION_ITEM_DESCRIPTOR =
+    "$NAV_BAR_CATALOG_DESCRIPTOR->registerDestinationItem($STRING_DESCRIPTOR$STRING_DESCRIPTOR)V"
+private const val CAPTURE_ITEM_CLICK_DESCRIPTOR =
+    "$NAV_BAR_REPLACEMENT_DESCRIPTOR->captureItemClick($OBJECT_DESCRIPTOR$FUNCTION0_DESCRIPTOR)V"
 private const val TAB_DATA_FILTER_DESCRIPTOR =
     "$NAV_BAR_FILTER_DESCRIPTOR->filter(Ljava/util/Map;)Ljava/util/Map;"
 private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
@@ -113,10 +121,18 @@ private data class ResolvedNavBarDestination(
     val spec: NavBarDestinationSpec,
     val titleResourceId: Long,
     val iconField: FieldReference,
-    val method: MutableMethod,
-    val callIndex: Int,
-    val clickRegister: Int,
+    val capture: DestinationClickCapture,
 )
+
+/** Where the destination's native drawer click is captured. */
+private sealed interface DestinationClickCapture {
+    /** Title-row releases: the destination owns one row call with its click in [clickRegister]. */
+    data class RowCall(val method: MutableMethod, val callIndex: Int, val clickRegister: Int) :
+        DestinationClickCapture
+
+    /** Item-model releases: the shared item renderer receives this item class and its click. */
+    data class Item(val itemType: String) : DestinationClickCapture
+}
 
 @Suppress("unused")
 val customizeNewXNavBarPatch =
@@ -155,6 +171,8 @@ val customizeNewXNavBarPatch =
 
             injectNavBarFilter(resolveNewXNavBarFilterTarget(tabDataMatch))
 
+            // ITEM-MODEL RELEASES: destinations are drawer item classes instead of title rows.
+            val itemModel = resolveDrawerItemModelOrNull()
             val destinations =
                 NAV_BAR_DESTINATIONS.mapNotNull { spec ->
                     if (!hasResourceId(ResourceType.STRING, spec.titleResourceName)) {
@@ -164,7 +182,11 @@ val customizeNewXNavBarPatch =
                                 spec.titleResourceName,
                         )
                     }
-                    resolveNavBarDestination(spec)
+                    if (itemModel != null) {
+                        resolveItemNavBarDestination(spec, itemModel)
+                    } else {
+                        resolveNavBarDestination(spec)
+                    }
                 }
             val contentTarget = resolveNavBarItemContent(tabData)
             val iconFields = destinations.map { it.iconField } + contentTarget.tabIconFields.values
@@ -172,6 +194,7 @@ val customizeNewXNavBarPatch =
 
             injectSettingsRegistrations(destinations, contentTarget.tabIconFields, iconDrawables)
             injectDestinationClickCaptures(destinations)
+            itemModel?.let(::injectItemClickCapture)
 
             val tabDataConstructor = resolveTabDataValueConstructor(tabData.tabDataValueType)
 
@@ -246,29 +269,28 @@ private fun NavBarItemContentTarget.injectReplacementOverride(tabDataConstructor
     val paramTypes = tabDataConstructor.parameterTypes.map(CharSequence::toString)
     method.insertHook(
         index = rendererCallIndex,
-        excludedRegisters = listOf(iconRegister, labelRegister, tabDataValueRegister, thisRegister),
+        excludedRegisters = listOf(iconRegister, labelRegister, tabDataValueRegister, navigationRegister),
         // The label switch jumps straight at the renderer call, so every case has to run the hook.
         relocateBranchTargets = true,
     ) {
         val instanceRegister = scratchRegister()
         val workRegister = scratchRegister()
 
-        // The receiver is preserved in a local above the original frame, so it is moved into the
-        // four-bit work register before every field read (format 22c cannot encode the receiver).
-        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
-        iget(workRegister, workRegister, navigationField)
+        // Captured content keeps its receiver in a high local; direct content keeps the tab itself.
+        move(workRegister, navigationRegister, OBJECT_DESCRIPTOR)
+        navigationField?.let { iget(workRegister, workRegister, it) }
         invokeStatic(methodReference(OVERRIDE_ICON_DESCRIPTOR), workRegister, iconRegister)
         moveResult(workRegister, iconType)
         checkCast(workRegister, iconType)
         move(iconRegister, workRegister, OBJECT_DESCRIPTOR)
 
-        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
-        iget(workRegister, workRegister, navigationField)
+        move(workRegister, navigationRegister, OBJECT_DESCRIPTOR)
+        navigationField?.let { iget(workRegister, workRegister, it) }
         invokeStatic(methodReference(OVERRIDE_LABEL_DESCRIPTOR), workRegister, labelRegister)
         moveResult(labelRegister, STRING_DESCRIPTOR)
 
-        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
-        iget(workRegister, workRegister, navigationField)
+        move(workRegister, navigationRegister, OBJECT_DESCRIPTOR)
+        navigationField?.let { iget(workRegister, workRegister, it) }
         invokeStatic(methodReference(SHOULD_CLEAR_BADGE_DESCRIPTOR), workRegister)
         moveResult(workRegister, "Z")
         ifEqz(workRegister, Target.Original)
@@ -285,7 +307,11 @@ private fun NavBarItemContentTarget.injectReplacementOverride(tabDataConstructor
 
     // Preserve the receiver before the compiler reuses the parameter registers for the icon and
     // the resolved label. Inserted last so the renderer call index above stayed valid.
-    method.insertHook(index = 0, relocateBranchTargets = false) { move(thisRegister, method.p0Register, OBJECT_DESCRIPTOR) }
+    if (navigationField != null) {
+        method.insertHook(index = 0, relocateBranchTargets = false) {
+            move(navigationRegister, method.p0Register, OBJECT_DESCRIPTOR)
+        }
+    }
 }
 
 private data class DrawerRowCall(
@@ -359,10 +385,72 @@ private fun resolveNavBarDestination(
         spec = spec,
         titleResourceId = titleResourceId,
         iconField = row.iconField,
-        method = mutableMethod,
-        callIndex = row.callIndex,
-        clickRegister = row.call.startRegister + 2,
+        capture =
+            DestinationClickCapture.RowCall(
+                method = mutableMethod,
+                callIndex = row.callIndex,
+                clickRegister = row.call.startRegister + 2,
+            ),
     )
+}
+
+/**
+ * Item-model destination: the single item class whose title mapper branch loads the
+ * destination title (or its alternate), with that item's static icon.
+ */
+private fun resolveItemNavBarDestination(
+    spec: NavBarDestinationSpec,
+    model: DrawerItemModel,
+): ResolvedNavBarDestination {
+    val titleResourceId = resourceId(ResourceType.STRING, spec.titleResourceName)
+    val alternateTitleResourceId =
+        spec.alternateTitleResourceName
+            ?.takeIf { hasResourceId(ResourceType.STRING, it) }
+            ?.let { resourceId(ResourceType.STRING, it) }
+    val titleResourceIds = listOfNotNull(titleResourceId, alternateTitleResourceId).map(Long::toInt).distinct()
+    val branches = titleResourceIds.flatMap(model::branchesWithTitle).distinctBy { it.itemType }
+    if (branches.isEmpty()) {
+        val nested = titleResourceIds.flatMap(model::branchesWithNestedTitle).distinctBy { it.itemType }
+        throw PatchException(
+            "NewX drawer item for ${spec.titleResourceName} is not dispatched by its own class" +
+                (if (nested.isEmpty()) "" else "; it is nested in ${nested.joinToString { it.itemType }}") +
+                ", so its click cannot be attributed to one destination",
+        )
+    }
+    val branch = requireExactlyOne("NewX drawer item for ${spec.titleResourceName}", branches) { it.itemType }
+    val iconField =
+        branch.iconField
+            ?: throw PatchException("NewX drawer item ${branch.itemType} for ${spec.titleResourceName} has no static icon")
+    return ResolvedNavBarDestination(
+        spec = spec,
+        titleResourceId = titleResourceId,
+        iconField = iconField,
+        capture = DestinationClickCapture.Item(branch.itemType),
+    )
+}
+
+/**
+ * Captures (item, click) at the item renderer entry. The extension maps the item class to the
+ * registered destinations. Entry registers are all free, so four-bit scratch registers suffice
+ * for the non-range invoke.
+ */
+private fun injectItemClickCapture(model: DrawerItemModel) {
+    val method = model.itemRenderer.mutableMethod()
+    val parameterWidths = method.parameterTypes.map { if (it == "J" || it == "D") 2 else 1 }
+    val firstParameterRegister = method.p0Register
+    val itemRegister = firstParameterRegister + parameterWidths.take(model.itemParameterIndex).sum()
+    val clickRegister = firstParameterRegister + parameterWidths.take(model.clickParameterIndex).sum()
+    method.insertHook(
+        index = 0,
+        excludedRegisters = listOf(itemRegister, clickRegister),
+        relocateBranchTargets = false,
+    ) {
+        val item = scratchRegister(RegisterLimit.FOUR_BIT)
+        val click = scratchRegister(RegisterLimit.FOUR_BIT)
+        move(item, itemRegister, OBJECT_DESCRIPTOR)
+        move(click, clickRegister, FUNCTION0_DESCRIPTOR)
+        invokeStatic(methodReference(CAPTURE_ITEM_CLICK_DESCRIPTOR), item, click)
+    }
 }
 
 internal fun List<Instruction>.resolveTitleResourceIdAtRowCall(
@@ -417,6 +505,7 @@ private fun injectSettingsRegistrations(
 ) {
     val registerDestination = methodReference(REGISTER_DESTINATION_DESCRIPTOR)
     val registerTab = methodReference(REGISTER_TAB_DESCRIPTOR)
+    val registerDestinationItem = methodReference(REGISTER_DESTINATION_ITEM_DESCRIPTOR)
     SettingsRegistrationState.inject {
         destinations.forEach { destination ->
             constString(0, destination.spec.id)
@@ -424,6 +513,12 @@ private fun injectSettingsRegistrations(
             sget(2, destination.iconField)
             constInt(3, iconDrawables.getValue(destination.iconField.toString()))
             invokeStatic(registerDestination, 0, 1, 2, 3)
+            val capture = destination.capture
+            if (capture is DestinationClickCapture.Item) {
+                constString(0, destination.spec.id)
+                constString(1, capture.itemType.toJavaClassName())
+                invokeStatic(registerDestinationItem, 0, 1)
+            }
         }
         NAV_BAR_NATIVE_TAB_OPTIONS.forEach { (name, labelResourceName) ->
             constString(0, name)
@@ -499,7 +594,11 @@ internal fun MutableMethod.resolveIconDrawableMap(iconType: String): Map<String,
 
 private fun injectDestinationClickCaptures(destinations: List<ResolvedNavBarDestination>) {
     val classDef = mutableClassDefBy(NAV_BAR_REPLACEMENT_DESCRIPTOR)
-    destinations.sortedByDescending { it.callIndex }.forEach { destination ->
+    val rowCalls =
+        destinations.mapNotNull { destination ->
+            (destination.capture as? DestinationClickCapture.RowCall)?.let { destination to it }
+        }
+    rowCalls.sortedByDescending { (_, capture) -> capture.callIndex }.forEach { (destination, capture) ->
         val destinationIndex =
             NAV_BAR_DESTINATIONS.indexOfFirst { spec -> spec.id == destination.spec.id }
         if (destinationIndex < 0) {
@@ -540,7 +639,7 @@ private fun injectDestinationClickCaptures(destinations: List<ResolvedNavBarDest
             returnVoid()
         }
 
-        destination.method.insertHook(destination.callIndex, relocateBranchTargets = false) {
+        capture.method.insertHook(capture.callIndex, relocateBranchTargets = false) {
             invokeStatic(
                 ImmutableMethodReference(
                     NAV_BAR_REPLACEMENT_DESCRIPTOR,
@@ -548,7 +647,7 @@ private fun injectDestinationClickCaptures(destinations: List<ResolvedNavBarDest
                     listOf(FUNCTION0_DESCRIPTOR),
                     "V",
                 ),
-                destination.clickRegister,
+                capture.clickRegister,
             )
         }
     }

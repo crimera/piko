@@ -14,6 +14,8 @@ import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
 import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.resolveInlineActionKindLayoutMethod
+import app.crimera.patches.newx.misc.drawer.parseItemBranches
+import app.crimera.patches.newx.timeline.hasKnownSpacesBarSignature
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineActionKindRenderCall
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineIconSizeHook
 import app.crimera.patches.newx.misc.inlineactions.isCapturedInlineActionEntryRenderer
@@ -39,6 +41,7 @@ import app.crimera.patches.newx.misc.postoptions.postOptionsParameterOffset
 import app.crimera.patches.newx.misc.postoptions.postOptionsFeedbackLookups
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
 import com.android.tools.smali.dexlib2.Opcode
@@ -48,6 +51,11 @@ import app.crimera.patches.newx.timeline.readsArrayListFromParameter
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
 import app.crimera.patches.newx.misc.dynamiccolor.resolveTabIndicatorTintSite
 import app.crimera.patches.newx.misc.replysorting.installReplySortingSelectionHook
+import app.crimera.patches.newx.misc.replysorting.ReplySortingSeed
+import app.crimera.patches.newx.misc.replysorting.enumSeeds
+import app.crimera.patches.newx.misc.replysorting.insertReplySortingDefault
+import app.crimera.patches.newx.misc.replysorting.isStateFlowFactoryArgument
+import app.crimera.patches.newx.misc.drawer.isItemTitleMapperShape
 import app.crimera.patches.newx.misc.replysorting.resolveReplySortingSelectionSite
 import app.crimera.tools.lint.ResolverLinter
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
@@ -78,6 +86,25 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import app.crimera.patches.newx.misc.dynamiccolor.factoryResultFeedsStore
+import app.crimera.patches.newx.misc.dynamiccolor.injectActivatedLikeTint
+import app.crimera.patches.newx.misc.dynamiccolor.isTabSlotColors
+import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsRowDelegate
+import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsRowIconConsumer
+import app.crimera.patches.newx.timeline.resolveProvenForYouCurrentPageRefreshBridges
+import app.crimera.patches.newx.misc.drawer.resolveDrawerItemModel
+import app.crimera.patches.newx.misc.drawer.requireRegistersDeadAt
+import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
+
+private const val DRAWER_OWNER = "Lcom/x/main/drawer/Owner;"
+private const val DRAWER_ITEM = "Lcom/x/main/drawer/Item;"
+private const val DRAWER_PROFILE = "Lcom/x/main/drawer/ItemProfile;"
+private const val DRAWER_NESTED = "Lcom/x/main/drawer/ItemNested;"
+private const val DRAWER_ICONS = "Lcom/x/icons/Icons;"
+private const val DRAWER_COMPOSER = "Landroidx/compose/runtime/Composer;"
+private const val FUNCTION0_FIXTURE = "Lkotlin/jvm/functions/Function0;"
+private const val DRAWER_PROFILE_ID = 0x7f140001
+private const val DRAWER_NESTED_ID = 0x7f140002
 
 class NewXResolverLinterTest {
     @Test
@@ -489,11 +516,17 @@ class NewXResolverLinterTest {
         val premium = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "premium", emptyList(), "Z")
         val offline = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "offline", emptyList(), "Z")
         val feature = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "feature", emptyList(), "Z")
-        listOf("direct", "relocated", "unrelatedTry", "dispatchPolicy", "defaultArm").forEach { shape ->
+        listOf("direct", "relocated", "unrelatedTry", "dispatchPolicy", "defaultArm", "retiredSwitch").forEach { shape ->
             val (handler, classes) = downloadCapabilityFixture(shape)
             val before = handler.instructions.map { it.opcode }
-            assertEquals(if (shape == "direct") 3 else 2,
-                resolveVideoDownloadSubscriptionResults(handler, premium, offline, feature, classes::get).size)
+            val rollout = feature.takeUnless { shape == "retiredSwitch" }
+            val expected = when (shape) {
+                "direct" -> 3
+                "retiredSwitch" -> 1
+                else -> 2
+            }
+            assertEquals(expected,
+                resolveVideoDownloadSubscriptionResults(handler, premium, offline, rollout, classes::get).size)
             assertEquals(before, handler.instructions.map { it.opcode })
         }
         // A valid quota policy elsewhere must not stand in for the captured handler's call path.
@@ -513,12 +546,18 @@ class NewXResolverLinterTest {
         val premium = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "premium", emptyList(), "Z")
         val offline = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "offline", emptyList(), "Z")
         val feature = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "feature", emptyList(), "Z")
-        listOf("direct", "relocated", "secondDisconnected", "secondOtherSelector").forEach { shape ->
+        listOf("direct", "relocated", "retiredSwitch", "secondDisconnected", "secondOtherSelector").forEach { shape ->
             val (handler, classes) = timelineDownloadCapabilityFixture(shape)
             val before = handler.instructions.map { it.opcode }
-            if (shape == "direct" || shape == "relocated") {
-                assertEquals(if (shape == "direct") 9 else 7,
-                    resolveTimelineDownloadSubscriptionResults(handler, premium, offline, feature, classes::get).size)
+            if (shape in listOf("direct", "relocated", "retiredSwitch")) {
+                val rollout = feature.takeUnless { shape == "retiredSwitch" }
+                val expected = when (shape) {
+                    "direct" -> 9
+                    "retiredSwitch" -> 1
+                    else -> 7
+                }
+                assertEquals(expected,
+                    resolveTimelineDownloadSubscriptionResults(handler, premium, offline, rollout, classes::get).size)
             } else {
                 val error = assertFailsWith<PatchException>(shape) {
                     resolveTimelineDownloadSubscriptionResults(handler, premium, offline, feature, classes::get)
@@ -546,7 +585,7 @@ class NewXResolverLinterTest {
         fun add(instruction: String) = implementation.downloadInstruction(instruction)
         add("iget-object v1, v10, $callback->host:$host")
         add("iget-object v0, v1, $host->subscriptions:Lcom/x/subscriptions/Fixture;")
-        (List(6) { "feature" } + "premium").forEach { gate ->
+        (List(if (shape == "retiredSwitch") 0 else 6) { "feature" } + "premium").forEach { gate ->
             add("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->$gate()Z")
             add("move-result v2")
         }
@@ -637,7 +676,9 @@ class NewXResolverLinterTest {
         val suspendDescriptor = "$coroutine->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;"
         val handler = MutableMethod(method(handlerType, "event", listOf("Ljava/lang/Object;"), "V", 12) {
             downloadInstruction("iget-object v0, v10, $handlerType->subscriptions:Lcom/x/subscriptions/Fixture;")
-            val gates = listOf("feature", "premium") + if (shape == "direct") listOf("offline") else emptyList()
+            val gates = listOf("feature", "premium", "offline").filter { gate ->
+                (gate != "feature" || shape != "retiredSwitch") && (gate != "offline" || shape == "direct")
+            }
             gates.forEach { gate ->
                 downloadInstruction("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->$gate()Z")
                 if (shape != "missingResult" || gate != "premium") downloadInstruction("move-result v2")
@@ -828,12 +869,127 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `palette cache keeps the factory argument when the Lazy constructor gains an auxiliary value`() {
+        val lazyType = "Lfixture/Lazy;"
+        val factoryType = "Lkotlin/jvm/functions/Function0;"
+        for (hasAuxiliary in listOf(false, true)) {
+            for (interveningCopy in listOf(false, true)) {
+                val code = MethodImplementationBuilder(4).apply {
+                    addInstruction("new-instance v0, Lfixture/Factory;".toInstruction())
+                    addInstruction("invoke-direct {v0}, Lfixture/Factory;-><init>()V".toInstruction())
+                    addInstruction("new-instance v1, $lazyType".toInstruction())
+                    val constructor = if (hasAuxiliary) {
+                        "invoke-direct {v1, v0, v2}, $lazyType-><init>(${factoryType}Ljava/util/concurrent/ConcurrentHashMap;)V"
+                    } else {
+                        "invoke-direct {v1, v0}, $lazyType-><init>($factoryType)V"
+                    }
+                    addInstruction(constructor.toInstruction())
+                    // An intervening copy and an unrelated constant must not break the store's provenance.
+                    if (interveningCopy) {
+                        addInstruction("move-object v2, v1".toInstruction())
+                        addInstruction("const/4 v3, 0x0".toInstruction())
+                    }
+                    addInstruction("sput-object v${if (interveningCopy) 2 else 1}, Lfixture/Theme;->standard:$lazyType".toInstruction())
+                    addInstruction("return-void".toInstruction())
+                }
+                val initializer = MutableMethod(ImmutableMethod(
+                    "Lfixture/Theme;", "<clinit>", emptyList(), "V", AccessFlags.STATIC.value,
+                    emptySet(), emptySet(), code.methodImplementation,
+                ))
+                val storeIndex = initializer.instructions.indexOfFirst { it.opcode == Opcode.SPUT_OBJECT }
+                val storeRegister = if (interveningCopy) 2 else 1
+                assertTrue(
+                    initializer.factoryResultFeedsStore(0, 1, storeIndex, storeRegister, 0, lazyType),
+                    "hasAuxiliary=$hasAuxiliary interveningCopy=$interveningCopy",
+                )
+                assertFalse(initializer.factoryResultFeedsStore(0, 1, storeIndex, storeRegister, 0, "Lfixture/Other;"))
+            }
+        }
+    }
+
+    @Test
+    fun `like tint follows a merged active flag across an unrelated instruction`() {
+        for (hasInterveningRead in listOf(false, true)) {
+            val code = MethodImplementationBuilder(9).apply {
+                addInstruction("sget-object v1, Lfixture/Action;->Unfavorite:Lfixture/Action;".toInstruction())
+                addInstruction(BuilderInstruction22t(Opcode.IF_NE, 0, 1, getLabel("inactive")))
+                addInstruction("const/4 v2, 0x1".toInstruction())
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("join")))
+                addLabel("inactive")
+                addInstruction("const/4 v2, 0x0".toInstruction())
+                addLabel("join")
+                if (hasInterveningRead) {
+                    addInstruction("iget-object v6, v0, Lfixture/Action;->modifier:Landroidx/compose/ui/Modifier;".toInstruction())
+                }
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, getLabel("normal")))
+                addInstruction("sget-wide v3, Lfixture/Colors;->active:J".toInstruction())
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("render")))
+                addLabel("normal")
+                addInstruction("const-wide/16 v3, 0x0".toInstruction())
+                addLabel("render")
+                addInstruction(
+                    "invoke-static {v5, v6, v3, v4}, Lcom/fixture/Icons;->render(Ljava/lang/String;Landroidx/compose/ui/Modifier;J)V"
+                        .toInstruction(),
+                )
+                addInstruction("return-void".toInstruction())
+            }
+            val method = MutableMethod(ImmutableMethod(
+                "Lfixture/Like;", "render", emptyList(), "V", AccessFlags.STATIC.value,
+                emptySet(), emptySet(), code.methodImplementation,
+            ))
+            assertEquals("active", method.injectActivatedLikeTint(0).field.name)
+        }
+    }
+
+    @Test
+    fun `tab slot tints require two palette fields rather than repeated reads of one capture`() {
+        for (secondary in listOf("primary", "secondary")) {
+            val implementation = MethodImplementationBuilder(8).apply {
+                addInstruction("iget-wide v0, v7, Lfixture/Palette;->primary:J".toInstruction())
+                addInstruction("iget-wide v2, v7, Lfixture/Palette;->$secondary:J".toInstruction())
+                addInstruction(
+                    "invoke-static {v6, v0, v1, v2, v3}, Lcom/x/ui/common/tabs/Fixture;->render(Ljava/lang/String;JJ)V"
+                        .toInstruction(),
+                )
+                addInstruction("return-void".toInstruction())
+            }
+            val slot = ImmutableMethod(
+                "Lcom/x/ui/common/tabs/Fixture;", "slot", emptyList(), "V", AccessFlags.STATIC.value,
+                emptySet(), emptySet(), implementation.methodImplementation,
+            )
+            assertEquals(secondary != "primary", isTabSlotColors(slot, "Lfixture/Horizon;"))
+        }
+    }
+
+    @Test
+    fun `Spaces bar renderer allows a second action callback before the composer`() {
+        val function0 = "Lkotlin/jvm/functions/Function0;"
+        val function1 = "Lkotlin/jvm/functions/Function1;"
+        val prefix = listOf(
+            "Lfixture/Flow;", function1, "Landroidx/compose/ui/Modifier;", "Z",
+            function1, "Lkotlin/jvm/functions/Function2;",
+        )
+        val tail = listOf("Landroidx/compose/runtime/Composer;", "I", "I")
+        fun renderer(vararg callbacks: String) = ImmutableMethod(
+            "Lfixture/Spaces;", "render",
+            (prefix + callbacks + tail).map { ImmutableMethodParameter(it, emptySet(), null) },
+            "V", AccessFlags.STATIC.value, emptySet(), emptySet(), null,
+        )
+        assertTrue(renderer(function0).hasKnownSpacesBarSignature())
+        assertTrue(renderer(function0, function0).hasKnownSpacesBarSignature())
+        assertFalse(renderer(function0, function1).hasKnownSpacesBarSignature())
+    }
+
+    @Test
     fun `inline layout discovery and kind hook follow receiver churn and reject unproven staging`() {
         val field = ImmutableFieldReference("Lfixture/Entry;", "action", "Lfixture/Action;")
         val decoy = inlineKindLayoutFixture(3, unrelatedField = true)
+        val fieldReadOnly = inlineKindLayoutFixture(2, readsKind = false)
+        fun resolve(vararg methods: Method): Method =
+            resolveInlineActionKindLayoutMethod(methods.toList(), field) { it == "Lfixture/Kind;" }
         listOf(2, 3).forEach { arity ->
             val source = inlineKindLayoutFixture(arity)
-            val resolved = resolveInlineActionKindLayoutMethod(listOf(decoy, source), field)
+            val resolved = resolve(decoy, fieldReadOnly, source)
             val instructions = resolved.instructions.toList()
             val constructor = instructions.indices.single { index ->
                 isInlineActionKindModelConstructor(instructions[index]) { it == "Lfixture/Kind;" }
@@ -841,12 +997,12 @@ class NewXResolverLinterTest {
             // Exercises the same semantic selection and render proof used before production emission.
             assertEquals(instructions.lastIndex - 1, resolveInlineActionKindRenderCall(resolved, constructor, 2, "Lfixture/Entry;"))
         }
-        assertFailsWith<PatchException> { resolveInlineActionKindLayoutMethod(listOf(decoy), field) }
+        assertFailsWith<PatchException> { resolve(decoy, fieldReadOnly) }
         assertFailsWith<PatchException> {
-            resolveInlineActionKindLayoutMethod(listOf(inlineKindLayoutFixture(2), inlineKindLayoutFixture(3)), field)
+            resolve(inlineKindLayoutFixture(2), inlineKindLayoutFixture(3))
         }
         listOf("overwrite", "wideOverwrite", "incoming", "outgoing").forEach { failure ->
-            val source = resolveInlineActionKindLayoutMethod(listOf(inlineKindLayoutFixture(3, failure)), field)
+            val source = resolve(inlineKindLayoutFixture(3, failure))
             val instructions = source.instructions.toList()
             val constructor = instructions.indices.single { index ->
                 isInlineActionKindModelConstructor(instructions[index]) { it == "Lfixture/Kind;" }
@@ -861,6 +1017,7 @@ class NewXResolverLinterTest {
         arity: Int,
         failure: String? = null,
         unrelatedField: Boolean = false,
+        readsKind: Boolean = true,
     ): Method {
         val implementation = MethodImplementationBuilder(24)
         fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
@@ -870,8 +1027,10 @@ class NewXResolverLinterTest {
         if (failure == "incoming") {
             implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 9, implementation.getLabel("render")))
         }
-        add("new-instance v14, Lfixture/ParentData;")
-        add("invoke-direct {v14, v11, v4, v12}, Lfixture/ParentData;-><init>(ZZLfixture/Kind;)V")
+        if (readsKind) {
+            add("new-instance v14, Lfixture/ParentData;")
+            add("invoke-direct {v14, v11, v4, v12}, Lfixture/ParentData;-><init>(ZZLfixture/Kind;)V")
+        }
         if (arity == 3) {
             // Actual 12.37 staging: preserve the old v1, copy entry, then overwrite entry's register.
             add("move-object v12, v1")
@@ -894,6 +1053,296 @@ class NewXResolverLinterTest {
             "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(),
             implementation.methodImplementation,
         )
+    }
+
+    @Test
+    fun `drawer item icon dispatch stops at the first native return`() {
+        val icon = "Lcom/x/icons/Fixture;"
+        val first = "Lfixture/First;"
+        val second = "Lfixture/Second;"
+        val code = MethodImplementationBuilder(3).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            add("instance-of v0, v2, $first")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 0, getLabel("next")))
+            add("sget-object v1, Lfixture/Icons;->first:$icon")
+            add("return-object v1")
+            addLabel("next")
+            add("instance-of v0, v2, $second")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 0, getLabel("unknown")))
+            add("sget-object v1, Lfixture/Icons;->second:$icon")
+            add("return-object v1")
+            addLabel("unknown")
+            add("const/4 v1, 0x0")
+            add("return-object v1")
+        }
+        val method = ImmutableMethod(
+            "Lfixture/Drawer;", "icon", listOf(ImmutableMethodParameter("Lfixture/Item;", emptySet(), null)),
+            icon, AccessFlags.STATIC.value, emptySet(), emptySet(), code.methodImplementation,
+        )
+        val fields = parseItemBranches(method).mapValues { (_, branch) ->
+            branch.filterIsInstance<ReferenceInstruction>().map { (it.reference as FieldReference).name }
+        }
+        assertEquals(mapOf(first to listOf("first"), second to listOf("second")), fields)
+    }
+
+    @Test
+    fun `drawer item model resolves singleton and instance branches titles icons and row calls end to end`() {
+        val owner = drawerItemOwner(clobberTitleAfterMapper = false)
+        val model = resolveDrawerItemModel(listOf(owner), DRAWER_PROFILE_ID)
+        assertTrue(model != null)
+        fun method(name: String) = owner.methods.single { it.name == name }.toSmaliDescriptor()
+        assertEquals(DRAWER_OWNER, model.ownerClass)
+        assertEquals(method("item"), model.itemRenderer.toSmaliDescriptor())
+        assertEquals(0, model.itemParameterIndex)
+        assertEquals(2, model.clickParameterIndex)
+        assertEquals(DRAWER_PROFILE, model.branchesWithTitle(DRAWER_PROFILE_ID).single().itemType)
+        assertEquals(DRAWER_NESTED, model.branchesWithNestedTitle(DRAWER_NESTED_ID).single().itemType)
+        assertEquals(
+            "Lcom/x/icons/Icons;->profile:Lcom/x/icons/Icons;",
+            model.uniqueIconFieldForTitle(DRAWER_PROFILE_ID, "profile").toString(),
+        )
+        assertEquals(listOf(method("row")), model.titledRenderers.map { it.toSmaliDescriptor() })
+        val anchor = model.anchorRowCalls.single()
+        assertEquals(method("anchors"), anchor.method.toSmaliDescriptor())
+        assertEquals(0, anchor.rendererCallOrdinal)
+        assertEquals(method("row"), anchor.renderer.toSmaliDescriptor())
+    }
+
+    @Test
+    fun `window registers rewritten before any read are dead after the anchor`() {
+        fun method(vararg body: String): MutableMethod = MutableMethod(
+            ImmutableMethod(
+                DRAWER_OWNER, "anchor", emptyList(), "V", AccessFlags.STATIC.value, emptySet(), emptySet(),
+                MethodImplementationBuilder(24).apply {
+                    body.forEach { addInstruction(it.toInstruction()) }
+                }.methodImplementation,
+            ),
+        )
+        // Index 0 is the anchor call; index 1 is the insertion point. v8 is rewritten by move/from16 first.
+        method(
+            "invoke-static {v8}, $DRAWER_OWNER->a(Ljava/lang/String;)V",
+            "move-object/from16 v8, v20",
+            "invoke-static {v8}, $DRAWER_OWNER->b(Ljava/lang/String;)V",
+            "return-void",
+        ).requireRegistersDeadAt(1, listOf(8), "test")
+        // A read of v9 before any write keeps it live at the insertion point.
+        assertFailsWith<PatchException> {
+            method(
+                "invoke-static {v9}, $DRAWER_OWNER->a(Ljava/lang/String;)V",
+                "invoke-static {v9}, $DRAWER_OWNER->b(Ljava/lang/String;)V",
+                "return-void",
+            ).requireRegistersDeadAt(1, listOf(9), "test")
+        }
+    }
+
+    @Test
+    fun `drawer item title clobbered before the titled renderer is rejected`() {
+        assertFailsWith<PatchException> {
+            resolveDrawerItemModel(listOf(drawerItemOwner(clobberTitleAfterMapper = true)), DRAWER_PROFILE_ID)
+        }
+    }
+
+    private fun drawerItemOwner(clobberTitleAfterMapper: Boolean): ImmutableClassDef {
+        val clobber = if (clobberTitleAfterMapper) "const/4 v1, 0x0" else "nop"
+        val methods = listOf(
+            drawerItemMethod("title", listOf(DRAWER_ITEM, "Z", DRAWER_COMPOSER), "Ljava/lang/String;", 6) {
+                drawerSmali("sget-object v0, $DRAWER_PROFILE->INSTANCE:$DRAWER_PROFILE")
+                drawerSmali("invoke-static {v3, v0}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z")
+                drawerSmali("move-result v1")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("nested")))
+                drawerSmali("const v2, 0x7f140001")
+                drawerSmali("return-object v2")
+                addLabel("nested")
+                drawerSmali("instance-of v1, v3, $DRAWER_NESTED")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("unknown")))
+                drawerSmali("invoke-static {v5}, $DRAWER_OWNER->nested($DRAWER_COMPOSER)Ljava/lang/String;")
+                drawerSmali("move-result-object v2")
+                drawerSmali("return-object v2")
+                addLabel("unknown")
+                drawerSmali("const/4 v2, 0x0")
+                drawerSmali("return-object v2")
+            },
+            drawerItemMethod("nested", listOf(DRAWER_COMPOSER), "Ljava/lang/String;", 2) {
+                drawerSmali("const v0, 0x7f140002")
+                drawerSmali("return-object v0")
+            },
+            drawerItemMethod("icon", listOf(DRAWER_ITEM), DRAWER_ICONS, 3) {
+                drawerSmali("sget-object v0, $DRAWER_PROFILE->INSTANCE:$DRAWER_PROFILE")
+                drawerSmali("invoke-static {v2, v0}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z")
+                drawerSmali("move-result v1")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("none")))
+                drawerSmali("sget-object v0, $DRAWER_ICONS->profile:$DRAWER_ICONS")
+                drawerSmali("return-object v0")
+                addLabel("none")
+                drawerSmali("const/4 v0, 0x0")
+                drawerSmali("return-object v0")
+            },
+            drawerItemMethod("list", listOf(DRAWER_ITEM, FUNCTION0_FIXTURE, DRAWER_COMPOSER), "V", 5) {
+                drawerSmali("const/4 v0, 0x0")
+                drawerSmali("invoke-static {v2, v0, v4}, $DRAWER_OWNER->title($DRAWER_ITEM" + "Z$DRAWER_COMPOSER)Ljava/lang/String;")
+                drawerSmali("move-result-object v1")
+                drawerSmali(clobber)
+                // A conditional between the mapper result and the titled renderer must not hide the callee.
+                addInstruction(BuilderInstruction21t(Opcode.IF_NEZ, 0, getLabel("skip")))
+                drawerSmali(
+                    "invoke-static {v2, v1, v3}, $DRAWER_OWNER->item($DRAWER_ITEM" +
+                        "Ljava/lang/String;$FUNCTION0_FIXTURE)V",
+                )
+                addLabel("skip")
+                drawerSmali("return-void")
+            },
+            drawerItemMethod("item", listOf(DRAWER_ITEM, "Ljava/lang/String;", FUNCTION0_FIXTURE), "V", 5) {
+                drawerSmali("invoke-static {v2}, $DRAWER_OWNER->icon($DRAWER_ITEM)$DRAWER_ICONS")
+                drawerSmali("move-result-object v0")
+                drawerSmali("const/4 v1, 0x0")
+                drawerSmali(
+                    "invoke-static {v3, v0, v4, v1}, $DRAWER_OWNER->row(Ljava/lang/String;$DRAWER_ICONS" +
+                        "$FUNCTION0_FIXTURE$DRAWER_COMPOSER)V",
+                )
+                drawerSmali("return-void")
+            },
+            drawerItemMethod("row", listOf("Ljava/lang/String;", DRAWER_ICONS, FUNCTION0_FIXTURE, DRAWER_COMPOSER), "V", 4) {
+                drawerSmali("return-void")
+            },
+            drawerItemMethod("anchors", listOf(DRAWER_ITEM, FUNCTION0_FIXTURE, DRAWER_COMPOSER), "V", 8) {
+                drawerSmali("invoke-static {v5}, $DRAWER_OWNER->icon($DRAWER_ITEM)$DRAWER_ICONS")
+                drawerSmali("move-result-object v2")
+                drawerSmali("const/4 v1, 0x0")
+                drawerSmali("move-object v3, v6")
+                drawerSmali("move-object v4, v7")
+                drawerSmali(
+                    "invoke-static/range {v1 .. v4}, $DRAWER_OWNER->row(Ljava/lang/String;$DRAWER_ICONS" +
+                        "$FUNCTION0_FIXTURE$DRAWER_COMPOSER)V",
+                )
+                drawerSmali("return-void")
+            },
+        )
+        return ImmutableClassDef(
+            DRAWER_OWNER, AccessFlags.PUBLIC.value, "Ljava/lang/Object;", emptyList(), null, emptySet(),
+            emptyList(), methods,
+        )
+    }
+
+    private fun drawerItemMethod(
+        name: String,
+        parameters: List<String> = emptyList(),
+        returnType: String = "V",
+        registerCount: Int = 1,
+        body: MethodImplementationBuilder.() -> Unit = {},
+    ): Method {
+        val code = MethodImplementationBuilder(registerCount).apply(body)
+        return ImmutableMethod(
+            DRAWER_OWNER, name, parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
+            returnType, AccessFlags.STATIC.value, emptySet(), emptySet(), code.methodImplementation,
+        )
+    }
+
+    private fun MethodImplementationBuilder.drawerSmali(instruction: String) =
+        addInstruction(instruction.toInstruction())
+
+    @Test
+    fun `For You refresh resolves the live page index through both native lookup shapes`() {
+        val event = "Lfixture/Event;"
+        fun tabHandler(safeLookup: Boolean, overwriteIndex: Boolean, interleaved: Boolean = false): Method {
+            val code = MethodImplementationBuilder(7).apply {
+                fun add(instruction: String) = addInstruction(instruction.toInstruction())
+                add("iget-object v0, v6, Lfixture/Home;->state:Lfixture/State;")
+                add("invoke-virtual {v0}, Lfixture/State;->get()Ljava/lang/Object;")
+                add("move-result-object v1")
+                add("check-cast v1, Lfixture/Pages;")
+                add("iget-object v1, v1, Lfixture/Pages;->list:Ljava/util/List;")
+                add("invoke-virtual {v0}, Lfixture/State;->get()Ljava/lang/Object;")
+                add("move-result-object v2")
+                add("check-cast v2, Lfixture/Pages;")
+                add("iget v2, v2, Lfixture/Pages;->selected:I")
+                if (overwriteIndex) add("const/4 v2, 0x0")
+                if (safeLookup) {
+                    add("invoke-static {v1, v2}, Lkotlin/collections/CollectionsKt;->getOrNull(Ljava/util/List;I)Ljava/lang/Object;")
+                } else {
+                    add("invoke-interface {v1, v2}, Ljava/util/List;->get(I)Ljava/lang/Object;")
+                }
+                add("move-result-object v1")
+                add("check-cast v1, Lfixture/Child;")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("done")))
+                add("invoke-virtual {v1}, Lfixture/Child;->component()Ljava/lang/Object;")
+                add("move-result-object v1")
+                add("instance-of v2, v1, Lfixture/ForYou;")
+                // Interleaved copies and constants keep the same page object; only the flow proves the cast.
+                if (interleaved) add("const/4 v4, 0x0")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, getLabel("done")))
+                if (interleaved) add("move-object v3, v1")
+                val castRegister = if (interleaved) 3 else 1
+                add("check-cast v$castRegister, Lfixture/ForYou;")
+                add("iget-object v1, v$castRegister, Lfixture/ForYou;->controller:Lfixture/Controller;")
+                add("sget-object v2, Lfixture/Refresh;->INSTANCE:Lfixture/Refresh;")
+                add("invoke-interface {v1, v2}, Lfixture/Controller;->dispatch($event)V")
+                addLabel("done")
+                add("return-void")
+            }
+            return ImmutableMethod(
+                "Lfixture/Home;", "refresh", emptyList(), "V", AccessFlags.PUBLIC.value,
+                emptySet(), emptySet(), code.methodImplementation,
+            )
+        }
+        for (safeLookup in listOf(false, true)) {
+            for (interleaved in listOf(false, true)) {
+                val bridge = tabHandler(safeLookup, false, interleaved)
+                    .resolveProvenForYouCurrentPageRefreshBridges(setOf(event)).single()
+                assertEquals("selected", bridge.pagesIndexField.name)
+                assertEquals("dispatch", bridge.refreshDispatch.name)
+                assertTrue(
+                    tabHandler(safeLookup, true, interleaved)
+                        .resolveProvenForYouCurrentPageRefreshBridges(setOf(event)).isEmpty(),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `delegated post options preserve the lookup action and only replace the native icon`() {
+        val action = "Lfixture/Action;"
+        val row = "Lfixture/Row;"
+        val icon = "Lcom/x/icons/Fixture;"
+        val map = ImmutableFieldReference("Lfixture/State;", "labels", "Ljava/util/Map;")
+        val string = "Ljava/lang/String;"
+        val item = "Lcom/x/ui/common/sheets/Fixture;"
+        fun method(owner: String, parameters: List<String>, registers: Int, code: MethodImplementationBuilder.() -> Unit) =
+            ImmutableMethod(
+                owner, "render", parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
+                "V", AccessFlags.STATIC.value, emptySet(), emptySet(),
+                MethodImplementationBuilder(registers).apply(code).methodImplementation,
+            )
+        val renderer = method("Lfixture/Menu;", listOf(action, map.definingClass), 6) {
+            addInstruction("move-object v1, v4".toInstruction())
+            addInstruction("iget-object v0, v5, $map".toInstruction())
+            addInstruction("invoke-interface {v0, v1}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;".toInstruction())
+            addInstruction("move-result-object v0".toInstruction())
+            addInstruction("check-cast v0, $string".toInstruction())
+            addInstruction("move-object v2, v1".toInstruction())
+            addInstruction("invoke-static {v2, v0}, $row->render($action$string)V".toInstruction())
+            addInstruction("return-void".toInstruction())
+        }
+        val lookup = postOptionsFeedbackLookups(renderer, map) { it == "Ljava/util/Map;" }.single()
+        assertEquals(row, resolvePostOptionsRowDelegate(renderer, lookup, action).definingClass)
+
+        val rowMethod = method(row, listOf(action, string), 6) {
+            val constructor = "$item-><init>(Ljava/lang/Object;$icon$string)V"
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 4, getLabel("icon")))
+            addInstruction("new-instance v0, $item".toInstruction())
+            addInstruction("const/4 v1, 0x0".toInstruction())
+            addInstruction("invoke-direct {v0, v4, v1, v5}, $constructor".toInstruction())
+            addInstruction("return-void".toInstruction())
+            addLabel("icon")
+            addInstruction("new-instance v0, $item".toInstruction())
+            addInstruction("sget-object v2, Lfixture/Icons;->native:$icon".toInstruction())
+            addInstruction("move-object v1, v2".toInstruction())
+            addInstruction("invoke-direct {v0, v4, v1, v5}, $constructor".toInstruction())
+            addInstruction("return-void".toInstruction())
+        }
+        val consumer = resolvePostOptionsRowIconConsumer(rowMethod)
+        assertEquals(8, consumer.index)
+        assertEquals(1, consumer.iconRegister)
+        assertEquals(4, consumer.actionRegister)
     }
 
     @Test
@@ -2241,7 +2690,7 @@ class NewXResolverLinterTest {
 
     @Test
     fun `reply sorting selection resolves the validated cast-to-store tuple through every positive form`() {
-        for (shape in listOf("adjacent", "entryMove", "multiHop", "returningOverwrite", "unrelatedStore", "postCastMove", "tryUnrelated")) {
+        for (shape in listOf("adjacent", "entryMove", "multiHop", "returningOverwrite", "unrelatedStore", "postCastMove", "tryUnrelated", "typed")) {
             val method = replySelectionFixture(shape)
             val instructions = method.implementation!!.instructions.toList()
             val site = resolveReplySortingSelectionSite(method, replyEnum, method.defaultUrtIndex())
@@ -2250,8 +2699,13 @@ class NewXResolverLinterTest {
                 site.storeIndex,
                 "$shape must select the store on the defaultUrt path, not an earlier returning arm",
             )
-            assertEquals(Opcode.CHECK_CAST, instructions[site.castIndex].opcode, shape)
-            assertEquals(replyEnum, ((instructions[site.castIndex] as ReferenceInstruction).reference as TypeReference).type, shape)
+            if (shape == "typed") {
+                assertEquals(null, site.castIndex, shape)
+            } else {
+                val cast = instructions[requireNotNull(site.castIndex)] as ReferenceInstruction
+                assertEquals(Opcode.CHECK_CAST, cast.opcode, shape)
+                assertEquals(replyEnum, (cast.reference as TypeReference).type, shape)
+            }
             assertEquals(Opcode.IPUT_OBJECT, instructions[site.storeIndex].opcode, shape)
             assertEquals(site.register, (instructions[site.storeIndex] as TwoRegisterInstruction).registerA, shape)
             assertTrue(site.storeIndex < method.defaultUrtIndex(), shape)
@@ -2287,6 +2741,163 @@ class NewXResolverLinterTest {
         assertEquals(site.register, (code[store] as TwoRegisterInstruction).registerA)
         val branch = code.first { it.opcode == Opcode.IF_EQZ } as BuilderOffsetInstruction
         assertEquals(store - 1, branch.target.location.index, "the incoming branch must run remember before the store")
+    }
+
+    private val flowStateFactory = "Lkotlinx/coroutines/flow/a3;->c(Ljava/lang/Object;)Lkotlinx/coroutines/flow/z2;"
+
+    /**
+     * PostDetail constructor shaped like 12.45.1: the InstanceKeeper StateFlow seed (index 0) and the
+     * unconditional prefetch request seed (index 3) share one method. With [clobberOnOnePath] the
+     * request copy is overwritten on the alternate branch before the request.
+     */
+    private fun replyRankingConstructorFixture(clobberOnOnePath: Boolean = false): ImmutableMethod {
+        val implementation = MethodImplementationBuilder(6).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            add("sget-object v0, $replyEnum->Relevance:$replyEnum")
+            add("invoke-static {v0}, $flowStateFactory")
+            add("move-result-object v1")
+            add("sget-object v2, $replyEnum->Relevance:$replyEnum")
+            add("new-instance v4, Lfixture/PrefetchRequest;")
+            if (clobberOnOnePath) {
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("alternate")))
+                add("move-object v3, v2")
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("join")))
+                addLabel("alternate")
+                add("const/4 v3, 0x0")
+                addLabel("join")
+            } else {
+                add("move-object v3, v2")
+            }
+            add("invoke-direct {v4, v3}, Lfixture/PrefetchRequest;-><init>($replyEnum)V")
+            add("return-void")
+        }
+        return ImmutableMethod(
+            "Lcom/x/postdetail/r;", "<init>",
+            listOf(ImmutableMethodParameter("Lfixture/Param;", emptySet(), null)),
+            "V", AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation.methodImplementation,
+        )
+    }
+
+    private val requestEnumSeed: (MethodReference, Int) -> Boolean =
+        { reference, parameter -> reference.parameterTypes[parameter].toString() == replyEnum }
+
+    @Test
+    fun `reply ranking seeds in one constructor are told apart by their data flow`() {
+        val method = replyRankingConstructorFixture()
+
+        // The StateFlow seed reaches the flow factory; the request seed reaches the enum argument.
+        assertEquals(listOf(ReplySortingSeed(0, 0)), method.enumSeeds(replyEnum, ::isStateFlowFactoryArgument))
+        assertEquals(listOf(ReplySortingSeed(3, 2)), method.enumSeeds(replyEnum, requestEnumSeed))
+    }
+
+    @Test
+    fun `a request seed copy overwritten on one branch is not proven to reach the request`() {
+        val method = replyRankingConstructorFixture(clobberOnOnePath = true)
+
+        assertEquals(emptyList(), method.enumSeeds(replyEnum, requestEnumSeed))
+        // The StateFlow seed does not pass through the clobbered copy and stays proven.
+        assertEquals(listOf(ReplySortingSeed(0, 0)), method.enumSeeds(replyEnum, ::isStateFlowFactoryArgument))
+    }
+
+    @Test
+    fun `constructor seeds receive the default when inserted in descending index order`() {
+        val method = MutableMethod(replyRankingConstructorFixture())
+        val stateSeed = method.enumSeeds(replyEnum, ::isStateFlowFactoryArgument).single()
+        val requestSeed = method.enumSeeds(replyEnum, requestEnumSeed).single()
+
+        // The patch applies later seeds first, so the earlier seed's index stays valid.
+        listOf(stateSeed, requestSeed).sortedByDescending { it.index }.forEach { seed ->
+            method.insertReplySortingDefault(seed.index, seed.register, replyEnum)
+        }
+
+        val code = method.instructions.toList()
+        // Both seeds are still Relevance reads, each now followed by its own default hook.
+        val seeds = code.withIndex().filter { (_, instruction) ->
+            instruction.opcode == Opcode.SGET_OBJECT &&
+                ((instruction as ReferenceInstruction).reference as FieldReference).name == "Relevance"
+        }
+        assertEquals(2, seeds.size)
+        seeds.forEach { (index, _) -> assertEquals(Opcode.CONST_CLASS, code[index + 1].opcode) }
+        assertEquals(
+            2,
+            code.count { instruction ->
+                ((instruction as? ReferenceInstruction)?.reference as? MethodReference)?.name == "getEnumDefault"
+            },
+        )
+    }
+
+    private fun mapperFixture(vararg parameters: String): ImmutableMethod {
+        val implementation = MethodImplementationBuilder(parameters.size.coerceAtLeast(1)).apply {
+            addInstruction("return-object v0".toInstruction())
+        }
+        return ImmutableMethod(
+            "Lfixture/Drawer;", "title",
+            parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
+            "Ljava/lang/String;", AccessFlags.STATIC.value, emptySet(), emptySet(), implementation.methodImplementation,
+        )
+    }
+
+    @Test
+    fun `drawer title mapper shape requires a leading item and one Composer but not a fixed arity`() {
+        val composer = "Landroidx/compose/runtime/Composer;"
+        assertTrue(mapperFixture("Lfixture/Item;", "Z", composer).isItemTitleMapperShape())
+        assertTrue(mapperFixture("Lfixture/Item;", "I", composer, "I").isItemTitleMapperShape())
+        assertTrue(mapperFixture("Lfixture/Item;", composer).isItemTitleMapperShape())
+        assertFalse(mapperFixture("I", composer).isItemTitleMapperShape(), "leading parameter must be an object")
+        assertFalse(mapperFixture("Lfixture/Item;", "Z").isItemTitleMapperShape(), "a Composer is required")
+    }
+
+    @Test
+    fun `drawer item dispatch follows a moved copy of the item parameter`() {
+        val icon = "Lcom/x/icons/Fixture;"
+        val first = "Lfixture/First;"
+        val code = MethodImplementationBuilder(4).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            // The item is the only parameter, so it sits in v3; the test is made through a copy.
+            add("move-object v0, v3")
+            add("instance-of v1, v0, $first")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 1, getLabel("unknown")))
+            add("sget-object v2, Lfixture/Icons;->first:$icon")
+            add("return-object v2")
+            addLabel("unknown")
+            add("const/4 v2, 0x0")
+            add("return-object v2")
+        }
+        val method = ImmutableMethod(
+            "Lfixture/Drawer;", "icon", listOf(ImmutableMethodParameter("Lfixture/Item;", emptySet(), null)),
+            icon, AccessFlags.STATIC.value, emptySet(), emptySet(), code.methodImplementation,
+        )
+        val fields = parseItemBranches(method).mapValues { (_, branch) ->
+            branch.filterIsInstance<ReferenceInstruction>().map { (it.reference as FieldReference).name }
+        }
+        assertEquals(mapOf(first to listOf("first")), fields)
+    }
+
+    @Test
+    fun `drawer singleton dispatch follows a moved copy of the item parameter`() {
+        val icon = "Lcom/x/icons/Fixture;"
+        val singleton = "Lfixture/Singleton;"
+        val code = MethodImplementationBuilder(5).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            add("move-object v0, v4")
+            add("sget-object v1, $singleton->INSTANCE:$singleton")
+            add("invoke-static {v0, v1}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z")
+            add("move-result v2")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, getLabel("unknown")))
+            add("sget-object v3, Lfixture/Icons;->singleton:$icon")
+            add("return-object v3")
+            addLabel("unknown")
+            add("const/4 v3, 0x0")
+            add("return-object v3")
+        }
+        val method = ImmutableMethod(
+            "Lfixture/Drawer;", "icon", listOf(ImmutableMethodParameter("Lfixture/Item;", emptySet(), null)),
+            icon, AccessFlags.STATIC.value, emptySet(), emptySet(), code.methodImplementation,
+        )
+        val fields = parseItemBranches(method).mapValues { (_, branch) ->
+            branch.filterIsInstance<ReferenceInstruction>().map { (it.reference as FieldReference).name }
+        }
+        assertEquals(mapOf(singleton to listOf("singleton")), fields)
     }
 
     private fun Method.defaultUrtIndex(): Int = implementation!!.instructions.indexOfFirst { instruction ->
@@ -2343,6 +2954,11 @@ class NewXResolverLinterTest {
                     unknownBranch("store")
                     add("nop")
                     addLabel("store")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                }
+                "typed" -> {
+                    add("move-object/from16 v3, v$parameter")
                     add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
                     endSelection()
                 }
@@ -2436,7 +3052,7 @@ class NewXResolverLinterTest {
         }
         return ImmutableMethod(
             "Lfixture/ReplySortingCallback;", "invoke",
-            listOf(ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null)), "V",
+            listOf(ImmutableMethodParameter(if (shape == "typed") replyEnum else "Ljava/lang/Object;", emptySet(), null)), "V",
             AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation.methodImplementation,
         )
     }

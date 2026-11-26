@@ -16,6 +16,9 @@ import app.crimera.patches.newx.settings.resolveSettingsIconField
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.misc.navbar.NewXNavBarTabData
+import app.crimera.patches.newx.misc.inlineactions.controlFlowEdges
+import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.misc.navbar.NewXTabDataFingerprint
 import app.crimera.patches.newx.misc.navbar.resolveIconField
 import app.crimera.patches.newx.misc.navbar.resolveNavBarItemContent
@@ -24,6 +27,7 @@ import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.patch.classDefForEach
 import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.hasResourceId
 import app.morphe.patcher.resource.resourceId
 import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
 import app.crimera.patches.newx.misc.navbar.validateNewXNavBarTabData
@@ -40,6 +44,7 @@ import app.crimera.patches.common.OBJECT_MOVE_OPCODES
 import app.crimera.patches.common.hasComposeShape
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.bytecode.Block
+import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
@@ -69,10 +74,12 @@ import app.morphe.patcher.util.numberOfParameterRegisters
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22x
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -91,6 +98,7 @@ private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION2_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 
 /**
  * Resolves the current APK's string entry names before the bytecode patch emits option IDs.
@@ -224,59 +232,77 @@ private object NewXDrawerIconlessRowFingerprint : Fingerprint(
  * IconButton call below is what distinguishes it. The material3 owner/param slots use
  * prefix/wildcard types because the IconButton class shifts between releases.
  */
+private fun isDrawerThemeToggleShape(method: Method): Boolean =
+    method.parameterDescriptors().hasComposeShape(
+        required =
+            listOf(
+                COMPOSER_DESCRIPTOR,
+                "Landroidx/compose/ui/Modifier;",
+                FUNCTION0_DESCRIPTOR,
+            ),
+        first = "I",
+    )
+
+private val DRAWER_THEME_TOGGLE_FILTERS =
+    listOf(
+        methodCall(
+            definingClass = "Landroidx/compose/material3/",
+            parameters =
+                listOf(
+                    "Lkotlin/jvm/functions/Function0;",
+                    "Landroidx/compose/ui/Modifier;",
+                    "Z",
+                    "L",
+                    "L",
+                    "Lkotlin/jvm/functions/Function2;",
+                    "Landroidx/compose/runtime/Composer;",
+                    "I",
+                    "I",
+                ),
+            returnType = "V",
+        ),
+    )
+
 private object NewXDrawerThemeToggleFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
-    custom = { method, _ ->
-        method.parameterDescriptors().hasComposeShape(
-            required =
-                listOf(
-                    COMPOSER_DESCRIPTOR,
-                    "Landroidx/compose/ui/Modifier;",
-                    FUNCTION0_DESCRIPTOR,
-                ),
-            first = "I",
-        )
-    },
-    filters =
-        listOf(
-            methodCall(
-                definingClass = "Landroidx/compose/material3/",
-                parameters =
-                    listOf(
-                        "Lkotlin/jvm/functions/Function0;",
-                        "Landroidx/compose/ui/Modifier;",
-                        "Z",
-                        "L",
-                        "L",
-                        "Lkotlin/jvm/functions/Function2;",
-                        "Landroidx/compose/runtime/Composer;",
-                        "I",
-                        "I",
-                    ),
-                returnType = "V",
-            ),
-        ),
+    custom = { method, _ -> isDrawerThemeToggleShape(method) },
+    filters = DRAWER_THEME_TOGGLE_FILTERS,
 )
 
 /**
- * GROK PATH: dedicated "Get Grok / Open Grok" button rendered without a title parameter.
- * Title is resolved inside from drawer_get_grok / drawer_open_grok, so filter by stable ID.
+ * Resource ids of the Get/Open Grok titles. The Grok button composable loads one of them as a
+ * constant on 12.41 and 12.43, and the parameter list of that composable changed in between (12.43
+ * added a fifth parameter), so the ids are the anchor rather than the parameter shape.
  */
-private object NewXDrawerGrokButtonFingerprint : Fingerprint(
-    classFingerprint = NewXDrawerContentClassFingerprint,
-    returnType = "V",
-    // The 4-parameter no-title ABI is the only discriminator for this optional row; widening the
-    // shape matched six sibling composables on 12.29.1.
-    // newx-resolver-lint: allow rigid-signature
-    parameters =
-        listOf(
-            "L",
-            "Lkotlin/jvm/functions/Function1;",
-            "Landroidx/compose/runtime/Composer;",
-            "I",
-        ),
-)
+private fun grokTitleResourceIds(): Set<Int> =
+    listOf("drawer_get_grok", "drawer_open_grok")
+        .filter { hasResourceId(ResourceType.STRING, it) }
+        .map { resourceId(ResourceType.STRING, it).toInt() }
+        .toSet()
+
+/** Whether [method] loads any of [resourceIds] as an integer constant. */
+private fun Method.loadsAnyResourceId(resourceIds: Set<Int>): Boolean =
+    resourceIds.isNotEmpty() && implementation?.instructions?.any { instruction ->
+        instruction.opcode in NARROW_CONST_OPCODES &&
+            (instruction as? NarrowLiteralInstruction)?.narrowLiteral?.let { it in resourceIds } == true
+    } == true
+
+private val NARROW_CONST_OPCODES = setOf(Opcode.CONST, Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST_HIGH16)
+
+/** Void composable in [definingClass]-or-[classFingerprint] scope that loads a Grok title id. */
+private fun grokButtonFingerprint(
+    definingClass: String? = null,
+    classFingerprint: Fingerprint? = null,
+): Fingerprint {
+    val resourceIds = grokTitleResourceIds()
+    return Fingerprint(
+        definingClass = definingClass,
+        classFingerprint = classFingerprint,
+        returnType = "V",
+        custom = { method, _ -> method.loadsAnyResourceId(resourceIds) },
+    )
+}
 
 // Title-based filtering for rows that expose localized titles.
 // TODO: Remove this path only when no supported release uses title-based drawer rows.
@@ -945,6 +971,334 @@ private fun MutableMethod.injectSnapshotDrawerRow(
     }
 }
 
+/** Title provider, icon and click of one row emitted by the patch. */
+private data class DrawerRowContent(
+    val icon: DrawerRowIcon,
+    val titleDescriptor: String,
+    val clickDescriptor: String,
+)
+
+/** One icon-gated row block: its rows emit only when the anchor call's icon is [gateIcon]. */
+private data class IconGatedRowBlock(
+    val gateIcon: FieldReference,
+    val rows: List<DrawerRowContent>,
+    val labelPrefix: String,
+)
+
+/**
+ * ITEM-MODEL ROWS: the anchor call renders every item of a list, so the emitted rows must be
+ * gated to one item. Each block compares the anchor call's icon argument with its item's static
+ * icon (identity: icons are singletons in the icon class), which the model proved to belong to
+ * exactly one item.
+ *
+ * All blocks share one hook, and each block's gate is evaluated on the untouched icon register.
+ * A block that emits its rows jumps past the remaining gates to the original call, so a later
+ * block never runs after an earlier block has overwritten the icon register. Each row skips on a
+ * null title, like the title-row path, and exits to the original call on the block's final row.
+ */
+private fun MutableMethod.injectIconGatedDrawerRows(call: DrawerItemRowCall, blocks: List<IconGatedRowBlock>) {
+    if (blocks.isEmpty() || blocks.any { it.rows.isEmpty() }) {
+        throw PatchException("NewX drawer gated row block has no rows")
+    }
+    val renderer = call.renderer
+    val callIndex = currentIndexOf(call)
+    val anchor =
+        instructions[callIndex] as? Instruction3rc
+            ?: throw PatchException("NewX drawer anchor row call is not a range invoke: $this @ $callIndex")
+    val parameters = renderer.parameterTypes.map(CharSequence::toString)
+    val titleIndex = parameters.indexOf(STRING_DESCRIPTOR)
+    val clickIndex = parameters.indexOf(FUNCTION0_DESCRIPTOR)
+    val iconIndex = parameters.indexOfFirst { it.startsWith("Lcom/x/icons/") }
+    if (!renderer.isSnapshotRowRenderer() || anchor.registerCount != parameters.size) {
+        throw PatchException("NewX drawer anchor row renderer has an unexpected shape: $renderer")
+    }
+    val startRegister = anchor.startRegister
+    val endRegister = startRegister + anchor.registerCount - 1
+    if (endRegister > 255) {
+        throw PatchException("NewX drawer anchor row registers are outside v0..v255: v$startRegister..v$endRegister")
+    }
+    val iconType = parameters[iconIndex]
+    blocks.forEach { block ->
+        if (block.gateIcon.type != iconType) {
+            throw PatchException("NewX drawer gate icon type changed: renderer=$iconType, gate=${block.gateIcon}")
+        }
+        block.rows.forEach { row ->
+            if (row.icon.type != iconType) {
+                throw PatchException("NewX drawer icon type changed: renderer=$iconType, icon=${row.icon}")
+            }
+        }
+    }
+    if (callIndex + 1 >= instructions.size) {
+        throw PatchException("NewX drawer anchor row has no continuation: $this")
+    }
+
+    val window = (startRegister..endRegister).toList()
+    val titleRegister = startRegister + titleIndex
+    val iconRegister = startRegister + iconIndex
+    val clickRegister = startRegister + clickIndex
+    // The gated rows overwrite the anchor's title, icon and click slots, and every block exits to the
+    // original call. Fail closed if the original code reads any of those slots after the anchor.
+    requireRegistersDeadAt(
+        index = callIndex + 1,
+        registers = listOf(titleRegister, iconRegister, clickRegister),
+        label = "NewX drawer gated rows",
+    )
+    val lastBlock = blocks.lastIndex
+    fun gateLabel(blockIndex: Int) = "${blocks[blockIndex].labelPrefix}_gate"
+    insertHook(
+        index = callIndex + 1,
+        // The rows reuse the anchor's register window, so scratch registers must avoid it.
+        excludedRegisters = window,
+        // A branch that skipped the anchor call has no valid window; keep it on the original code.
+        relocateBranchTargets = false,
+    ) {
+        // if-ne is format 22t: both operands must be four-bit registers.
+        val gateRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+        val comparedIcon =
+            if (iconRegister <= 15) {
+                iconRegister
+            } else {
+                scratchRegister(RegisterLimit.FOUR_BIT).also { move(it, iconRegister, OBJECT_DESCRIPTOR) }
+            }
+        blocks.forEachIndexed { blockIndex, block ->
+            if (blockIndex > 0) label(gateLabel(blockIndex))
+            // A failed gate advances to the next block's gate; once a block matches, skipping its
+            // final row exits directly to Target.Original so no later gate sees mutated registers.
+            val nextGate = if (blockIndex == lastBlock) Target.Original else Target.Local(gateLabel(blockIndex + 1))
+            sget(gateRegister, block.gateIcon)
+            ifNe(comparedIcon, gateRegister, nextGate)
+            block.rows.forEachIndexed { rowIndex, row ->
+                if (rowIndex > 0) label("${block.labelPrefix}_${rowIndex - 1}")
+                val skip =
+                    if (rowIndex == block.rows.lastIndex) Target.Original else Target.Local("${block.labelPrefix}_$rowIndex")
+                invokeStatic(methodReference(row.titleDescriptor))
+                moveResult(titleRegister, STRING_DESCRIPTOR)
+                ifEqz(titleRegister, skip)
+                when (val icon = row.icon) {
+                    is DrawerRowIcon.Field -> sget(iconRegister, icon.reference)
+                    is DrawerRowIcon.Accessor -> {
+                        invokeStatic(icon.getter)
+                        moveResult(iconRegister, icon.type)
+                    }
+                }
+                invokeStatic(methodReference(row.clickDescriptor))
+                moveResult(clickRegister, FUNCTION0_DESCRIPTOR)
+                invokeStatic(renderer, *window.toIntArray())
+            }
+            // The icon register now holds this block's item icon, so later gates must not run.
+            if (blockIndex < lastBlock) goto(Target.Original)
+        }
+    }
+}
+
+/**
+ * Fails closed unless none of [registers] can be read at [index] before being rewritten on any path.
+ * Backward liveness over the method's CFG; exception edges carry pre-instruction state (leaving
+ * before any destination write), so a throwing write cannot kill a register read in its handler.
+ * A pure write (const, move-result, sget, new-instance, move, iget) kills its destination without
+ * reading it.
+ */
+internal fun MutableMethod.requireRegistersDeadAt(index: Int, registers: List<Int>, label: String) {
+    val code = instructions.toList()
+    val edges = code.controlFlowEdges(implementation?.tryBlocks.orEmpty())
+        ?: throw PatchException("$label: control flow of $this is not analyzable")
+    val liveIn = MutableList<Set<Int>>(code.size) { emptySet() }
+    var changed = true
+    while (changed) {
+        changed = false
+        for (current in code.indices.reversed()) {
+            val instruction = code[current]
+            val normalOut = mutableSetOf<Int>()
+            val exceptionalOut = mutableSetOf<Int>()
+            edges[current].forEach { edge ->
+                if (edge.exceptional) exceptionalOut += liveIn[edge.target] else normalOut += liveIn[edge.target]
+            }
+            val next = instruction.readRegisters() + (normalOut - instruction.killedRegisters()) + exceptionalOut
+            if (next != liveIn[current]) {
+                liveIn[current] = next
+                changed = true
+            }
+        }
+    }
+    val live = liveIn.getOrElse(index) { emptySet() }.intersect(registers.toSet())
+    if (live.isNotEmpty()) {
+        throw PatchException(
+            "$label overwrites ${live.sorted().joinToString { "v$it" }} still read after index $index in $this",
+        )
+    }
+}
+
+/**
+ * Registers an instruction reads. A pure write reads its source register (if any) and never its
+ * destination, unless source and destination overlap (e.g. `iget v0, v0` or overlapping wide move).
+ */
+private fun Instruction.readRegisters(): Set<Int> {
+    if (pureWriteDestination() == null) return registersUsed.toSet()
+    val isWide = opcode.setsWideRegister()
+    val source = (this as? TwoRegisterInstruction)?.registerB
+    return when {
+        source == null -> emptySet()
+        isWide && opcode in WIDE_MOVE_OPCODES -> setOf(source, source + 1)
+        else -> setOf(source)
+    }
+}
+
+private val WIDE_MOVE_OPCODES = setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16)
+
+/** Registers an instruction overwrites without reading them (the destination of a pure write). */
+private fun Instruction.killedRegisters(): Set<Int> {
+    val destination = pureWriteDestination() ?: return emptySet()
+    return if (opcode.setsWideRegister()) setOf(destination, destination + 1) else setOf(destination)
+}
+
+/** Destination of an instruction that only writes it: constants, static/instance reads, moves, results. */
+private fun Instruction.pureWriteDestination(): Int? {
+    // dexlib2 names opcodes in smali form ("move-object/from16"); compare against the enum spelling.
+    val name = opcode.name.uppercase().replace('-', '_').replace('/', '_')
+    val pure =
+        name.startsWith("CONST") || name.startsWith("SGET") || name.startsWith("IGET") ||
+            name == "NEW_INSTANCE" || name.startsWith("MOVE")
+    if (!pure) return null
+    return when (this) {
+        is Instruction22x -> registerA
+        is TwoRegisterInstruction -> registerA
+        is OneRegisterInstruction -> registerA
+        else -> null
+    }
+}
+
+/**
+ * ITEM-MODEL PATH. Hides rows by title in the titled renderers, lists the mapped item titles as
+ * options, and emits the Piko settings row and the shortcut rows after the settings and Profile
+ * item rows. Navigation, catalog and fixed-ID behaviors are shared with the title-row path.
+ */
+private fun applyItemModelDrawer(
+    model: DrawerItemModel,
+    hiddenItems: MultiChoiceSettingDefinition,
+) {
+    // HIDE: every renderer that receives a mapped item title.
+    model.titledRenderers.forEach { renderer -> renderer.mutableMethod().injectDrawerItemGuard(hiddenItems) }
+
+    // OPTIONS + CATALOG: titles loaded by the mapper, with the icon of the item that loads them.
+    val titleIcons = linkedMapOf<Int, FieldReference?>()
+    model.branches.forEach { branch ->
+        (branch.titleResourceIds + branch.nestedTitleResourceIds).forEach { resourceId ->
+            if (titleIcons[resourceId] == null) titleIcons[resourceId] = branch.iconField
+        }
+    }
+    injectDynamicDrawerOptions(hiddenItems = hiddenItems, resourceIds = titleIcons.keys.toList())
+
+    val tabDataMatch =
+        requireExactlyOne(
+            label = "NewX tabData builder",
+            candidates = NewXTabDataFingerprint.scopedMatchAll(),
+        )
+    val tabData = validateNewXNavBarTabData(tabDataMatch)
+    val tabIconFields = resolveNavBarItemContent(tabData).tabIconFields
+    val messagesIcon = tabIconFields["DM"] ?: throw PatchException("NewX Messages tab icon was not resolved")
+    val grokIcon = tabIconFields["GROK"] ?: throw PatchException("NewX Grok tab icon was not resolved")
+    val notificationsIcon =
+        tabIconFields["NOTIFICATIONS"] ?: throw PatchException("NewX Notifications tab icon was not resolved")
+    injectDrawerCatalog(
+        nativeEntries =
+            titleIcons.map { (resourceId, iconField) ->
+                DrawerCatalogEntry(
+                    resourceDrawerOptionId(resourceId),
+                    iconField?.takeIf { it.type.startsWith("Lcom/x/icons/") },
+                )
+            },
+        shortcutIcons =
+            mapOf(
+                DRAWER_SHORTCUT_MESSAGES to messagesIcon,
+                DRAWER_SHORTCUT_GROK to grokIcon,
+                DRAWER_SHORTCUT_NOTIFICATIONS to notificationsIcon,
+            ),
+    )
+    val tabNavigation = resolveItemDrawerTabNavigation(tabData, model)
+    hookDrawerTabComponent(tabNavigation.componentClass)
+    replaceDrawerTabOpenerBodies(tabNavigation)
+
+    // ANCHORS: the settings item (resolved settings icon) and the Profile item.
+    val iconTypes =
+        model.anchorRowCalls.map { call ->
+            requireExactlyOne(
+                "NewX drawer anchor icon parameter in ${call.renderer}",
+                call.renderer.parameterTypes.map(CharSequence::toString).filter { it.startsWith("Lcom/x/icons/") },
+            )
+        }.distinct()
+    val iconType =
+        iconTypes.singleOrNull()
+            ?: throw PatchException("NewX drawer anchor rows use several icon types: $iconTypes")
+    val settingsIconField = resolveSettingsIconField(iconType)
+    model.requireUniqueIconBranch(settingsIconField, "the settings item")
+    val profileIconField =
+        model.uniqueIconFieldForTitle(
+            resourceId(ResourceType.STRING, "drawer_profile_title").toInt(),
+            "drawer_profile_title",
+        )
+    val pikoRow =
+        DrawerRowContent(
+            icon = DrawerRowIcon.Accessor(pikoSettingsIconGetter(iconType)),
+            titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getPikoSettingsTitle()Ljava/lang/String;",
+            clickDescriptor = "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsClickHandler()$FUNCTION0_DESCRIPTOR",
+        )
+    val shortcutRows =
+        listOf(
+            DrawerRowContent(
+                icon = DrawerRowIcon.Field(messagesIcon),
+                titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getMessagesTitle()Ljava/lang/String;",
+                clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getMessagesClickHandler()$FUNCTION0_DESCRIPTOR",
+            ),
+            DrawerRowContent(
+                icon = DrawerRowIcon.Field(grokIcon),
+                titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getGrokTitle()Ljava/lang/String;",
+                clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getGrokClickHandler()$FUNCTION0_DESCRIPTOR",
+            ),
+            DrawerRowContent(
+                icon = DrawerRowIcon.Field(notificationsIcon),
+                titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getNotificationsTitle()Ljava/lang/String;",
+                clickDescriptor =
+                    "$DRAWER_TAB_OPENER_DESCRIPTOR->getNotificationsClickHandler()$FUNCTION0_DESCRIPTOR",
+            ),
+        )
+    // Which list (menu or footer) renders an item is runtime data, so every anchor row receives
+    // both gated blocks; only the row of the matching item emits. Calls are injected in
+    // descending ordinal so the ordinal of every remaining anchor stays valid.
+    model.anchorRowCalls.groupBy { it.method.toSmaliDescriptor() }.values.forEachIndexed { methodIndex, calls ->
+        val method = requireExactlyOne("NewX drawer anchor method", calls.map { it.method }.distinct()).mutableMethod()
+        calls.sortedByDescending { it.rendererCallOrdinal }.forEach { call ->
+            val suffix = "${methodIndex}_${call.rendererCallOrdinal}"
+            method.injectIconGatedDrawerRows(
+                call,
+                listOf(
+                    IconGatedRowBlock(settingsIconField, listOf(pikoRow), "piko_drawer_settings_$suffix"),
+                    IconGatedRowBlock(profileIconField, shortcutRows, "piko_drawer_shortcuts_$suffix"),
+                ),
+            )
+        }
+    }
+
+    // THEME PATH / GROK PATH: same title-less widgets as the title-row path, in the item owner class.
+    val themeMatches =
+        Fingerprint(
+            definingClass = model.ownerClass,
+            returnType = "V",
+            custom = { method, _ -> isDrawerThemeToggleShape(method) },
+            filters = DRAWER_THEME_TOGGLE_FILTERS,
+        ).matchAllOrNull().orEmpty().distinctBy { it.originalMethod.toString() }
+    requireAtMostOne(
+        label = "NewX drawer theme toggle",
+        candidates = themeMatches,
+    )?.method?.injectFixedDrawerItemGuard(hiddenItems, "THEME_TOGGLE")
+    val grokMatches =
+        grokButtonFingerprint(definingClass = model.ownerClass).matchAllOrNull().orEmpty()
+            .distinctBy { it.originalMethod.toString() }
+    requireAtMostOne(
+        label = "NewX drawer Grok button",
+        candidates = grokMatches,
+    )?.method?.injectFixedDrawerItemGuard(hiddenItems, "GROK")
+}
+
 /**
  * Finds the Profile menu row: the only unconditionally composed top-section row, which makes
  * its registers safe to snapshot for rows emitted later at the end of the menu section.
@@ -1026,7 +1380,7 @@ private fun resolveDrawerTabNavigation(
     tabData: NewXNavBarTabData,
 ): DrawerTabNavigation {
     // Read-only discovery pass; see the navigation bar patch for why mutable proxies are avoided.
-    val dispatcherMatch =
+    val dispatcherFingerprint =
         Fingerprint(
             name = "invoke",
             returnType = OBJECT_DESCRIPTOR,
@@ -1056,7 +1410,11 @@ private fun resolveDrawerTabNavigation(
                     opcodes = INVOKE_INTERFACE_OPCODES,
                 ),
             )
-        ).matchAll(1..1).single()
+        )
+    val dispatcherMatch = requireExactlyOne(
+        "NewX drawer Communities click",
+        dispatcherFingerprint.matchAllOrNull().orEmpty(),
+    )
     val dispatcher = dispatcherMatch.originalMethod
     val dispatcherInstructions = dispatcher.instructions.toList()
     val switchIndex = dispatcherMatch.instructionMatches[0].index
@@ -1149,6 +1507,116 @@ private fun resolveDrawerTabNavigation(
         closerField = closerField,
         closerMethod = closerMethod,
         closerArgField = closerArgField,
+    )
+}
+
+/** Item-model drawers dispatch Communities from the landing component's item handler. */
+/**
+ * The `main/api` event fields an invoke's [argument] register is proven to hold at [callIndex]:
+ * each one is a static read whose value reaches the argument on every path.
+ */
+private fun Method.closeEventFields(callIndex: Int, argument: Int): List<FieldReference> {
+    val code = implementation?.instructions?.toList().orEmpty()
+    return code.take(callIndex).withIndex().mapNotNull { (index, instruction) ->
+        if (instruction.opcode != Opcode.SGET_OBJECT) return@mapNotNull null
+        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+        val load = instruction as OneRegisterInstruction
+        field.takeIf {
+            field.type.startsWith("Lcom/x/main/api/") &&
+                provesValueFromInstruction(index, load.registerA, callIndex, argument)
+        }
+    }
+}
+
+/**
+ * The drawer-close call after the tab change: the first Object-argument invoke-interface past it
+ * that receives a main/api event on every path. The event read proves the call, so the call is
+ * located by data flow rather than by its distance from the tab change.
+ */
+private fun Method.closeEventCallIndex(tabChangeIndex: Int): Int {
+    val code = implementation?.instructions?.toList().orEmpty()
+    return code.indices.firstOrNull { index ->
+        if (index <= tabChangeIndex || code[index].opcode !in INVOKE_INTERFACE_OPCODES) return@firstOrNull false
+        val reference = code[index].getReference<MethodReference>() ?: return@firstOrNull false
+        val registers = code[index].registersUsed
+        reference.parameterTypes.map(CharSequence::toString) == listOf(OBJECT_DESCRIPTOR) &&
+            reference.returnType == "V" && registers.size == 2 &&
+            closeEventFields(index, registers[1]).isNotEmpty()
+    } ?: throw PatchException("NewX drawer close call after the tab change is missing in $this")
+}
+
+private fun resolveItemDrawerTabNavigation(
+    tabData: NewXNavBarTabData,
+    model: DrawerItemModel,
+): DrawerTabNavigation {
+    val itemType = model.itemRenderer.parameterTypes[model.itemParameterIndex].toString()
+    val communitiesTitle = resourceId(ResourceType.STRING, "drawer_communities_title").toInt()
+    val communitiesItem = requireExactlyOne(
+        "NewX drawer Communities item", model.branchesWithTitle(communitiesTitle),
+    ).itemType
+    val match = requireExactlyOne(
+        "NewX item drawer Communities navigation",
+        Fingerprint(
+            definingClass = "Lcom/x/main/landing/",
+            parameters = listOf(itemType),
+            returnType = "V",
+            isStatic = false,
+            filters = listOf(
+                fieldAccess(opcode = Opcode.SGET_OBJECT, definingClass = communitiesItem, type = communitiesItem),
+                fieldAccess(opcode = Opcode.SGET_OBJECT, definingClass = tabData.navigationType, name = "COMMUNITIES"),
+                methodCall(
+                    definingClass = FUNCTION1_DESCRIPTOR,
+                    name = "invoke",
+                    parameters = listOf(OBJECT_DESCRIPTOR),
+                    returnType = OBJECT_DESCRIPTOR,
+                    opcodes = INVOKE_INTERFACE_OPCODES,
+                ),
+            ),
+        ).scopedMatchAll(),
+    )
+    val method = match.originalMethod
+    val code = method.instructions.toList()
+    val enumRead = match.instructionMatches[1].index
+    val tabChange = match.instructionMatches[2].index
+    val close = method.closeEventCallIndex(tabChange)
+    val (tabFunction, tabArgument) = code[tabChange].registersUsed
+    val (closeReceiver, closeArgument) = code[close].registersUsed
+    val enumRegister = (code[enumRead] as OneRegisterInstruction).registerA
+    if (!method.provesValueFromInstruction(enumRead, enumRegister, tabChange, tabArgument)) {
+        throw PatchException("NewX drawer Communities enum does not reach the tab callback in $method")
+    }
+
+    fun componentField(callIndex: Int, register: Int): FieldReference = requireExactlyOne(
+        "NewX drawer component field used at $callIndex in $method",
+        code.take(callIndex).withIndex().mapNotNull { (index, instruction) ->
+            if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+            val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+            val read = instruction as TwoRegisterInstruction
+            field.takeIf {
+                field.definingClass == method.definingClass &&
+                    method.provesParameterValue(index, read.registerB, method.p0Register) &&
+                    method.provesValueFromInstruction(index, read.registerA, callIndex, register)
+            }
+        },
+    )
+
+    val tabChangeField = componentField(tabChange, tabFunction)
+    val closeField = componentField(close, closeReceiver)
+    val closeMethod = code[close].getReference<MethodReference>()
+        ?: throw PatchException("NewX drawer close call has no method reference in $method")
+    val closeArgumentField = method.closeEventFields(close, closeArgument).let { fields ->
+        requireExactlyOne("NewX drawer close event in $method", fields)
+    }
+    if (tabChangeField.type != FUNCTION1_DESCRIPTOR || closeField.type != closeMethod.definingClass) {
+        throw PatchException("NewX item drawer tab-change or close receiver has changed type in $method")
+    }
+    return DrawerTabNavigation(
+        componentClass = method.definingClass,
+        enumType = tabData.navigationType,
+        tabChangeFunctionField = tabChangeField,
+        closerField = closeField,
+        closerMethod = closeMethod,
+        closerArgField = closeArgumentField,
     )
 }
 
@@ -1316,6 +1784,14 @@ val customizeNewXDrawerPatch =
             )
 
         execute {
+            // ITEM-MODEL RELEASES: rows come from item mappers instead of title literals. The
+            // title-row path below stays verbatim for releases without the item title mapper.
+            val itemModel = resolveDrawerItemModelOrNull()
+            if (itemModel != null) {
+                applyItemModelDrawer(itemModel, hiddenItems)
+                return@execute
+            }
+
             val classMatches = NewXDrawerContentClassFingerprint.scopedMatchAll()
             if (classMatches.size != 1) {
                 throw PatchException(
@@ -1481,7 +1957,8 @@ val customizeNewXDrawerPatch =
             themeMatches.singleOrNull()?.method?.injectFixedDrawerItemGuard(hiddenItems, "THEME_TOGGLE")
 
             // GROK PATH: dedicated Get/Open Grok button; skip when the release has no Grok row.
-            val grokMatches = NewXDrawerGrokButtonFingerprint.scopedMatchAllOrNull().orEmpty()
+            val grokMatches = grokButtonFingerprint(classFingerprint = NewXDrawerContentClassFingerprint)
+                .scopedMatchAllOrNull().orEmpty()
             if (grokMatches.size > 1) {
                 throw PatchException(
                     "Expected at most one NewX drawer Grok button, found ${grokMatches.size}: " +

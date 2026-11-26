@@ -16,6 +16,7 @@ import app.crimera.patches.newx.misc.inlineactions.capturedInlineActionRendererC
 import app.crimera.patches.newx.misc.inlineactions.resolveCapturedInlineActionEntryRenderer
 import app.crimera.patches.newx.misc.inlineactions.hasOnlyFallThroughInto
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.models.firstParameterSlot
 import app.crimera.patches.newx.models.isInlineActionEntryRenderer
@@ -715,10 +716,12 @@ private fun resolveFactory(
         }
         if (selectorLiterals.size != 1) return@mapNotNull null
         if (!initializer.factoryResultFeedsStore(
+                allocationIndex = allocation.index,
                 constructorIndex = constructor.index,
                 storeIndex = storeIndex,
                 storeRegister = storeRegister,
                 allocationRegister = allocationRegister,
+                cacheFieldType = cacheField.type,
             )
         ) {
             return@mapNotNull null
@@ -764,11 +767,18 @@ private fun Instruction.receiverRegister(): Int? =
         else -> null
     }
 
-private fun MutableMethod.factoryResultFeedsStore(
+/**
+ * True when exactly one consumer receives the factory allocated at [allocationIndex] and its result
+ * reaches [storeIndex] in [storeRegister]. Both links are CFG provenance, not literal register or
+ * adjacency checks: moves, check-casts and unrelated instructions between them are tolerated.
+ */
+internal fun MutableMethod.factoryResultFeedsStore(
+    allocationIndex: Int,
     constructorIndex: Int,
     storeIndex: Int,
     storeRegister: Int,
     allocationRegister: Int,
+    cacheFieldType: String,
 ): Boolean {
     val consumers = instructions.withIndex().filter { indexed ->
         indexed.index > constructorIndex &&
@@ -781,33 +791,60 @@ private fun MutableMethod.factoryResultFeedsStore(
                     Opcode.INVOKE_STATIC,
                     Opcode.INVOKE_STATIC_RANGE,
                     -> {
+                        val factoryArgument = registers.getOrNull(functionParameter) ?: return@let false
                         reference.returnType.startsWith("L") &&
-                            registers.getOrNull(functionParameter) == allocationRegister &&
+                            provesValueFromInstruction(allocationIndex, allocationRegister, indexed.index, factoryArgument) &&
                             instructions.getOrNull(indexed.index + 1)?.let { result ->
                                 result.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                                    (result as? OneRegisterInstruction)?.registerA == storeRegister
+                                    provesValueFromInstruction(
+                                        indexed.index + 1,
+                                        (result as OneRegisterInstruction).registerA,
+                                        storeIndex,
+                                        storeRegister,
+                                    )
                             } == true
                     }
                     Opcode.INVOKE_DIRECT,
                     Opcode.INVOKE_DIRECT_RANGE,
                     -> {
-                        // Newer Kotlin lowers LazyKt.b(Function0) to a direct
-                        // kotlin.Lazy(Function0) constructor. The Function0 is
-                        // the second invoke register and the constructed Lazy
-                        // object is stored immediately, so no move-result exists.
+                        // Register 0 is the receiver; the Lazy implementation can take auxiliary arguments after its factory.
+                        val factoryArgument = registers.getOrNull(1) ?: return@let false
+                        val receiver = registers.firstOrNull() ?: return@let false
                         reference.name == "<init>" &&
                             reference.returnType == "V" &&
-                            reference.parameterTypes.map(CharSequence::toString) ==
-                                listOf(FUNCTION0_DESCRIPTOR) &&
-                            registers.getOrNull(functionParameter + 1) == allocationRegister &&
-                            registers.firstOrNull() == storeRegister &&
-                            indexed.index + 1 == storeIndex
+                            reference.definingClass == cacheFieldType &&
+                            functionParameter == 0 &&
+                            provesValueFromInstruction(allocationIndex, allocationRegister, indexed.index, factoryArgument) &&
+                            cacheObjectReachesStore(indexed.index, receiver, storeIndex, storeRegister, cacheFieldType)
                     }
                     else -> false
                 }
             } == true
     }
     return consumers.size == 1
+}
+
+/**
+ * The cache object built by the `<init>` at [initIndex] (receiver [receiver]) is the value that
+ * [storeRegister] holds at [storeIndex]. The unique `new-instance` of [cacheFieldType] that proves
+ * the receiver at the constructor is the origin; the store must prove the same object.
+ */
+private fun MutableMethod.cacheObjectReachesStore(
+    initIndex: Int,
+    receiver: Int,
+    storeIndex: Int,
+    storeRegister: Int,
+    cacheFieldType: String,
+): Boolean {
+    val origins = instructions.withIndex().filter { (index, instruction) ->
+        index < initIndex &&
+            instruction.opcode == Opcode.NEW_INSTANCE &&
+            instruction.getReference<TypeReference>()?.type == cacheFieldType &&
+            provesValueFromInstruction(index, (instruction as OneRegisterInstruction).registerA, initIndex, receiver)
+    }
+    val origin = origins.singleOrNull() ?: return false
+    val originRegister = (origin.value as OneRegisterInstruction).registerA
+    return provesValueFromInstruction(origin.index, originRegister, storeIndex, storeRegister)
 }
 
 private fun MutableMethod.resolvePaletteAllocationIndex(
@@ -1191,37 +1228,9 @@ private fun patchInlineActionTints() {
             } == true
     }
     val unfavoriteRead = requireExactlyOne("NewX Unfavorite enum read", unfavoriteReads)
-    val likeComposableConstructors =
-        tintMethod.instructions.drop(unfavoriteRead.index + 1)
-            .mapNotNull { instruction -> instruction.getReference<MethodReference>() }
-            .filter { reference ->
-                reference.name == "<init>" &&
-                    reference.parameterTypes.let { parameters ->
-                        when (parameters.size) {
-                            5 ->
-                                parameters[0] == "Ljava/lang/String;" &&
-                                    parameters[1] == "Z" &&
-                                    parameters[2] == "Ljava/lang/Long;" &&
-                                    parameters[3] == "F" &&
-                                    parameters[4].toString()
-                                        .startsWith("Landroidx/compose/runtime/")
-                            6 ->
-                                parameters[0] == "Ljava/lang/String;" &&
-                                    parameters[1] == "Z" &&
-                                    parameters[2] == "Ljava/lang/Long;" &&
-                                    parameters[3] == "F" &&
-                                    parameters[4] == "Lkotlin/jvm/functions/Function1;" &&
-                                    parameters[5].toString()
-                                        .startsWith("Landroidx/compose/runtime/")
-                            else -> false
-                        }
-                    } &&
-                    reference.definingClass.hasComposableLambdaInvoke()
-            }.distinctBy(MethodReference::toString)
-    val likeComposableConstructor =
-        requireAtMostOne("NewX standalone like icon composable constructor", likeComposableConstructors)
+    val likeComposable = tintMethod.resolveLikeIconComposable(unfavoriteRead.index)
     val unifiedLikeRendererCandidates =
-        if (likeComposableConstructor == null) tintMethod.unifiedLikeButtonRendererCalls() else emptyList()
+        if (likeComposable == null) tintMethod.unifiedLikeButtonRendererCalls() else emptyList()
 
     if (capturedRenderer == null) {
         // Historical renderers receive both colors as composable parameters. Resolve the wide
@@ -1279,8 +1288,8 @@ private fun patchInlineActionTints() {
         }
     }
     val activatedTint = tintMethod.injectActivatedLikeTint(unfavoriteRead.index)
-    if (likeComposableConstructor != null) {
-        patchLikeIconComposable(likeComposableConstructor.definingClass, activatedTint.field)
+    if (likeComposable != null) {
+        patchLikeIconComposable(likeComposable, activatedTint.field)
     } else {
         requireExactlyOne(
             "NewX unified like-button renderer receiving the activated tint",
@@ -1420,11 +1429,12 @@ private fun wideReadsByOwner(
  * callee rendering the labels. Hooking the source tints labels and icons together while the
  * slot's alpha-driven selection emphasis flows through untouched.
  */
-private fun isTabSlotColors(method: Method, horizon: String): Boolean {
+internal fun isTabSlotColors(method: Method, horizon: String): Boolean {
     val reads = wideReadsByOwner(method, horizon)
     if (reads.size != 1) return false
     val ownerReads = reads.values.first()
     if (ownerReads.size != 2) return false
+    if (ownerReads.map { it.value.getReference<FieldReference>() }.distinct().size != 2) return false
     return method.implementation?.instructions?.toList().orEmpty().any { instruction ->
         instruction.getReference<MethodReference>()?.let { reference ->
             reference.definingClass.startsWith(TAB_RENDERER_SCOPE) &&
@@ -2511,12 +2521,71 @@ private fun MutableMethod.injectTabIndicatorCallbackTint(site: TabIndicatorTintS
     }
 }
 
-private fun String.hasComposableLambdaInvoke(): Boolean =
-    mutableClassDefBy(this).methods.count { method ->
-        method.name == "invoke" &&
-            method.parameterTypes == listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
-            method.returnType == "Ljava/lang/Object;"
-    } == 1
+private fun String.resolveComposableLambdaInvoke(): MutableMethod? =
+    requireAtMostOne(
+        "NewX like content invoke in $this",
+        mutableClassDefBy(this).methods.filter { method ->
+            method.name == "invoke" &&
+                method.parameterTypes == listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
+                method.returnType == "Ljava/lang/Object;"
+        },
+    )
+
+private fun Instruction.likeIconCaptureConstructor(): MethodReference? {
+    if (opcode !in DIRECT_INVOKE_OPCODES) return null
+    val constructor = getReference<MethodReference>() ?: return null
+    val parameters = constructor.parameterTypes.map(CharSequence::toString)
+    return constructor.takeIf {
+        constructor.name == "<init>" &&
+            parameters.containsAll(listOf("Ljava/lang/String;", "Z", "Ljava/lang/Long;", "F")) &&
+            parameters.any { it.startsWith("Landroidx/compose/runtime/") }
+    }
+}
+
+private fun MutableMethod.resolveLikeIconComposable(unfavoriteIndex: Int): MutableMethod? {
+    val candidates = instructions.drop(unfavoriteIndex + 1)
+        .mapNotNull { it.likeIconCaptureConstructor() }
+        .distinctBy { it.definingClass }
+        .mapNotNull { it.definingClass.resolveComposableLambdaInvoke() }
+        .flatMap { outer ->
+            if (outer.lottieRendererCalls().isNotEmpty()) return@flatMap listOf(outer)
+            val code = outer.instructions.toList()
+            // A content wrapper can allocate a second lambda and pass it to the Compose factory.
+            code.withIndex().mapNotNull { (index, instruction) ->
+                val constructor = instruction.likeIconCaptureConstructor() ?: return@mapNotNull null
+                val receiver = instruction.registersUsed.firstOrNull() ?: return@mapNotNull null
+                val allocation = code.take(index).withIndex().singleOrNull { (sourceIndex, source) ->
+                    source.opcode == Opcode.NEW_INSTANCE &&
+                        source.getReference<TypeReference>()?.type == constructor.definingClass &&
+                        outer.provesValueFromInstruction(
+                            sourceIndex, (source as OneRegisterInstruction).registerA, index, receiver,
+                        )
+                } ?: return@mapNotNull null
+                val allocatedRegister = (allocation.value as OneRegisterInstruction).registerA
+                val wrapped = code.withIndex().drop(index + 1).any { (callIndex, call) ->
+                    val factory = call.getReference<MethodReference>() ?: return@any false
+                    val parameters = factory.parameterTypes.map(CharSequence::toString)
+                    val arguments = call.registersUsed
+                    // One register per parameter; a wide parameter would shift the mapping, so none is allowed.
+                    if (call.opcode != Opcode.INVOKE_STATIC || arguments.size != parameters.size ||
+                        parameters.any { it == "J" || it == "D" }
+                    ) return@any false
+                    factory.definingClass.startsWith("Landroidx/compose/runtime/internal/") &&
+                        parameters.indices.any { slot ->
+                            parameters[slot] in COMPOSE_CALLBACK_PARAMETER_TYPES &&
+                                outer.provesValueFromInstruction(
+                                    allocation.index, allocatedRegister, callIndex, arguments[slot],
+                                )
+                        }
+                }
+                if (!wrapped) return@mapNotNull null
+                constructor.definingClass.resolveComposableLambdaInvoke()?.takeIf {
+                    it.lottieRendererCalls().isNotEmpty()
+                }
+            }
+        }.distinct()
+    return requireAtMostOne("NewX like animation composable", candidates)
+}
 
 private fun MethodReference.resolveMutableMethod(label: String): MutableMethod =
     mutableClassDefBy(definingClass)
@@ -2528,6 +2597,9 @@ private fun MethodReference.resolveMutableMethod(label: String): MutableMethod =
 
 private val WIDE_MOVE_OPCODES =
     setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16)
+
+/** Parameter types that can carry a Compose content lambda into a runtime-internal factory. */
+private val COMPOSE_CALLBACK_PARAMETER_TYPES = setOf("Lkotlin/Function;", "Ljava/lang/Object;")
 
 private val BOOLEAN_NORMALIZATION_OPCODES =
     setOf(
@@ -2561,7 +2633,7 @@ private fun Instruction.isComposeRendererCall(): Boolean {
         "J" in parameters
 }
 
-private data class ResolvedActivatedLikeTint(
+internal data class ResolvedActivatedLikeTint(
     val field: FieldReference,
     val rendererCallIndex: Int,
 )
@@ -2580,7 +2652,7 @@ private fun MutableMethod.composeRendererCallsForWideValue(
     }
 }
 
-private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): ResolvedActivatedLikeTint {
+internal fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): ResolvedActivatedLikeTint {
     val methodInstructions = instructions.toList()
     val unfavoriteRead = methodInstructions.getOrNull(unfavoriteIndex)
         ?: throw PatchException("NewX Unfavorite enum read is out of bounds: $this")
@@ -2612,9 +2684,15 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): Resolve
                 ?: return@flatMap emptyList()
 
             val mergeGotos = methodInstructions.withIndex().filter { indexed ->
-                indexed.index in (comparisonIndex + 1) until unary.index &&
-                    indexed.value.opcode in setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32) &&
-                    (indexed.value as? BuilderOffsetInstruction)?.target?.location?.index == unary.index
+                if (indexed.index !in (comparisonIndex + 1) until unary.index ||
+                    indexed.value.opcode !in setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
+                ) return@filter false
+                val join = (indexed.value as? BuilderOffsetInstruction)?.target?.location?.index
+                    ?: return@filter false
+                join in (comparisonTarget + 1)..unary.index &&
+                    methodInstructions.subList(join, unary.index).none {
+                        it is OffsetInstruction || !it.opcode.canContinue() || it.writesRegister(booleanRegister)
+                    }
             }
             if (mergeGotos.size != 1) return@flatMap emptyList()
             val mergeGotoIndex = mergeGotos.single().index
@@ -2660,7 +2738,7 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): Resolve
         }
     }
     val colorLoad =
-        requireExactlyOne("NewX activated-like tint load in the active branch", colorCandidates)
+        requireExactlyOne("NewX activated-like tint load in the active branch of $this", colorCandidates)
     val activeLikeField = colorLoad.value.getReference<FieldReference>()
         ?: throw PatchException("NewX activated-like tint field is missing: $this")
     val colorRegister = (colorLoad.value as? OneRegisterInstruction)?.registerA
@@ -2700,21 +2778,41 @@ private fun List<Instruction>.resolveBooleanNormalizationValue(
     return resolveLatestLiteral(write.index, move.registerB)
 }
 
-private fun MutableMethod.resolveLottieRenderer(): ResolvedLottieRenderer {
-    val candidates = instructions.withIndex().filter { indexed ->
+/**
+ * Compose lottie renderer by shape, not by slot: one Lottie animation, one Function0, one Modifier,
+ * one String, one Composer, exactly two Boolean flags, and trailing Int defaults. Slot order and the
+ * optional trailing Int count are not part of the contract.
+ */
+private fun MutableMethod.lottieRendererCalls(): List<IndexedValue<Instruction>> =
+    instructions.withIndex().filter { indexed ->
         val reference = indexed.value.getReference<MethodReference>() ?: return@filter false
-        if (reference.parameterTypes.size !in 8..9 || reference.returnType != "V") return@filter false
-        val parameters = reference.parameterTypes
-        parameters[0] == "Z" &&
-            parameters[2] == "Z" &&
-            parameters[3] == FUNCTION0_DESCRIPTOR &&
-            parameters[4] == COMPOSE_MODIFIER_DESCRIPTOR &&
-            parameters[5] == "Ljava/lang/String;" &&
-            parameters[6] == "Landroidx/compose/runtime/Composer;" &&
-            parameters[7] == "I" &&
-            (parameters.size == 8 || parameters[8] == "I")
+        if (reference.parameterTypes.size !in 8..10 || reference.returnType != "V") return@filter false
+        val parameters = reference.parameterTypes.map(CharSequence::toString)
+        val allowed = parameters.all { type ->
+            type == "Z" || type == "I" || type.startsWith("Lcom/x/lottie/") ||
+                type == FUNCTION0_DESCRIPTOR || type == COMPOSE_MODIFIER_DESCRIPTOR ||
+                type == "Ljava/lang/String;" || type == COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR
+        }
+        allowed &&
+            parameters.count { it.startsWith("Lcom/x/lottie/") } == 1 &&
+            parameters.count { it == FUNCTION0_DESCRIPTOR } == 1 &&
+            parameters.count { it == COMPOSE_MODIFIER_DESCRIPTOR } == 1 &&
+            parameters.count { it == "Ljava/lang/String;" } == 1 &&
+            parameters.count { it == COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR } == 1 &&
+            parameters.count { it == "Z" } == 2 &&
+            parameters.count { it == "I" } >= 1
     }
-    val candidate = requireExactlyOne("NewX like Lottie renderer call", candidates)
+
+/** Register slot of the animation flag: the second Boolean, which the inline hook overwrites. */
+private fun MethodReference.lottieAnimationFlagSlot(): Int {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    val flags = parameters.indices.filter { parameters[it] == "Z" }
+    if (flags.size != 2) throw PatchException("NewX Lottie renderer must take exactly two Boolean flags: $this")
+    return flags[1]
+}
+
+private fun MutableMethod.resolveLottieRenderer(): ResolvedLottieRenderer {
+    val candidate = requireExactlyOne("NewX like Lottie renderer call", lottieRendererCalls())
     val reference = candidate.value.getReference<MethodReference>()
         ?: throw PatchException("NewX like Lottie renderer reference is missing: $this")
     return ResolvedLottieRenderer(
@@ -2725,19 +2823,15 @@ private fun MutableMethod.resolveLottieRenderer(): ResolvedLottieRenderer {
 }
 
 private fun patchLikeIconComposable(
-    descriptor: String,
+    composable: MutableMethod,
     activeLikeField: FieldReference,
 ) {
-    val composable =
-        mutableClassDefBy(descriptor).methods.singleOrNull { method ->
-            method.name == "invoke" &&
-                method.parameterTypes == listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
-                method.returnType == "Ljava/lang/Object;"
-        } ?: throw PatchException("NewX like icon composable invoke method not found: $descriptor")
     val lottieRenderer = composable.resolveLottieRenderer()
     val rangeInstruction = lottieRenderer.instruction as? RegisterRangeInstruction
         ?: throw PatchException("NewX like Lottie renderer is not an invoke-range: $composable")
-    val animationRegister = rangeInstruction.startRegister + 2
+    val renderer = lottieRenderer.instruction.getReference<MethodReference>()
+        ?: throw PatchException("NewX like Lottie renderer reference is missing: $composable")
+    val animationRegister = rangeInstruction.startRegister + renderer.lottieAnimationFlagSlot()
 
     composable.insertHook(
         index = lottieRenderer.index,

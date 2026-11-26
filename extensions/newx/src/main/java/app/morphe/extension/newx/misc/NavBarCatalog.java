@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,8 @@ public final class NavBarCatalog {
     private static final Map<String, Tab> TABS = new ConcurrentHashMap<>();
     private static final List<String> DESTINATION_ORDER = new CopyOnWriteArrayList<>();
     private static final List<String> TAB_ORDER = new CopyOnWriteArrayList<>();
+    private static final Map<String, CopyOnWriteArrayList<String>> DESTINATIONS_BY_ITEM_CLASS =
+            new ConcurrentHashMap<>();
     private static final Set<String> LIVE_TAB_IDS = ConcurrentHashMap.newKeySet();
     private static volatile boolean liveTabsKnown;
 
@@ -62,6 +65,26 @@ public final class NavBarCatalog {
         if (DESTINATIONS.put(id, new Destination(id, titleResourceId, icon, drawableRes)) == null) {
             DESTINATION_ORDER.add(id);
         }
+    }
+
+    /**
+     * Injection point: binds a registered destination to the drawer item class that renders it on
+     * item-model releases. Several destinations may share one item class (Bookmarks/History).
+     */
+    public static void registerDestinationItem(String destinationId, String itemClassName) {
+        if (destinationId == null || itemClassName == null) {
+            throw new IllegalArgumentException("Navigation bar destination item needs an id and a class");
+        }
+        CopyOnWriteArrayList<String> destinationIds =
+                DESTINATIONS_BY_ITEM_CLASS.computeIfAbsent(itemClassName, ignored -> new CopyOnWriteArrayList<>());
+        destinationIds.addIfAbsent(destinationId);
+    }
+
+    /** Destinations rendered by drawer items of this class; empty for unrelated items. */
+    public static List<String> destinationsForItemClass(String itemClassName) {
+        if (itemClassName == null) return Collections.emptyList();
+        CopyOnWriteArrayList<String> destinationIds = DESTINATIONS_BY_ITEM_CLASS.get(itemClassName);
+        return destinationIds == null ? Collections.emptyList() : Collections.unmodifiableList(destinationIds);
     }
 
     /** Injection point: registers one navigation tab for the editor. */

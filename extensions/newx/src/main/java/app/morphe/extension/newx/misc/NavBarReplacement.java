@@ -29,6 +29,17 @@ public final class NavBarReplacement {
         DESTINATION_CLICKS.put(destinationId, click);
     }
 
+    /**
+     * Injection point (item-model drawers): every drawer item row passes its item and click.
+     * Only items registered for a destination are kept.
+     */
+    public static void captureItemClick(Object item, Function0<?> click) {
+        if (item == null || click == null) return;
+        for (String destinationId : NavBarCatalog.destinationsForItemClass(item.getClass().getName())) {
+            DESTINATION_CLICKS.put(destinationId, click);
+        }
+    }
+
     /** Injection point: substitutes the icon with the configured destination's icon. */
     public static Object overrideIcon(Object tab, Object originalIcon) {
         String destinationId = configuredDestination(tab);
