@@ -24,6 +24,7 @@ import app.crimera.patches.newx.misc.postoptions.TRANSLATE_ACTION
 import app.crimera.patches.newx.misc.postoptions.newXPostOption
 import app.crimera.patches.newx.models.ResolvedNewXPostModels
 import app.crimera.patches.newx.models.ResolvedNewXTimelineModels
+import app.crimera.patches.newx.models.fieldForOutlinedToStringLabel
 import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.models.newXPostModelResolutionPatch
 import app.crimera.patches.newx.models.newXTimelineModelResolutionPatch
@@ -489,7 +490,7 @@ private fun patchDisplayTextBridges(
  * pairs labels with reads by instruction order and picked `endIdx` for `startIdx` on 12.38.
  */
 private fun Match.toStringField(label: String): FieldReference =
-    method.outlinedToStringField(label) ?: fieldForToStringLabel(label)
+    method.fieldForOutlinedToStringLabel(label)
 
 /**
  * The concrete note body reads its text field after the `, inlineMedia=` label, then passes both
@@ -505,65 +506,6 @@ internal fun Method.resolveNotePostBodyTextField(): FieldReference {
             field.definingClass == definingClass && field.type == STRING_DESCRIPTOR
         }.distinctBy { field -> field.toString() }
     return requireExactlyOne("NewX note post body text field in $this", candidates)
-}
-
-private fun Method.outlinedToStringField(label: String): FieldReference? {
-    val instructions = instructions.toList()
-    fun definedAt(register: Int, callIndex: Int, matches: (Int) -> Boolean): List<Int> =
-        instructions.indices.filter { index ->
-            index < callIndex && matches(index) &&
-                instructions.valueReachesRegister(
-                    index,
-                    (instructions[index] as OneRegisterInstruction).registerA,
-                    callIndex,
-                    register,
-                )
-        }
-    val candidates = instructions.withIndex().flatMap { (callIndex, call) ->
-        if (call.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) return@flatMap emptyList()
-        val helper = call.getReference<MethodReference>() ?: return@flatMap emptyList()
-        val appendOrder = classDefByOrNull(helper.definingClass)?.methods
-            ?.singleOrNull { it.toReference().toString() == helper.toString() }
-            ?.stringBuilderParameterOrder() ?: return@flatMap emptyList()
-        val arguments = call.registersUsed
-        val labelSlots = arguments.indices.filter { slot ->
-            definedAt(arguments[slot], callIndex) { index ->
-                instructions[index].getReference<StringReference>()?.string == label
-            }.isNotEmpty()
-        }
-        labelSlots.flatMap { labelSlot ->
-            val fieldSlot = appendOrder.getOrNull(appendOrder.indexOf(labelSlot) + 1) ?: return@flatMap emptyList()
-            val register = arguments.getOrNull(fieldSlot) ?: return@flatMap emptyList()
-            definedAt(register, callIndex) { index ->
-                instructions[index].opcode in FIELD_READ_OPCODES &&
-                    instructions[index].getReference<FieldReference>()?.definingClass == definingClass
-            }.mapNotNull { index -> instructions[index].getReference<FieldReference>() }
-        }
-    }.distinctBy { it.toString() }
-    return requireAtMostOne("NewX outlined toString field for '$label' in $this", candidates)
-}
-
-/**
- * Parameter slots of a static `StringBuilder` helper in the order they are written: the
- * `StringBuilder(String)` seed, then each `append`. Null unless every write reads a parameter.
- */
-private fun Method.stringBuilderParameterOrder(): List<Int>? {
-    if (!AccessFlags.STATIC.isSet(accessFlags)) return null
-    val implementation = implementation ?: return null
-    val parameterStart = implementation.registerCount - parameterTypes.sumOf { type ->
-        if (type.toString() == "J" || type.toString() == "D") 2 else 1
-    }
-    val order = mutableListOf<Int>()
-    for (instruction in implementation.instructions) {
-        val reference = instruction.getReference<MethodReference>() ?: continue
-        if (reference.definingClass != "Ljava/lang/StringBuilder;") continue
-        val isWrite = (reference.name == "<init>" && reference.parameterTypes.size == 1) || reference.name == "append"
-        if (!isWrite) continue
-        val slot = instruction.registersUsed.getOrNull(1)?.minus(parameterStart) ?: return null
-        if (slot < 0) return null
-        order += slot
-    }
-    return order.takeIf { it.isNotEmpty() }
 }
 
 private fun resolveTranslationPath(): ResolvedTranslationPath {

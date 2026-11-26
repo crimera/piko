@@ -76,6 +76,13 @@
     <string name="piko_newx_hide_timeline_add_tab_summary">Removes the + button that adds tabs from the NewX home timeline tabs bar</string>
     <string name="piko_newx_group_timeline_tabs_title">Timeline tabs</string>
     <string name="piko_newx_group_timeline_tabs_summary">Choose which timeline tabs are shown and hide the tabs bar or its add button</string>
+    <string name="piko_newx_explore_tabs_title">Explore tabs to hide</string>
+    <string name="piko_newx_explore_tabs_summary">Choose which tabs to hide from the Explore screen</string>
+    <string name="piko_newx_explore_tab_for_you">For You</string>
+    <string name="piko_newx_explore_tab_trending">Trending</string>
+    <string name="piko_newx_explore_tab_news">News</string>
+    <string name="piko_newx_explore_tab_sports">Sports</string>
+    <string name="piko_newx_explore_tab_entertainment">Entertainment</string>
     <string name="piko_newx_for_you_tab_hook_title">Use custom For You topic selector</string>
     <string name="piko_newx_for_you_tab_hook_summary">Opens the custom topic selector from the For You tab instead of the native snooze sheet</string>
     <string name="piko_newx_topic_filtering_title">For You topic filter</string>
