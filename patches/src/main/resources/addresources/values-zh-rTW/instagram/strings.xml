@@ -109,6 +109,8 @@
     <string name="piko_disable_double_tap_like_message">停用訊息雙擊按讚</string>
     <string name="piko_disable_double_tap_to_like">停用雙擊按讚</string>
     <!-- Miscellaneous Section -->
+    <string name="piko_category_appearance">外觀</string>
+    <string name="piko_category_posts">貼文</string>
     <string name="piko_material_you_title">Material You 模式</string>
     <string name="piko_amoled_title">AMOLED 純黑模式</string>
     <string name="piko_follow_back_indicator">顯示追蹤關係</string>
@@ -120,8 +122,8 @@
     <string name="piko_friendship_status">追蹤關係</string>
     <string name="piko_follow_list_non_follower_badge">啟用追蹤狀態指示器</string>
     <string name="piko_follow_list_non_follower_badge_desc">增加一個標籤顯示你正在追蹤的帳號是否追蹤你</string>
-    <string name="piko_resume_reels_after_scrolling">滑動返回後繼續播放 Reels</string>
-    <string name="piko_resume_reels_after_scrolling_desc">當您滑動回原先的 Reels 時，從上次中斷的地方繼續播放</string>
+    <string name="piko_resume_reels_after_scrolling">記住 Reels 的播放進度</string>
+    <string name="piko_resume_reels_after_scrolling_desc">當您滑動至其他 Reels 時，自動記住目前的播放進度</string>
     <string name="piko_improve_image_viewing">提高相片畫質</string>
     <string name="piko_improve_image_viewing_desc">從伺服器抓取最高解析度圖片。可能會降低效能、增加應用程式資料大小，或導致應用程式切換至舊版版面配置</string>
     <string name="piko_copy_comment">複製留言</string>

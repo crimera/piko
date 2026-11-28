@@ -109,6 +109,8 @@
     <string name="piko_disable_double_tap_like_message">Mesaja çift tıklayıp beğenmeyi devre dışı bırak</string>
     <string name="piko_disable_double_tap_to_like">Çift dokunarak beğenmeyi devre dışı bırak</string>
     <!-- Miscellaneous Section -->
+    <string name="piko_category_appearance">Görünüm</string>
+    <string name="piko_category_posts">Gönderiler</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
@@ -120,8 +122,8 @@
     <string name="piko_friendship_status">Arkadaşlık durumu</string>
     <string name="piko_follow_list_non_follower_badge">Takip Edilenler listesinde takip etmeyenleri göster</string>
     <string name="piko_follow_list_non_follower_badge_desc">Kendi “Takip Edilenler” listenizdeki, sizi geri takip etmeyen hesapların satırlarına bir rozet ekler</string>
-    <string name="piko_resume_reels_after_scrolling">Kaydırma işleminden sonra videoları oynatmaya devam et</string>
-    <string name="piko_resume_reels_after_scrolling_desc">Bir Reel\'i geri kaydırdığınızda, onu kaldığınız yerden izlemeye devam edin</string>
+    <string name="piko_resume_reels_after_scrolling">Reels\'ta oynatma konumunu hatırla</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Başka bir Reel’e kaydırdığınızda oynatma konumunuzu hatırlar</string>
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
     <string name="piko_improve_image_viewing_desc">Sunucudan en yüksek çözünürlüklü görselleri çeker. Performansı düşürebilir, uygulama veri boyutunu artırabilir veya uygulamanın eski bir düzene geçmesine neden olabilir</string>
     <string name="piko_copy_comment">Yorumu kopyala</string>
@@ -241,8 +243,8 @@
     <string name="piko_download_file_name_token_variant_suffix">Varyant</string>
     <string name="piko_download_current_media">Mevcut medyayı indir</string>
     <string name="piko_download_as_image">Resim olarak indir</string>
-    <string name="piko_video_variants">Video varyantları</string>
-    <string name="piko_image_variants">Resim varyantları</string>
+    <string name="piko_video_variants">Video seçenekleri</string>
+    <string name="piko_image_variants">Görsel seçenekleri</string>
     <string name="piko_download_audio">Ses olarak indir</string>
     <string name="piko_download_options">İndirme seçenekleri</string>
     <string name="piko_copy_media_link">Medya bağlantısını kopyala</string>

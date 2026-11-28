@@ -109,6 +109,8 @@
     <string name="piko_disable_double_tap_like_message">메시지 두 번 탭하여 좋아요 비활성화</string>
     <string name="piko_disable_double_tap_to_like">두 번 탭하여 좋아요 비활성화</string>
     <!-- Miscellaneous Section -->
+    <string name="piko_category_appearance">디자인</string>
+    <string name="piko_category_posts">게시물</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
@@ -120,8 +122,8 @@
     <string name="piko_friendship_status">관계 상태</string>
     <string name="piko_follow_list_non_follower_badge">팔로잉 목록에 팔로워가 아닌 계정 표시</string>
     <string name="piko_follow_list_non_follower_badge_desc">내가 팔로우하는 목록에서 나를 맞팔로우하지 않는 계정 행에 배지를 추가합니다</string>
-    <string name="piko_resume_reels_after_scrolling">스크롤 후 릴스 이어보기</string>
-    <string name="piko_resume_reels_after_scrolling_desc">스크롤해서 다른 콘텐츠를 본 뒤 다시 돌아왔을 때, 이전에 보던 지점부터 릴스를 이어서 재생합니다</string>
+    <string name="piko_resume_reels_after_scrolling">릴스에서 재생 위치 저장</string>
+    <string name="piko_resume_reels_after_scrolling_desc">다른 릴스로 스크롤할 때 재생 위치를 저장합니다</string>
     <string name="piko_improve_image_viewing">이미지 보기 개선</string>
     <string name="piko_improve_image_viewing_desc">서버에서 최대 해상도의 이미지를 가져옵니다\n\n성능이 저하되거나 앱의 데이터 크기가 증가할 수 있으며, 앱이 이전 레이아웃으로 전환될 수도 있습니다</string>
     <string name="piko_copy_comment">댓글 복사 버튼 추가</string>
@@ -161,6 +163,8 @@
     <string name="piko_category_dm">메시지</string>
     <string name="piko_disable_disappearing_messages_gesture">사라지는 메시지 스와이프 비활성화</string>
     <string name="piko_disable_disappearing_messages_gesture_desc">채팅 화면에서 위로 스와이프해도 사라지는 메시지 기능이 활성화되지 않도록 방지합니다</string>
+    <string name="piko_send_keyboard_gifs">키보드 GIF 보내기</string>
+    <string name="piko_send_keyboard_gifs_desc">키보드의 GIF 선택기에서 선택한 GIF를 \'스티커 아이콘을 탭하여 GIF를 찾아 보내세요\' 대신 애니메이션 이미지로 보냅니다</string>
     <string name="piko_unlimited_replays">일시적 미디어를 영구 보관</string>
     <string name="piko_unlimited_replays_desc">1~2 회만 볼 수 있는 미디어를 계속 볼 수 있게 변경합니다</string>
     <string name="piko_ephemeral_caption">임시 미디어 수신 방식 표시</string>
@@ -184,6 +188,7 @@
     <string name="piko_customise_story_timestamp">스토리 시간 표시 설정</string>
     <string name="piko_customise_story_timestamp_desc">스토리가 게시된 시간을 표시하는 방식을 변경합니다</string>
     <string name="piko_customise_story_ring_size">스토리 링 크기 설정</string>
+    <string name="piko_customise_story_ring_size_desc">스토리 링 크기를 백분율로 변경합니다</string>
     <string name="piko_disable_story_flipping">스토리 자동 넘기기 비활성화</string>
     <string name="piko_disable_story_flipping_desc">스토리가 자동으로 다음으로 넘어가지 않도록 합니다</string>
     <string name="piko_loop_story">스토리 반복 재생</string>
@@ -370,12 +375,25 @@
     <string name="piko_pref_delete_font_success">폰트를 성공적으로 삭제하였습니다</string>
     <string name="piko_pref_delete_font_fail">폰트를 삭제할 수 없습니다</string>
     <string name="piko_pref_delete_font_warn">삭제할 사용자 정의 폰트를 찾을 수 없습니다</string>
+    <string name="piko_emoji_font">이모지 폰트</string>
+    <string name="piko_pref_add_emoji">이모지 추가</string>
+    <string name="piko_pref_delete_emoji">이모지 삭제</string>
     <string name="piko_use_system_font">시스템 폰트 사용</string>
     <string name="piko_use_system_font_desc">아래에 폰트 파일이 추가되지 않은 경우에만 적용되며, 폰트 파일을 추가하면 이 스위치는 무시됩니다</string>
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">추천 플래그</string>
     <string name="piko_category_rec_flags_desc">커뮤니티에서 추천하는 개발자 플래그</string>
     <string name="piko_rec_flags_read_error">캐시된 플래그 파일을 읽을 수 없습니다</string>
+    <string name="piko_rec_flags_modified">수정된 플래그</string>
+    <string name="piko_rec_flags_category_stories">스토리 및 하이라이트</string>
+    <string name="piko_rec_flags_category_reels">릴스 및 동영상</string>
+    <string name="piko_rec_flags_category_feed">피드 및 탐색</string>
+    <string name="piko_rec_flags_category_messages">DM 및 메모</string>
+    <string name="piko_rec_flags_category_profile">프로필 및 하단바</string>
+    <string name="piko_rec_flags_category_quality">화질 및 업로드</string>
+    <string name="piko_rec_flags_category_other">기타</string>
+    <string name="piko_rec_flags_download_hint">추천 플래그를 다운로드하여 찾아보고 구성하세요. 시작하려면 플래그 새로고침을 탭하세요</string>
+    <string name="piko_rec_flags_invalid_number">-9223372036854775808 에서 9223372036854775807 사이의 정수를 입력하세요</string>
     <string name="piko_rec_flags_no_file">추천 플래그 파일을 찾을 수 없습니다</string>
     <string name="piko_rec_flags_refresh_file">플래그 새로고침</string>
     <string name="piko_rec_flags_last_modified_at">마지막 수정일: %s</string>
@@ -435,7 +453,9 @@
     <string name="piko_user_type_unverified">인증되지 않은 사용자</string>
     <string name="piko_user_type_verified">인증된 사용자</string>
     <string name="piko_filter_story_minimum_item_count">최소 스토리 항목</string>
+    <string name="piko_filter_story_minimum_item_count_desc">사용자가 설정한 개수 미만의 항목이 있는 스토리를 숨깁니다</string>
     <string name="piko_filter_story_maximum_item_count">최대 스토리 항목</string>
+    <string name="piko_filter_story_maximum_item_count_desc">사용자가 설정한 개수 이상의 항목이 있는 스토리를 숨깁니다</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">인스턴트 저장</string>
     <string name="piko_instants_download_desc">한 번만 볼 수 있는 인스턴트를 시청하는 동안 캡처하여 나중에 \'저장된 인스턴트 보기\'에서 다시 보고 다운로드할 수 있습니다</string>
@@ -483,4 +503,115 @@
     <string name="piko_patch_theme">테마</string>
     <string name="piko_patch_settings">설정 추가</string>
     <!-- Recommended flags -->
+    <string name="piko_rec_flag_73245_name" formatted="false">"스토리에서 무언가를 탭하면 표시되는 검은색 레이아웃의 버튼"</string>
+    <string name="piko_rec_flag_118413_name" formatted="false">"게시 후 스토리 수정"</string>
+    <string name="piko_rec_flag_118413_desc" formatted="false">"수정 시간이 15분으로 제한됩니다"</string>
+    <string name="piko_rec_flag_85030_name" formatted="false">"스토리에 대한 새 폰트 및 애니메이션"</string>
+    <string name="piko_rec_flag_125004_name" formatted="false">"스토리에 대한 새 Instagram Plus 폰트"</string>
+    <string name="piko_rec_flag_125004_desc" formatted="false">"이 플래그를 활성화하면 Instagram Plus 기능을 사용할 수 있습니다"</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_name" formatted="false">"Instagram Plus 업그레이드 표시"</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_desc" formatted="false">"이 플래그를 비활성화하면 Instagram Plus 업그레이드 알림 및 소개 팁을 숨길 수 있습니다"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_name" formatted="false">"선택된 Instagram Plus 기능 및 엔트리 포인트"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_desc" formatted="false">"선택된 Instagram Plus 엔트리 포인트, 무료 미리보기, 무료 슈퍼 좋아요 및 채팅 폰트 렌더링을 비활성화합니다. 모든 Plus 기능이 비활성화되는 것은 아닙니다"</string>
+    <string name="piko_rec_flag_126445_name" formatted="false">"게시된 스토리의 타임스탬프에 대한 새로운 스타일"</string>
+    <string name="piko_rec_flag_93316_name" formatted="false">"하이라이트에 스토리를 바로 게시"</string>
+    <string name="piko_rec_flag_93316_desc" formatted="false">"선택한 하이라이트로 연결되는 스티커를 추가합니다"</string>
+    <string name="piko_rec_flag_105130_name" formatted="false">"다른 사람의 스토리 친한 친구 목록에서 자신을 제거"</string>
+    <string name="piko_rec_flag_105130_desc" formatted="false">"친한 친구 아이콘을 탭하면 나가는 버튼이 표시됩니다"</string>
+    <string name="piko_rec_flag_119043_name" formatted="false">"스토리 비행기 버튼을 길게 탭하여 스토리 보내기"</string>
+    <string name="piko_rec_flag_119728_name" formatted="false">"스토리 뷰어 목록 재디자인"</string>
+    <string name="piko_rec_flag_58803_name" formatted="false">"피드에서 Instagram 로고를 추천으로 바꾸기"</string>
+    <string name="piko_rec_flag_103957_name" formatted="false">"피드에서 릴스와 동영상을 2 배속으로 재생"</string>
+    <string name="piko_rec_flag_103957_desc" formatted="false">"모서리를 길게 눌러 피드에서 재생합니다"</string>
+    <string name="piko_rec_flag_109947_name" formatted="false">"릴스에서 오버플로우 메뉴 재생 속도"</string>
+    <string name="piko_rec_flag_121815_name" formatted="false">"릴스에서 빠른 재생 메뉴"</string>
+    <string name="piko_rec_flag_121815_desc" formatted="false">"길게 탭하면 빠른 재생 메뉴가 실행됩니다"</string>
+    <string name="piko_rec_flag_82799_16_name" formatted="false">"짧은 릴스에서 재생바 숨기기"</string>
+    <string name="piko_rec_flag_82799_16_desc" formatted="false">"모든 릴스에 재생바를 표시하려면 '재생바 최소 릴스 지속 시간'을 비활성화하고 1로 설정하세요"</string>
+    <string name="piko_rec_flag_82799_41_name" formatted="false">"재생바 최소 릴스 지속 시간"</string>
+    <string name="piko_rec_flag_82799_41_desc" formatted="false">"1로 설정하고 \"짧은 릴스에서 재생바 숨기기\"를 비활성화하면 모든 릴에 시크바가 표시됩니다"</string>
+    <string name="piko_rec_flag_98405_name" formatted="false">"다이렉트 메시지에서 임시 사진/동영상의 스포일러 표시"</string>
+    <string name="piko_rec_flag_46551_name" formatted="false">"프로필 사진 확장 허용"</string>
+    <string name="piko_rec_flag_46551_desc" formatted="false">"'계정 개인 정보' 설정 섹션에 사용자가 프로필 사진 확대/축소를 활성화 또는 비활성화할 수 있는 새 버튼을 표시합니다."</string>
+    <string name="piko_rec_flag_93842_name" formatted="false">"탐색 줌 애니메이션"</string>
+    <string name="piko_rec_flag_group_5a4e2edc04c51be62a40ece694ccdd82_name" formatted="false">"탐색에서 저장된 버튼"</string>
+    <string name="piko_rec_flag_124823_name" formatted="false">"탐색 탬에서 재디자인"</string>
+    <string name="piko_rec_flag_77064_name" formatted="false">"닉네임 대신 사용자 이름 표시"</string>
+    <string name="piko_rec_flag_77064_desc" formatted="false">"알림 및 다이렉트 메시지 전용입니다"</string>
+    <string name="piko_rec_flag_91066_name" formatted="false">"알림 설정 재디자인"</string>
+    <string name="piko_rec_flag_127260_name" formatted="false">"스토리 좋아요 버튼을 길게 탭하여 빠른 이모지 반응을 보낼 수 있습니다"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_name" formatted="false">"Meta AI 엔트리 포인트 및 프롬프트 표시"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_desc" formatted="false">"이 플래그를 비활성화하면 메타 AI 엔트리 포인트 및 프롬프트를 숨길 수 있습니다"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_name" formatted="false">"추가 Meta AI 프롬프트 및 엔트리 포인트 숨기기"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_desc" formatted="false">"이 플래그를 활성화하면 추가 Meta AI 팝업, 검색 아이콘, 제안 및 공유 대상을 숨길 수 있습니다"</string>
+    <string name="piko_rec_flag_136724_7_name" formatted="false">"Muse 공유 바로가기 숨기기"</string>
+    <string name="piko_rec_flag_136724_7_desc" formatted="false">"지원되는 버전의 Muse 앱이 설치된 경우 바로가기를 숨기지 않습니다"</string>
+    <string name="piko_rec_flag_66222_6_name" formatted="false">"릴스 아래 관심 버튼 숨기기"</string>
+    <string name="piko_rec_flag_66222_6_desc" formatted="false">"광고가 아닌 릴스 아래에 있는 '관심 있음' 및 '관심 없음' 버튼에 적용되며, 오버플로우 메뉴에는 영향을 주지 않습니다"</string>
+    <string name="piko_rec_flag_55922_2_name" formatted="false">"릴스 메뉴에 관심 옵션"</string>
+    <string name="piko_rec_flag_55922_2_desc" formatted="false">"이 플래그를 비활성화한 후 Reels 관심 옵션 레이아웃을 1로 설정하면, 새롭게 개편된 더보기 메뉴에서 '관심 있음'과 '관심 없음' 항목을 슘길 수 있습니다"</string>
+    <string name="piko_rec_flag_84236_0_name" formatted="false">"릴스 관심 옵션 레이아웃"</string>
+    <string name="piko_rec_flag_84236_0_desc" formatted="false">"릴 메뉴에서 관심 옵션을 1로 설정하고 비활성화하면 새롭게 디자인된 오버플로우 메뉴에서 두 가지 피드백 옵션이 모두 숨길 수 있습니다"</string>
+    <string name="piko_rec_flag_45023_0_name" formatted="false">"QR 코드 공유"</string>
+    <string name="piko_rec_flag_45023_0_desc" formatted="false">"게시물 메뉴의 QR 코드 옵션도 제어할 수 있습니다"</string>
+    <string name="piko_rec_flag_97046_1_name" formatted="false">"모든 리믹스 보기 옵션 숨기기"</string>
+    <string name="piko_rec_flag_97046_1_desc" formatted="false">"적격 원본 게시물에서 그룹화된 리믹스 옵션을 숨길 수도 있습니다"</string>
+    <string name="piko_rec_flag_31983_10_name" formatted="false">"게시물 메뉴에서 팔로우 취소 옵션 숨기기"</string>
+    <string name="piko_rec_flag_40597_31_name" formatted="false">"게시물 메뉴에서 즐겨찾기 옵션"</string>
+    <string name="piko_rec_flag_72006_9_name" formatted="false">"새롭게 디자인된 릴스 메뉴에서 전체 화면 옵션"</string>
+    <string name="piko_rec_flag_83371_0_name" formatted="false">"릴스 자동 스크롤"</string>
+    <string name="piko_rec_flag_83371_0_desc" formatted="false">"이 플래그를 비활성화하면 ig_android_long_press에서 clips_tab이 auto_scroll로 설정되어 있지 않은 경우, 해당 메뉴 옵션도 숨길 수 있습니다"</string>
+    <string name="piko_rec_flag_94528_0_name" formatted="false">"간소화된 DM 받은 편지함 네비게이션"</string>
+    <string name="piko_rec_flag_94528_0_desc" formatted="false">"검색창을 헤더 검색 아이콘으로 바꾸기"</string>
+    <string name="piko_rec_flag_75196_8_name" formatted="false">"DM 받은 편지함 추천"</string>
+    <string name="piko_rec_flag_75196_8_desc" formatted="false">"DM 받은 편지함에서 추천을 숨기려면 9000000000으로 설정하세요"</string>
+    <string name="piko_rec_flag_126024_12_name" formatted="false">"플로팅 탭 바"</string>
+    <string name="piko_rec_flag_126024_12_desc" formatted="false">"홈커밍 네비게이션 레이아웃에서는 사용할 수 없습니다"</string>
+    <string name="piko_rec_flag_126411_0_name" formatted="false">"선택한 탭에 대한 알약 배경"</string>
+    <string name="piko_rec_flag_33903_2_name" formatted="false">"프로필에 추천된 계정"</string>
+    <string name="piko_rec_flag_78393_3_name" formatted="false">"프로필 릴스에서 정렬 화살표 숨기기"</string>
+    <string name="piko_rec_flag_group_3ea1d8e866d3fdcf760c8dcb56c0876b_name" formatted="false">"엣지 투 엣지 레이아웃"</string>
+    <string name="piko_rec_flag_group_3ea1d8e866d3fdcf760c8dcb56c0876b_desc" formatted="false">"Android 15 이상에서 메인 화면을 상태바 및 시스템 하단바 영역으로 확장합니다"</string>
+    <string name="piko_rec_flag_109730_name" formatted="false">"릴스 오버플로우 메뉴에 Meta Al 추가"</string>
+    <string name="piko_rec_flag_80654_name" formatted="false">"릴스 설명란에 Meta Al 추가"</string>
+    <string name="piko_rec_flag_111509_3_name" formatted="false">"검색에서 Meta AI 추천"</string>
+    <string name="piko_rec_flag_111509_3_desc" formatted="false">"이 플래그를 비활성화하면 최근 프로필 검색을 표시할 수 있습니다"</string>
+    <string name="piko_rec_flag_111509_9_name" formatted="false">"접을 수 있는 최근 검색"</string>
+    <string name="piko_rec_flag_111509_9_desc" formatted="false">"이 플래그를 비활성화하면 최근 검색 목록을 접히지 않도록 할 수 있습니다"</string>
+    <string name="piko_rec_flag_111509_21_name" formatted="false">"최근 검색을 가로로 스크롤"</string>
+    <string name="piko_rec_flag_111509_21_desc" formatted="false">"이 플래그를 비활성화하면 최근 검색을 세로 목록으로 표시할 수 있습니다"</string>
+    <string name="piko_rec_flag_111509_25_name" formatted="false">"검색창 힌트 캐러셀"</string>
+    <string name="piko_rec_flag_111509_26_name" formatted="false">"검색창 힌트 캐러셀 (동적)"</string>
+    <string name="piko_rec_flag_group_cb40d6eb2313fdb53365bfcf626bd4ab_name" formatted="false">"검색 null 상태에서 추천 사용자"</string>
+    <string name="piko_rec_flag_group_cb40d6eb2313fdb53365bfcf626bd4ab_desc" formatted="false">"이 플래그를 비활성화하면 추천 사옹자를 숨길 수 있습니다"</string>
+    <string name="piko_rec_flag_111509_17_name" formatted="false">"표시되는 최근 검색 최대 개수 (Android)"</string>
+    <string name="piko_rec_flag_111509_17_desc" formatted="false">"검색 기록에 보관되는 최근 프로필 수를 설정할 수 있습니다. 기본값은 25 입니다"</string>
+    <string name="piko_rec_flag_111509_1_name" formatted="false">"표시되는 최근 검색 최대 개수"</string>
+    <string name="piko_rec_flag_111509_1_desc" formatted="false">"검색 기록에 보관되는 최근 프로필 수를 설정할 수 있습니다. 기본값은 25 입니다"</string>
+    <string name="piko_rec_flag_109125_name" formatted="false">"울트라 HDR 항상 켜기"</string>
+    <string name="piko_rec_flag_109125_desc" formatted="false">"이 플래그를 비활성화하면 Ultra HDR 사진을 최대 밝기로 렌더링할 수 없습니다"</string>
+    <string name="piko_rec_flag_68885_name" formatted="false">"HDR 콘텐츠에서 SDR 슈퍼 화이트"</string>
+    <string name="piko_rec_flag_68885_desc" formatted="false">"이 플래그를 비활성화하면 HDR 지원 화면에서 릴스 및 동영상의 밝기 향상을 제거할 수 있습니다"</string>
+    <string name="piko_rec_flag_65057_0_name" formatted="false">"지도 메모"</string>
+    <string name="piko_rec_flag_65057_0_desc" formatted="false">"이 플래그를 비활성화하면 메모 지도 기능이 제거됩니다 (친구 지도도 제거됩니다)"</string>
+    <string name="piko_rec_flag_75711_0_name" formatted="false">"GIF 메모"</string>
+    <string name="piko_rec_flag_75711_0_desc" formatted="false">"이 플래그를 비활성화하면 GIF 메모 기능이 제거됩니다"</string>
+    <string name="piko_rec_flag_121655_0_name" formatted="false">"투표 메모"</string>
+    <string name="piko_rec_flag_121655_0_desc" formatted="false">"이 플래그를 활성화하면 메모 투표 기능을 사용할 수 있습니다 (작동이 보장되지 않습니다)"</string>
+    <string name="piko_rec_flag_76757_0_name" formatted="false">"블렌드"</string>
+    <string name="piko_rec_flag_76757_0_desc" formatted="false">"이 플래그를 비활성화하면 적격 채팅 헤더에서 블렌드 버튼을 숨길 수 있습니다"</string>
+    <string name="piko_rec_flag_140592_0_name" formatted="false">"Muse 프로필 버튼"</string>
+    <string name="piko_rec_flag_140592_0_desc" formatted="false">"이 플래그를 비활성화하면 프로필에서 Muse 버튼을 숨길 수 있습니다"</string>
+    <string name="piko_rec_flag_58467_20_name" formatted="false">"쓰레드 프로필 버튼"</string>
+    <string name="piko_rec_flag_58467_20_desc" formatted="false">"이 플래그를 비활성화하면 프로필에서 스레드 버튼을 제거할 수 있습니다"</string>
+    <string name="piko_rec_flag_83371_10_name" formatted="false">"세션별 ​​자동 스크롤"</string>
+    <string name="piko_rec_flag_83371_10_desc" formatted="false">"이 플래그를 비활성화하면 Instagram을 종료할 때마다 자동 스크롤이 꺼짐 상태로 초기화되지 않고, 마지막으로 설정한 상태를 그대로 유지할 수 있습니다"</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_name" formatted="false">"고화질 업로드"</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_desc" formatted="false">"이 플래그를 활성화하면 업로드 품질을 향샹 시킬 수 있습니다"</string>
+    <string name="piko_rec_flag_group_d635982bb65ea560b908003df98afb8c_name" formatted="false">"동영상 초고해상도 (머신 러닝) 업로드"</string>
+    <string name="piko_rec_flag_group_d635982bb65ea560b908003df98afb8c_desc" formatted="false">"이 플래그를 활성화하면 기기 머신 러닝을 사용하여 모든 동영상을 1080p로 업스케일할 수 있습니다 (해상도가 1080p 미만인 경우)"</string>
+    <string name="piko_rec_flag_80122_1_name" formatted="false">"WEBP 갤러리 압축"</string>
+    <string name="piko_rec_flag_80122_1_desc" formatted="false">"이 플래그 값을 100으로 설정하면 Instagram에서 다이렉트 메시지를 위해 갤러리 사진의 임시 복사본을 만들 때 최고 WEBP 품질을 사용할 수 있습니다. 이 설정은 igd_webp_device_gallery가 활성화된 경우에만 적용됩니다"</string>
+    <string name="piko_rec_flag_55416_1_name" formatted="false">"HEIC 업로드 압축"</string>
+    <string name="piko_rec_flag_55416_1_desc" formatted="false">"이 플래그 값을 100으로 설정하면 일반 HEIC 업로드의 최고 품질을 사용할 수 있습니다"</string>
 </resources>

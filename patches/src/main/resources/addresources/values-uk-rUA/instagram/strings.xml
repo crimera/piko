@@ -109,6 +109,8 @@
     <string name="piko_disable_double_tap_like_message">Вимкнути like подвійним дотиком на повідомленнях</string>
     <string name="piko_disable_double_tap_to_like">Вимкнути like подвійним дотиком</string>
     <!-- Miscellaneous Section -->
+    <string name="piko_category_appearance">Зовнішній вигляд</string>
+    <string name="piko_category_posts">Дописи</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Увімкнути індикатор взаємної підписки</string>
@@ -120,8 +122,8 @@
     <string name="piko_friendship_status">Статус дружби</string>
     <string name="piko_follow_list_non_follower_badge">Показувати тих, хто не підписаний на вас, у списку підписок</string>
     <string name="piko_follow_list_non_follower_badge_desc">Додає значок у рядках у вашому власному списку підписок для акаунтів, які не підписані на вас у відповідь</string>
-    <string name="piko_resume_reels_after_scrolling">Відновлювати Reels після прокручування</string>
-    <string name="piko_resume_reels_after_scrolling_desc">Продовжувати перегляд Reel з місця зупинки, коли ви повертаєтеся до нього</string>
+    <string name="piko_resume_reels_after_scrolling">Запам\'ятовувати позицію відтворення в Reels</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Запам\'ятовує позицію відтворення, коли ви перегортаєте на інший Reel</string>
     <string name="piko_improve_image_viewing">Покращити якість перегляду зображень</string>
     <string name="piko_improve_image_viewing_desc">Отримувати зображення з сервера в максимальній роздільній здатності</string>
     <string name="piko_copy_comment">Скопіювати коментар</string>

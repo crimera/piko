@@ -109,6 +109,8 @@
     <string name="piko_disable_double_tap_like_message">Wyłącz polubienie wiadomości podwójnym dotknięciem</string>
     <string name="piko_disable_double_tap_to_like">Wyłącz polubienie podwójnym dotknięciem</string>
     <!-- Miscellaneous Section -->
+    <string name="piko_category_appearance">Wygląd</string>
+    <string name="piko_category_posts">Posty</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Włącz wskaźnik statusu relacji</string>
@@ -120,8 +122,8 @@
     <string name="piko_friendship_status">Status znajomości</string>
     <string name="piko_follow_list_non_follower_badge">Pokaż nieobserwujących na liście Obserwowani</string>
     <string name="piko_follow_list_non_follower_badge_desc">Dodaje plakietkę do wierszy na twojej liście Obserwowani dla kont, które nie obserwują cię zwrotnie</string>
-    <string name="piko_resume_reels_after_scrolling">Wznawiaj rolki po przewinięciu</string>
-    <string name="piko_resume_reels_after_scrolling_desc">Kontynuuj odtwarzanie rolki od momentu, w którym zostało przerwane, gdy przewiniesz do niej z powrotem</string>
+    <string name="piko_resume_reels_after_scrolling">Zapamiętaj moment odtwarzania w rolkach</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Zapamiętuje moment odtwarzania po przewinięciu do innej rolki</string>
     <string name="piko_improve_image_viewing">Popraw jakość obrazów</string>
     <string name="piko_improve_image_viewing_desc">Pobiera z serwera obrazy w maksymalnej rozdzielczości. Może obniżyć wydajność, zwiększyć rozmiar danych aplikacji lub spowodować przełączenie aplikacji na starszy układ</string>
     <string name="piko_copy_comment">Kopiuj komentarz</string>
@@ -373,9 +375,9 @@
     <string name="piko_pref_delete_font_success">Czcionka została pomyślnie usunięta</string>
     <string name="piko_pref_delete_font_fail">Nie udało się usunąć czcionki</string>
     <string name="piko_pref_delete_font_warn">Nie znaleziono czcionki do usunięcia</string>
-    <string name="piko_emoji_font">Czcionka emotek</string>
-    <string name="piko_pref_add_emoji">Dodaj emotki</string>
-    <string name="piko_pref_delete_emoji">Usuń emotki</string>
+    <string name="piko_emoji_font">Czcionka emotikon</string>
+    <string name="piko_pref_add_emoji">Dodaj emotikony</string>
+    <string name="piko_pref_delete_emoji">Usuń emotikony</string>
     <string name="piko_use_system_font">Użyj czcionki systemowej</string>
     <string name="piko_use_system_font_desc">Działa tylko wtedy, gdy poniżej nie dodano pliku czcionki. Dodanie własnego pliku nadpisuje to ustawienie.</string>
     <!-- Developer Options Section -->
@@ -537,7 +539,7 @@
     <string name="piko_rec_flag_77064_name" formatted="false">"Wyświetlaj nazwę użytkownika zamiast pseudonimu"</string>
     <string name="piko_rec_flag_77064_desc" formatted="false">"w powiadomieniach i wiadomościach prywatnych"</string>
     <string name="piko_rec_flag_91066_name" formatted="false">"Nowy wygląd ustawień powiadomień"</string>
-    <string name="piko_rec_flag_127260_name" formatted="false">"Wysyłaj szybkie reakcje emotek po przytrzymaniu przycisku polubienia relacji"</string>
+    <string name="piko_rec_flag_127260_name" formatted="false">"Wysyłaj szybkie reakcje emotikonami po przytrzymaniu przycisku polubienia relacji"</string>
     <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_name" formatted="false">"Pokazuj punkty wejścia i podpowiedzi Meta AI"</string>
     <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_desc" formatted="false">"Wyłącz, aby ukryć punkty wejścia i podpowiedzi Meta AI"</string>
     <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_name" formatted="false">"Ukryj dodatkowe podpowiedzi i punkty wejścia Meta AI"</string>

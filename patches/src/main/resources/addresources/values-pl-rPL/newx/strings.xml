@@ -450,7 +450,7 @@
     <string name="morphe_settings_import_success">Przywrócono ustawienia NewX: %1$d</string>
     <string name="morphe_settings_import_failure_parse">Nie udało się przywrócić ustawień NewX: %1$s</string>
     <string name="piko_newx_font_title">Styl czcionki</string>
-    <string name="piko_newx_font_summary">Dostosuj styl czcionki aplikacji i emotek</string>
+    <string name="piko_newx_font_summary">Dostosuj styl czcionki aplikacji i emotikon</string>
     <string name="piko_newx_custom_font_title">Własna czcionka</string>
     <string name="piko_newx_custom_font_summary">Zastosuj w aplikacji własną czcionkę TTF lub OTF</string>
     <string name="piko_newx_add_font_title">Dodaj czcionkę</string>
@@ -458,11 +458,11 @@
     <string name="piko_newx_delete_font_title">Usuń czcionkę</string>
     <string name="piko_newx_system_font_title">Używaj czcionki systemowej</string>
     <string name="piko_newx_system_font_summary">Używaj domyślnej czcionki systemowej</string>
-    <string name="piko_newx_custom_emoji_font_title">Własna czcionka emotek</string>
-    <string name="piko_newx_custom_emoji_font_summary">Zastosuj własną czcionkę dla emotek</string>
-    <string name="piko_newx_add_emoji_font_title">Dodaj czcionkę emotek</string>
+    <string name="piko_newx_custom_emoji_font_title">Własna czcionka emotikon</string>
+    <string name="piko_newx_custom_emoji_font_summary">Zastosuj własną czcionkę dla emotikon</string>
+    <string name="piko_newx_add_emoji_font_title">Dodaj czcionkę emotikon</string>
     <string name="piko_newx_add_emoji_font_summary">Upewnij się, że plik czcionki ma format .ttf lub .otf</string>
-    <string name="piko_newx_delete_emoji_font_title">Usuń czcionkę emotek</string>
+    <string name="piko_newx_delete_emoji_font_title">Usuń czcionkę emotikon</string>
     <string name="piko_newx_font_added">Pomyślnie dodano czcionkę</string>
     <string name="piko_newx_font_add_failed">Nie udało się dodać czcionki</string>
     <string name="piko_newx_font_invalid">Upewnij się, że plik czcionki ma format .ttf lub .otf</string>

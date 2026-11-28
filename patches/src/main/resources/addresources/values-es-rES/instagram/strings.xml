@@ -109,6 +109,8 @@
     <string name="piko_disable_double_tap_like_message">Desactivar me gusta con doble toque en mensajes</string>
     <string name="piko_disable_double_tap_to_like">Desactivar el doble toque para dar me gusta</string>
     <!-- Miscellaneous Section -->
+    <string name="piko_category_appearance">Apariencia</string>
+    <string name="piko_category_posts">Publicaciones</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">Habilitar el indicador de estado de amistad</string>
@@ -120,8 +122,8 @@
     <string name="piko_friendship_status">Estado de amistad</string>
     <string name="piko_follow_list_non_follower_badge">Mostrar quienes te dejaron de seguir en la siguiente lista</string>
     <string name="piko_follow_list_non_follower_badge_desc">Agrega una insignia a las filas de tu propia lista de seguimiento para las cuentas que no te siguen</string>
-    <string name="piko_resume_reels_after_scrolling">Reanudar los reels tras desplazarse</string>
-    <string name="piko_resume_reels_after_scrolling_desc">Continúa un Reel desde donde lo dejaste cuando vuelves a él al desplazarte hacia atrás</string>
+    <string name="piko_resume_reels_after_scrolling">Recordar la posición de reproducción en los Reels</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Recuerda tu posición de reproducción cuando te desplazas a otro Reel</string>
     <string name="piko_improve_image_viewing">Mejorar calidad de imágenes</string>
     <string name="piko_improve_image_viewing_desc">Obtiene imágenes con la resolución máxima del servidor. Puede reducir el rendimiento, aumentar el tamaño de los datos de la aplicación o hacer que la aplicación cambie a un diseño más antiguo</string>
     <string name="piko_copy_comment">Copiar comentario</string>
@@ -186,6 +188,7 @@
     <string name="piko_customise_story_timestamp">Personalizar horario de la historia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizar el horario mostrado de cuando se publicó la historia</string>
     <string name="piko_customise_story_ring_size">Personalizar tamaño del anillo de historia</string>
+    <string name="piko_customise_story_ring_size_desc">Cambiar el tamaño del anillo de la historia en un porcentaje</string>
     <string name="piko_disable_story_flipping">Desactiva saltar a la siguiente historia automáticamente</string>
     <string name="piko_disable_story_flipping_desc">Desactiva saltar a la siguiente historia automáticamente</string>
     <string name="piko_loop_story">Historia en bucle</string>

@@ -109,6 +109,8 @@
     <string name="piko_disable_double_tap_like_message">禁用双击点赞消息</string>
     <string name="piko_disable_double_tap_to_like">禁用双击点赞</string>
     <!-- Miscellaneous Section -->
+    <string name="piko_category_appearance">外观</string>
+    <string name="piko_category_posts">帖子</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">纯黑</string>
     <string name="piko_follow_back_indicator">启用友谊状态指示器</string>
@@ -120,8 +122,6 @@
     <string name="piko_friendship_status">好友关系状态</string>
     <string name="piko_follow_list_non_follower_badge">在关注列表中显示未回关用户</string>
     <string name="piko_follow_list_non_follower_badge_desc">在你自己的关注列表中，为没有回关你的账号添加标记</string>
-    <string name="piko_resume_reels_after_scrolling">滚动回来后继续播放 Reels</string>
-    <string name="piko_resume_reels_after_scrolling_desc">当你滚回之前看过的 Reel 时，从上次离开的位置继续播放</string>
     <string name="piko_improve_image_viewing">提高图像分辨率</string>
     <string name="piko_improve_image_viewing_desc">从服务器获取最大分辨率图像。可能会降低性能，增加应用数据大小，或导致应用切换到旧布局</string>
     <string name="piko_copy_comment">复制评论</string>
@@ -161,6 +161,8 @@
     <string name="piko_category_dm">私信</string>
     <string name="piko_disable_disappearing_messages_gesture">禁用上滑开启阅后即焚</string>
     <string name="piko_disable_disappearing_messages_gesture_desc">阻止在聊天中向上滑动来开启阅后即焚消息</string>
+    <string name="piko_send_keyboard_gifs">发送键盘 GIF</string>
+    <string name="piko_send_keyboard_gifs_desc">在键盘的 GIF 选择器中选中的 GIF 作为动画图像，而不是显示“点击贴图图标来查找并发送 GIF”</string>
     <string name="piko_unlimited_replays">将短暂性媒体设为永久</string>
     <string name="piko_unlimited_replays_desc">将未过期的\"阅后即焚\"媒体更改为無限次檢視</string>
     <string name="piko_ephemeral_caption">显示短暂性媒体的接收方式</string>
@@ -184,6 +186,7 @@
     <string name="piko_customise_story_timestamp">自定义快拍时间戳</string>
     <string name="piko_customise_story_timestamp_desc">自定义快拍发布时间的时间戳格式</string>
     <string name="piko_customise_story_ring_size">自定义快拍环大小</string>
+    <string name="piko_customise_story_ring_size_desc">按百分比调整快拍环的大小</string>
     <string name="piko_disable_story_flipping">禁用快拍自动滚动</string>
     <string name="piko_disable_story_flipping_desc">禁用自动跳转/移动到下个快拍</string>
     <string name="piko_loop_story">循环快拍</string>
@@ -217,6 +220,7 @@
     <string name="piko_dash_audio_aac_lc_desc">将 DASH 下载中的 xHE-AAC 音频重新编码为 192 kbps 的 AAC-LC，几乎所有播放器都能播放</string>
     <string name="piko_embed_download_metadata">嵌入视频元数据</string>
     <string name="piko_embed_download_metadata_desc">添加标题、帖子链接、创建者和上传日期到下载的 MP4 文件</string>
+    <string name="piko_download_conflict_policy">媒体已下载时</string>
     <string name="piko_download_file_name_template">文件名格式</string>
     <string name="piko_download_file_name_template_invalid">无效的文件名</string>
     <string name="piko_download_file_name_insert_token">插入 %1$s</string>

@@ -1,2 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="piko_newx_settings_title">Pengaturan Piko</string>
+    <string name="piko_newx_settings_ok">OK</string>
+    <string name="piko_newx_settings_cancel">Batal</string>
+    <string name="piko_newx_category_content_title">Konten</string>
+    <string name="piko_newx_category_appearance_title">Penampilan</string>
+    <string name="piko_newx_category_links_title">Tautan</string>
+    <string name="piko_newx_category_navigation_title">Navigasi</string>
+    <string name="piko_newx_inline_action_reply">Balas</string>
+    <string name="piko_newx_inline_action_repost">Posting ulang</string>
+    <string name="piko_newx_inline_action_like">Suka</string>
+    <string name="piko_newx_inline_action_dislike">Tidak suka</string>
+    <string name="piko_newx_inline_action_share">Bagikan</string>
+    <string name="piko_newx_nav_bar_home">Beranda</string>
+    <string name="piko_newx_nav_bar_notifications">Notifikasi</string>
+    <string name="piko_newx_nav_bar_dm">Pesan</string>
+    <string name="piko_newx_post_option_copy_link">Salin tautan</string>
+    <string name="piko_newx_post_option_share">Bagikan postingan</string>
+    <string name="piko_newx_post_option_bookmark">Bookmark</string>
+    <string name="piko_newx_post_option_follow">Ikuti</string>
+    <string name="piko_newx_post_option_block">Blokir</string>
+    <string name="piko_newx_post_option_report">Laporkan</string>
+    <string name="piko_newx_post_option_not_interested">Tidak tertarik</string>
+    <string name="piko_newx_media_sheet_copy_gif_link">Salin tautan GIF</string>
+    <string name="piko_newx_media_sheet_copy_video_link">Salin tautan video</string>
+    <string name="piko_newx_media_sheet_copy_photo">Salin foto</string>
+    <string name="piko_newx_media_sheet_save">Simpan</string>
+    <string name="piko_newx_media_sheet_save_photo">Simpan foto</string>
+    <string name="piko_newx_media_sheet_save_video">Simpan video</string>
+    <string name="piko_newx_media_sheet_save_4k_photo">Simpan foto 4K</string>
+    <string name="piko_newx_media_sheet_share">Bagikan</string>
+    <string name="piko_newx_post_filtering_scope_usernames">Nama pengguna</string>
+    <string name="piko_newx_post_filtering_save">Simpan</string>
+    <string name="piko_newx_post_filtering_cancel">Batal</string>
+    <string name="piko_newx_post_filtering_remove">Hapus</string>
+    <string name="piko_newx_verified_account_whitelist_save">Simpan</string>
+    <string name="piko_newx_verified_account_whitelist_cancel">Batal</string>
+    <string name="piko_newx_feature_switch_not_overridden_section">Bawaan</string>
+    <string name="piko_newx_feature_switch_save">Simpan</string>
+    <string name="piko_newx_feature_switch_cancel">Batal</string>
+    <string name="piko_newx_restore_title">Pulihkan pengaturan</string>
+    <string name="piko_newx_font_title">Gaya font</string>
+    <string name="piko_newx_add_font_title">Tambahkan font</string>
+    <string name="piko_newx_delete_font_title">Hapus font</string>
+    <string name="piko_newx_system_font_title">Gunakan font sistem</string>
+    <string name="piko_newx_add_emoji_font_title">Tambahkan font emoji</string>
+    <string name="piko_newx_delete_emoji_font_title">Hapus font emoji</string>
+</resources>
