@@ -438,12 +438,31 @@ internal fun Method.provesValueFromInstructionOnSourcePaths(
     targetRegister: Int,
 ): Boolean = valueProvenanceAt(targetIndex, targetRegister, sourceRegister, sourceIndex, sourcePathsOnly = true)
 
+/**
+ * Every write of [sourceRegister] at [sourceIndices] carries one value, such as a mapper result and
+ * its null fallback. Each pass of a loop rewrites both, so the join after them stays proven.
+ */
+internal fun Method.provesValueFromInstructions(
+    sourceIndices: List<Int>,
+    sourceRegister: Int,
+    targetIndex: Int,
+    targetRegister: Int,
+): Boolean = sourceIndices.isNotEmpty() &&
+    valueProvenanceAt(
+        targetIndex,
+        targetRegister,
+        sourceRegister,
+        sourceIndices.first(),
+        aliasInstructions = sourceIndices.drop(1).toSet(),
+    )
+
 private fun Method.valueProvenanceAt(
     targetIndex: Int,
     targetRegister: Int,
     originRegister: Int,
     originInstruction: Int?,
     sourcePathsOnly: Boolean = false,
+    aliasInstructions: Set<Int> = emptySet(),
 ): Boolean {
     val implementation = implementation ?: return false
     val code = implementation.instructions.toList()
@@ -486,6 +505,10 @@ private fun Method.valueProvenanceAt(
             if (instruction.opcode.setsWideRegister() && destination + 1 < outState.size) {
                 outState[destination + 1] = index + 1
             }
+        } else if (index in aliasInstructions && destination == originRegister &&
+            originInstruction != null && !instruction.opcode.setsWideRegister()
+        ) {
+            outState[destination] = originInstruction
         }
         edges[index].forEach { edge ->
             val next = if (edge.exceptional) inState else outState

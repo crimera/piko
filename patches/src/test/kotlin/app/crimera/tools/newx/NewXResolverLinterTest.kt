@@ -7,6 +7,7 @@ import app.crimera.patches.newx.misc.dynamiccolor.isDefaultPaletteConstructorAda
 import app.crimera.patches.newx.misc.dynamiccolor.isMediaViewerButtonContent
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructions
 import app.crimera.patches.newx.misc.dynamiccolor.defaultPaletteConstructorRejection
 import app.crimera.patches.newx.misc.postdetails.replyComposerAnchorIndices
 import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
@@ -178,6 +179,36 @@ class NewXResolverLinterTest {
         assertFalse(candidate(false).provesValueFromInstruction(1, 0, 6, 0))
         assertTrue(candidate(false).provesValueFromInstructionOnSourcePaths(1, 0, 6, 0))
         assertFalse(candidate(true).provesValueFromInstructionOnSourcePaths(1, 0, 6, 0))
+    }
+
+    @Test
+    fun `mapper result and its null fallback stay one value across loop passes`() {
+        // 12.45.1 footer rows: each pass maps the item's icon, falls back on null, then renders it.
+        fun candidate(clobber: Boolean): Method {
+            val body = MethodImplementationBuilder(4).apply {
+                fun add(instruction: String) = addInstruction(instruction.toInstruction())
+                addLabel("next")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 3, getLabel("exit")))
+                add("invoke-static {}, Lfixture/Icons;->map()Lfixture/Icon;")
+                add("move-result-object v1")
+                addInstruction(BuilderInstruction21t(Opcode.IF_NEZ, 1, getLabel("join")))
+                add("sget-object v1, Lfixture/Icons;->fallback:Lfixture/Icon;")
+                addLabel("join")
+                if (clobber) add("const/4 v1, 0x0") else add("nop")
+                add("move-object v0, v1")
+                add("invoke-static {v0}, Lfixture/Renderer;->render(Lfixture/Icon;)V")
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("next")))
+                addLabel("exit")
+                add("return-void")
+            }.methodImplementation
+            return ImmutableMethod("Lfixture/Rows;", "render",
+                listOf(ImmutableMethodParameter("Z", emptySet(), null)), "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(), body)
+        }
+        // Tracing from the fallback alone reaches the join again through the next pass's result.
+        assertFalse(candidate(false).provesValueFromInstructionOnSourcePaths(4, 1, 7, 0))
+        assertTrue(candidate(false).provesValueFromInstructions(listOf(2, 4), 1, 7, 0))
+        assertFalse(candidate(true).provesValueFromInstructions(listOf(2, 4), 1, 7, 0))
     }
 
     @Test

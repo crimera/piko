@@ -7,6 +7,7 @@ import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructions
 import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -559,8 +560,10 @@ private fun CodeLayout.isNullFallbackOf(
             fallback.opcode == Opcode.SGET_OBJECT &&
             (fallback as OneRegisterInstruction).registerA == register &&
             fallback.getReference<FieldReference>() != null
+    // The result and its fallback are one value: tracing from the fallback alone loses it in a loop,
+    // where the next pass reaches the join through the result again (12.45.1 footer rows).
     return isShape &&
-        method.provesValueFromInstructionOnSourcePaths(fallbackIndex, register, callIndex, targetRegister)
+        method.provesValueFromInstructions(listOf(moveIndex, fallbackIndex), register, callIndex, targetRegister)
 }
 
 /**
