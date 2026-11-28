@@ -62,6 +62,21 @@ public class TrackDataIntf extends Entity implements AudioMediaInterface {
         return (String) this.getValue("progressive_download_url");
     }
 
+    @Override
+    public String getAudioDashManifest() throws Exception {
+        return (String) getValue("dash_manifest");
+    }
+
+    @Override
+    public Integer getDurationMs() throws Exception {
+        return (Integer) getValue("duration_in_ms");
+    }
+
+    @Override
+    public String getFastStartUrl() throws Exception {
+        return (String) getValue("fast_start_progressive_download_url");
+    }
+
     public String getSongThumbnailUrl() throws Exception {
         return (String) this.getValue("cover_artwork_thumbnail_uri");
     }

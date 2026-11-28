@@ -12,7 +12,6 @@ import app.morphe.patcher.StringComparisonType
 import app.morphe.patcher.StringFilter
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.document
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.patch

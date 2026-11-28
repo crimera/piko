@@ -1,14 +1,117 @@
+## [3.12.0-dev.6](https://github.com/crimera/piko/compare/v3.12.0-dev.5...v3.12.0-dev.6) (2026-11-23)
+
+### 🐛 Bug Fixes
+
+* Ignore touches on a bottom sheet while it closes ([#2331](https://github.com/crimera/piko/issues/2331)) ([c918af4](https://github.com/crimera/piko/commit/c918af4ed81f762ee24ec7799385ced7aaf97eb2))
+* **Instagram:** Account for static shortcuts when publishing DM share targets ([3f4a9ad](https://github.com/crimera/piko/commit/3f4a9adce3fd45a4dbf2d89193c046e1c0a334d4))
+* **Instagram:** Align patch dependencies and restore standalone DM features ([2966372](https://github.com/crimera/piko/commit/29663729bc0605cbcc567c1dfdd16bbea36517ad))
+* **Instagram:** Hide the floating stories tray in the home feed ([67d40a2](https://github.com/crimera/piko/commit/67d40a2feeebcd0a3ea5445487def62817f543fb))
+* **Instagram:** Hide the notes tray across inbox layouts ([c9ecc15](https://github.com/crimera/piko/commit/c9ecc15404778d052871de21b452a8ae3f094b03))
+* **Instagram:** Keep deleted messages visible during the back transition ([d1cf592](https://github.com/crimera/piko/commit/d1cf59239e76b0d3ab5e6db6a954616b8d1edbb6))
+* **Instagram:** Prefer the highest download quality and reuse cached alternatives ([21550c1](https://github.com/crimera/piko/commit/21550c1fd87bb552a655d1b0f22ba70b9275a87e))
+* **Instagram:** Prevent back gestures from selecting a settings row ([24ccfa3](https://github.com/crimera/piko/commit/24ccfa33067e081b40d8ac2c379a497f30fbae0b))
+* **Instagram:** Save audio as .m4a and report failed post and DM downloads ([#2332](https://github.com/crimera/piko/issues/2332)) ([1072b57](https://github.com/crimera/piko/commit/1072b573bf0a3404c0ba0400b15dbeb928de492a))
+* **Instagram:** Show settings and menu actions only when their features are available ([81b06b9](https://github.com/crimera/piko/commit/81b06b9d4d53df276d995367ba91899f3cced9cf))
+* **Instagram:** Stop downloads losing completion notifications and same-name items ([#2330](https://github.com/crimera/piko/issues/2330)) ([1086e10](https://github.com/crimera/piko/commit/1086e108cda17a49676012dd12bf49dd761da527))
+* **Instagram:** Validate story item limits and preserve text settings on save failure ([c80cb42](https://github.com/crimera/piko/commit/c80cb428a0587f2038dcd1c760e90ebc73507b56))
+
+### ✨ New Features
+
+* **Instagram:** Add "Custom emoji font" patch ([#2288](https://github.com/crimera/piko/issues/2288)) ([21244bc](https://github.com/crimera/piko/commit/21244bcc26e96d6dca3c904526cd21a8e37ff3ed))
+* **Instagram:** Add original signers patch ([2cac26d](https://github.com/crimera/piko/commit/2cac26d4bc1f01c80f94ab1b3b3ac51b929413a5))
+* **Instagram:** Allow screenshots in Instants ([e314af2](https://github.com/crimera/piko/commit/e314af27510ea8cbd4312dd417a77ddbe7eaaceb))
+* **Instagram:** Extend inbox lock to deleted message history ([b68439b](https://github.com/crimera/piko/commit/b68439b4c57711efcc44eef2a7d24b1cb76f2334))
+* **Twitter:** Add panorama strip layout and default NewX picker to staggered ([cf7b200](https://github.com/crimera/piko/commit/cf7b20018b32158fc34508813a567c67daeb226e))
+* **Twitter:** Add staggered layout and grid columns to NewX download picker ([e9028e7](https://github.com/crimera/piko/commit/e9028e772b06d567b2698057acae1d4c4910c424))
+
+### 🔧 Improvements
+
+* **Instagram:** Hide redundant photo downloads and empty resolution menus ([c9acf02](https://github.com/crimera/piko/commit/c9acf0218834e42ac9c31e0a21157d846606fdab))
+* **Instagram:** Limit flag search to the category list and preserve scroll position on refresh ([043bac8](https://github.com/crimera/piko/commit/043bac83f24664278b194aa2e9c418b70367e486))
+* **Instagram:** Prefer higher download quality for equal request counts ([1e15187](https://github.com/crimera/piko/commit/1e15187a12eafb9427b82f73935bd5218de7f8ba))
+* **Instagram:** Show current story settings and validate icon size ([7dfb7fc](https://github.com/crimera/piko/commit/7dfb7fc2c15d5108c386480db7ce2b4f842ea6bb))
+
+## [3.12.0-dev.5](https://github.com/crimera/piko/compare/v3.12.0-dev.4...v3.12.0-dev.5) (2026-11-20)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** Download every image from reposts with the inline download button ([e1d3157](https://github.com/crimera/piko/commit/e1d315719c37392648b6ccf681df83f0efdaad95))
+* **Twitter:** Hide iconless Grok rows in customized drawer ([a4ecf18](https://github.com/crimera/piko/commit/a4ecf18d59cfabf7af8c6a4c6232c1926511606d))
+
+### ✨ New Features
+
+* **Twitter:** Add grid view toggle to NewX inline download picker ([8c88f53](https://github.com/crimera/piko/commit/8c88f5355da9926d457b677fc5fdfe484a1c248a))
+
+### 🚀 Updated App Support
+
+* **Instagram:** Add support for 456.0.0.53.78 ([9ae877b](https://github.com/crimera/piko/commit/9ae877b3e3acad985c79f5936419b58e689b4e49))
+
+## [3.12.0-dev.4](https://github.com/crimera/piko/compare/v3.12.0-dev.3...v3.12.0-dev.4) (2026-11-19)
+
+### 🐛 Bug Fixes
+
+* **Disable Play Store updates:** Show original version code in crash logs ([4dc764c](https://github.com/crimera/piko/commit/4dc764cc3068683acd6d27cfec4b84ba50e1c1c7))
+* **Twitter:** Add `Spoof client version` patch to fix XChat "Update Required" ([#2302](https://github.com/crimera/piko/issues/2302)) ([8d265d8](https://github.com/crimera/piko/commit/8d265d819240f0ec48ab52c06dbc17d479f10f1b))
+
+### ✨ New Features
+
+* **Instagram:** Add recommended flags ([38e0976](https://github.com/crimera/piko/commit/38e0976ddf9d60e97a2343382e69b58d9970eee2))
+* **Instagram:** Send GIFs from the keyboard's GIF picker in DMs ([#2303](https://github.com/crimera/piko/issues/2303)) ([a0d905e](https://github.com/crimera/piko/commit/a0d905e013b30dcbd9146c3f6c056b0ca6e1cf4d))
+* **Twitter:** Add `Fix 20 photos support` patch for old X ([a0110b2](https://github.com/crimera/piko/commit/a0110b2c618c0f0d3916e2392158de267f6084db))
+
+### 🔧 Improvements
+
+* **Instagram:** Organize and localize recommended flags ([560db89](https://github.com/crimera/piko/commit/560db897c5fd25acc2b536fb8f6025bc94929bb0))
+
+## [3.12.0-dev.3](https://github.com/crimera/piko/compare/v3.12.0-dev.2...v3.12.0-dev.3) (2026-11-17)
+
+### 🐛 Bug Fixes
+
+* Declare NewX compatibility for "Disable Play Store updates" patch ([1feef65](https://github.com/crimera/piko/commit/1feef65e2e69ac9f331c09aacf3c263cbd3ce9bb))
+* **Twitter:** "Custom sharing domain" for old X fails ([ddb8d86](https://github.com/crimera/piko/commit/ddb8d8684325d15923b14374ed96c02bb3e186d3))
+
+### ✨ New Features
+
+* **Twitter:** Show a clear error message when attempting to apply old patches to NewX ([07709b2](https://github.com/crimera/piko/commit/07709b248bc6d2f461b70b9595a18b519624be98))
+
+## [3.12.0-dev.2](https://github.com/crimera/piko/compare/v3.12.0-dev.1...v3.12.0-dev.2) (2026-11-17)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Restore standalone onboarding permission prompt blocking ([ea36a69](https://github.com/crimera/piko/commit/ea36a6989723d38a5021ad9eba51469877ee897d))
+* **Twitter:** Enable legacy patches by default again ([962967c](https://github.com/crimera/piko/commit/962967c0140284a136c2344a4c431c48246ae048))
+
+### ✨ New Features
+
+* **Twitter:** Group patches into NewX patches and Old patches ([5422737](https://github.com/crimera/piko/commit/5422737fd6aed96a21bb73fcdece9990ca113a35))
+
+## [3.12.0-dev.1](https://github.com/crimera/piko/compare/v3.11.1...v3.12.0-dev.1) (2026-11-17)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Hide inline download button on own stories ([394149b](https://github.com/crimera/piko/commit/394149bec1934356f8da0619aa701d254c021926))
+* **Instagram:** Save whole images instead of truncated ones ([#2294](https://github.com/crimera/piko/issues/2294)) ([09cc0a5](https://github.com/crimera/piko/commit/09cc0a5629d9b89fbe72168ffd1fd7430b38b296))
+
+### ✨ New Features
+
+* **Instagram:** Add options for already downloaded media ([13d6ccb](https://github.com/crimera/piko/commit/13d6ccbfd5ab4bad7ef8c4f476f713cf01aef1d8))
+* **Twitter:** Add support for newer twitter versions ([7cd08a3](https://github.com/crimera/piko/commit/7cd08a3709022f815343c68afdec9cf19237b967))
+
 ## [3.11.1](https://github.com/crimera/piko/compare/v3.11.0...v3.11.1) (2026-11-10)
 
 ### 🐛 Bug Fixes
 
+* **Instagram:** Replace Change version code patch with `Disable Play Store updates` ([#2278](https://github.com/crimera/piko/issues/2278)) ([e513043](https://github.com/crimera/piko/commit/e5130437b15a67442b0b3819f3b30e3cb1a559ef))
 * **Instagram:** Spoof patched app signature to match original app ([#2281](https://github.com/crimera/piko/issues/2281)) ([47d8af4](https://github.com/crimera/piko/commit/47d8af42553dc2e5218e740834fee8e79da49e57))
+* **Instagram:** Remove `Disable analytics`, `Unlock employee options`, `Allow user network certificate`, `Disable telemetry`, `Unlock Plus benefits` patches ([7f3ca61](https://github.com/crimera/piko/commit/7f3ca610d86b73623c2bdae2cc19eb73ace22b13))
 
 ## [3.11.1-dev.1](https://github.com/crimera/piko/compare/v3.11.0...v3.11.1-dev.1) (2026-11-10)
 
 ### 🐛 Bug Fixes
 
+* **Instagram:** Replace Change version code patch with `Disable Play Store updates` ([#2278](https://github.com/crimera/piko/issues/2278)) ([e513043](https://github.com/crimera/piko/commit/e5130437b15a67442b0b3819f3b30e3cb1a559ef))
 * **Instagram:** Spoof patched app signature to match original app ([#2281](https://github.com/crimera/piko/issues/2281)) ([47d8af4](https://github.com/crimera/piko/commit/47d8af42553dc2e5218e740834fee8e79da49e57))
+* **Instagram:** Remove `Disable analytics`, `Unlock employee options`, `Allow user network certificate`, `Disable telemetry`, `Unlock Plus benefits` patches ([7f3ca61](https://github.com/crimera/piko/commit/7f3ca610d86b73623c2bdae2cc19eb73ace22b13))
 
 ## [3.11.0](https://github.com/crimera/piko/compare/v3.10.0...v3.11.0) (2026-11-09)
 

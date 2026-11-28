@@ -23,7 +23,9 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -37,13 +39,18 @@ import androidx.annotation.RequiresApi;
 
 import java.lang.reflect.Proxy;
 import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
 import java.util.WeakHashMap;
 import java.util.function.Supplier;
 
-import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
+import app.morphe.extension.instagram.patches.devFlags.Flag;
+import app.morphe.extension.instagram.settings.preference.RecommendedFlagsScreen;
+import app.morphe.extension.instagram.settings.preference.widgets.RecommendedFlagPreference;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
@@ -330,7 +337,7 @@ public final class SettingsActivity {
             contentFrame = new FrameLayout(activity);
             contentFrame.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
-            FrameLayout fragmentContainer = new FrameLayout(activity);
+            FrameLayout fragmentContainer = new PreferenceListContainer(activity);
             fragmentContainer.setId(FRAGMENT_CONTAINER_ID);
             fragmentContainer.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
             contentFrame.addView(fragmentContainer, new FrameLayout.LayoutParams(
@@ -410,11 +417,11 @@ public final class SettingsActivity {
                 SettingsFragment fragment,
                 PreferenceScreen rootScreen
         ) {
-            if (!rootSettings || searchController != null) {
+            rootFragment = fragment;
+            if ((!rootSettings && !Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) || searchController != null) {
                 return;
             }
 
-            rootFragment = fragment;
             searchController = new SettingsSearchController(
                     activity,
                     createSearchIndex(fragment, rootScreen),
@@ -445,6 +452,10 @@ public final class SettingsActivity {
                 SettingsFragment fragment,
                 PreferenceScreen rootScreen
         ) {
+            List<Flag> flags = RecommendedFlags.getFlags(false);
+            if (RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
+                return fragment.indexFlags(flags);
+            }
             final PreferenceManager preferenceManager = fragment.getPreferenceManager();
             final Context context = fragment.getActivity();
             return SettingsSearchIndex.create(
@@ -455,7 +466,7 @@ public final class SettingsActivity {
                             String previousSharedPreferencesName =
                                     preferenceManager.getSharedPreferencesName();
                             preferenceManager.setSharedPreferencesName(
-                                    Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)
+                                    RecommendedFlagsScreen.isFlagsScreen(fragmentName)
                                             ? Constants.REC_FLAGS
                                             : Constants.SHARED_PREF_NAME
                             );
@@ -463,7 +474,7 @@ public final class SettingsActivity {
                                 PreferenceScreen screen =
                                         preferenceManager.createPreferenceScreen(context);
                                 new ScreenBuilder(context, screen, new Helper(context))
-                                        .buildFragmentForSearch(fragmentName);
+                                        .buildFragmentForSearch(fragmentName, flags);
                                 return screen;
                             } finally {
                                 preferenceManager.setSharedPreferencesName(
@@ -477,11 +488,11 @@ public final class SettingsActivity {
 
         public void onPause() {
             RecommendedFlags.removeChangeListener(recommendedFlagsChanged);
-            refreshSearchIndexOnResume = searchController != null;
+            refreshSearchIndexOnResume = rootFragment != null;
         }
 
         public void onResume() {
-            if (rootSettings) {
+            if (rootSettings || RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
                 RecommendedFlags.addChangeListener(recommendedFlagsChanged);
             }
             if (refreshSearchIndexOnResume) {
@@ -491,11 +502,23 @@ public final class SettingsActivity {
         }
 
         private void refreshSearchIndex() {
+            if (rootFragment != null && searchController == null) {
+                rootFragment.refreshFlagsScreen();
+                return;
+            }
             if (rootFragment != null && searchController != null) {
-                searchController.replaceIndex(createSearchIndex(
-                        rootFragment,
-                        rootFragment.buildScreen(Constants.PIKO_FRAGMENT_SETTINGS)
-                ));
+                if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName) && !searchController.state().searchMode) {
+                    List<Flag> flags = RecommendedFlags.getFlags(false);
+                    searchController.replaceIndex(rootFragment.indexFlags(flags));
+                    RecommendedFlagsScreen.updateCategories(activity, rootFragment.getPreferenceScreen(), false, flags);
+                    return;
+                }
+                rootFragment.runPreservingScrollPosition(() -> {
+                    searchController.replaceIndex(createSearchIndex(
+                            rootFragment,
+                            rootFragment.buildScreen(fragmentName)
+                    ));
+                });
             }
         }
 
@@ -640,6 +663,43 @@ public final class SettingsActivity {
         }
     }
 
+    private static final class PreferenceListContainer extends FrameLayout {
+        private final int touchSlop;
+        private boolean fromBackEdge;
+        private float downX;
+        private float downY;
+
+        PreferenceListContainer(Context context) {
+            super(context);
+            touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent event) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    downX = event.getX();
+                    downY = event.getY();
+                    WindowInsets insets = getRootWindowInsets();
+                    fromBackEdge = false;
+                    if (Build.VERSION.SDK_INT >= 29 && insets != null) {
+                        android.graphics.Insets edges = insets.getSystemGestureInsets();
+                        fromBackEdge = downX < edges.left || getWidth() - downX < edges.right;
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                case MotionEvent.ACTION_UP:
+                    // ListView checks vertical movement only and can click a row after a back swipe.
+                    float distanceX = Math.abs(event.getX() - downX);
+                    if (fromBackEdge && distanceX > touchSlop && distanceX > Math.abs(event.getY() - downY)) {
+                        return true;
+                    }
+                    break;
+            }
+            return super.onInterceptTouchEvent(event);
+        }
+    }
+
     public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
@@ -650,8 +710,53 @@ public final class SettingsActivity {
         private ListView listView;
         private View searchEntryView;
         private boolean searchEntryAdded;
+        private final Map<String, Flag> searchableFlags = new HashMap<>();
         private final SharedPreferences.OnSharedPreferenceChangeListener dependencyListener =
-                (preferences, key) -> helper.updateDependencies(getPreferenceScreen());
+                (preferences, key) -> {
+                    helper.updateDependencies(getPreferenceScreen());
+                    if (RecommendedFlagsScreen.isFlagsScreen(fragmentName) && listView != null) {
+                        // Rebuild after the dialog has finished saving its preference value.
+                        listView.removeCallbacks(this.refreshFlags);
+                        listView.post(this.refreshFlags);
+                    }
+                };
+        private final Runnable refreshFlags = () -> {
+            Controller controller = getController(getActivity());
+            if (controller == null || listView == null) return;
+            if (RecommendedFlagsScreen.MODIFIED.equals(fragmentName)) {
+                refreshFlagsScreen();
+            } else if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)
+                    && controller.searchController != null && !controller.searchController.state().searchMode) {
+                RecommendedFlagsScreen.updateCategories(context, getPreferenceScreen(), false, RecommendedFlags.getFlags(false));
+            }
+        };
+
+        private void refreshFlagsScreen() {
+            runPreservingScrollPosition(() -> setPreferenceScreen(buildScreen(fragmentName)));
+        }
+
+        private SettingsSearchIndex indexFlags(List<Flag> flags) {
+            searchableFlags.clear();
+            for (Flag flag : flags) {
+                searchableFlags.put(flag.getCode().key, flag);
+            }
+            return SettingsSearchIndex.forRecommendedFlags(flags);
+        }
+
+        private void runPreservingScrollPosition(Runnable update) {
+            ListView currentList = listView;
+            android.os.Parcelable scrollState = currentList == null
+                    ? null : currentList.onSaveInstanceState();
+            update.run();
+            if (scrollState != null) {
+                // PreferenceFragment queues another bind when its screen changes.
+                currentList.post(() -> {
+                    if (listView == currentList) {
+                        currentList.onRestoreInstanceState(scrollState);
+                    }
+                });
+            }
+        }
 
         void updateNavigationArguments(String fragmentName, String targetPreferenceKey) {
             this.fragmentName = fragmentName == null
@@ -702,6 +807,10 @@ public final class SettingsActivity {
 
         @Override
         public void onPause() {
+            if (listView != null && getActivity().isFinishing()) {
+                // A row click can already be queued when the closing animation starts.
+                listView.setOnItemClickListener(null);
+            }
             preferenceManager.getSharedPreferences()
                     .unregisterOnSharedPreferenceChangeListener(dependencyListener);
             super.onPause();
@@ -709,6 +818,7 @@ public final class SettingsActivity {
 
         @Override
         public void onDestroyView() {
+            if (listView != null) listView.removeCallbacks(this.refreshFlags);
             listView = null;
             searchEntryView = null;
             searchEntryAdded = false;
@@ -734,7 +844,7 @@ public final class SettingsActivity {
             }
 
             preferenceManager.setSharedPreferencesName(
-                    Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)
+                    RecommendedFlagsScreen.isFlagsScreen(fragmentName)
                             ? Constants.REC_FLAGS
                             : Constants.SHARED_PREF_NAME
             );
@@ -768,12 +878,13 @@ public final class SettingsActivity {
 
             Activity activity = getActivity();
             Controller controller = getController(activity);
-            if (isRootFragment() && controller != null) {
+            if ((isRootFragment() || RecommendedFlagsScreen.isFlagsScreen(fragmentName)) && controller != null) {
                 controller.onRootFragmentReady(
                         this,
                         getPreferenceScreen()
                 );
-            } else if (listView != null
+            }
+            if (listView != null
                     && targetPreferenceKey != null
                     && !targetPreferenceKey.isEmpty()) {
                 scrollToPreference(listView, targetPreferenceKey);
@@ -797,14 +908,21 @@ public final class SettingsActivity {
         }
 
         private void renderSearchState(SettingsSearchController.State state) {
-            if (!isRootFragment() || state == null) {
+            if ((!isRootFragment() && !RecommendedFlagsScreen.isFlagsScreen(fragmentName)) || state == null) {
                 return;
             }
 
             PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);
             if (!state.searchMode) {
                 new ScreenBuilder(context, screen, new Helper(context))
-                        .buildFragment(Constants.PIKO_FRAGMENT_SETTINGS);
+                        .buildFragment(fragmentName);
+            } else if (RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
+                for (SettingsSearchIndex.Result result : state.results) {
+                    Flag flag = searchableFlags.get(result.preferenceKey);
+                    if (flag != null) {
+                        screen.addPreference(RecommendedFlagPreference.create(context, flag, true));
+                    }
+                }
             } else {
                 for (SettingsSearchIndex.Result result : state.results) {
                     screen.addPreference(new SearchResultPreference(
@@ -815,6 +933,10 @@ public final class SettingsActivity {
             }
             setPreferenceScreen(screen);
             if (listView != null) {
+                if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) {
+                    listView.setTranscriptMode(state.searchMode
+                            ? ListView.TRANSCRIPT_MODE_DISABLED : ListView.TRANSCRIPT_MODE_NORMAL);
+                }
                 if (searchEntryView != null) {
                     if (state.searchMode && searchEntryAdded) {
                         listView.removeHeaderView(searchEntryView);

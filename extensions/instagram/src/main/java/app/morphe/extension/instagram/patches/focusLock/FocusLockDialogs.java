@@ -6,6 +6,7 @@
 
 package app.morphe.extension.instagram.patches.focusLock;
 
+import app.morphe.extension.instagram.utils.InstaUtils;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.AlertDialog;
@@ -55,7 +56,7 @@ public class FocusLockDialogs {
                     if (FocusLock.lock()) {
                         PikoUtils.toast(str("piko_focus_lock_locked_toast"));
                         // Some hooks read preferences once at class-load time, so restart.
-                        Utils.restartApp(Utils.getContext());
+                        InstaUtils.restartApp(Utils.getContext());
                     }
                 })
                 .show();
@@ -84,7 +85,7 @@ public class FocusLockDialogs {
                 .setNegativeButton(str("piko_cancel"), null)
                 .setPositiveButton(str("piko_ok"), (d, w) -> {
                     if (FocusLock.unlock()) {
-                        Utils.restartApp(Utils.getContext());
+                        InstaUtils.restartApp(Utils.getContext());
                     }
                 })
                 .show();

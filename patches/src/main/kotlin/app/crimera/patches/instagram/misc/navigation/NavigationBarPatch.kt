@@ -57,7 +57,7 @@ private object NavigationBarFingerprint : Fingerprint(
         // All navigation candidates.
         methodCall(
             definingClass = "this",
-            parameters = listOf(USER_SESSION_CLASS),
+            parameters = emptyList(),
             returnType = LIST,
             opcode = Opcode.INVOKE_STATIC,
             location = MatchAfterImmediately(),
@@ -84,8 +84,8 @@ private object StartupFingerprint : Fingerprint(
 )
 
 private object InitialTabPositionFingerprint : Fingerprint(
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
-    parameters = listOf("L", "L", STRING, "Z", "Z"),
+    isStatic = false,
+    parameters = listOf("L", STRING, "Z"),
     returnType = "V",
     strings = listOf("feed_viewpager_empty_tabs"),
     filters = listOf(
@@ -166,15 +166,14 @@ private fun installTransform(navigationMatch: Match) {
     val tabsRegister = returnMatch.getInstruction<OneRegisterInstruction>().registerA
     val candidatesRegister = method.findFreeRegister(returnMatch.index, tabsRegister)
     requireLocalRegisters(method, listOf(candidatesRegister))
-    val sessionRegister = method.p0Register + 1
-    if (tabsRegister !in 0..0xf || sessionRegister !in 0..0xf) {
+    if (tabsRegister !in 0..0xf) {
         throw PatchException("Navigation transform requires 4-bit registers")
     }
 
     method.addInstructionsAtControlFlowLabel(
         returnMatch.index,
         """
-            invoke-static {v$sessionRegister}, $allCandidates
+            invoke-static {}, $allCandidates
             move-result-object v$candidatesRegister
             invoke-static {v$tabsRegister, v$candidatesRegister}, $EXTENSION->transformNavigationTabs(Ljava/util/List;Ljava/util/List;)Ljava/util/List;
             move-result-object v$tabsRegister
@@ -202,7 +201,7 @@ private fun installStartup(
         method.implementation ?: throw PatchException("Navigation startup has no implementation")
     val nativeStart = method.getInstruction(0)
     val resumeNative = nativeStart.location.addNewLabel()
-    val candidateStart = "invoke-static {v$sessionRegister}, $allCandidates".toInstruction(method)
+    val candidateStart = "invoke-static {}, $allCandidates".toInstruction(method)
     val candidateEnd =
         "invoke-static {v$intentRegister, v$coldRegister, v$candidatesRegister}, $EXTENSION->applyStartupTab(Landroid/content/Intent;ZLjava/util/List;)V"
             .toInstruction(method)
@@ -246,7 +245,7 @@ val navigationBarPatch =
                 definingClass = allCandidates.definingClass,
                 name = allCandidates.name,
                 accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
-                parameters = listOf(USER_SESSION_CLASS),
+                parameters = emptyList(),
                 returnType = LIST,
             ).match()
             val fragmentField = navigationFragmentField(NavigationEnumFingerprint.match())

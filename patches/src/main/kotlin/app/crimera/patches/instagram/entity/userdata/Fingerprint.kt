@@ -88,8 +88,14 @@ internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     parameters = listOf(),
     filters = listOf(
-        literal(-265713450),
-        methodCall(name = "getOptionalStringValueNative", location = MatchAfterWithin(1)),
+        literal("username".hashCode()),
+        methodCall(
+            definingClass = "Lcom/instagram/pando/livetree/LiveTreeJNI;",
+            parameters = listOf("I"),
+            returnType = "Ljava/lang/String;",
+            opcode = Opcode.INVOKE_VIRTUAL,
+            location = MatchAfterWithin(1),
+        ),
     ),
 )
 

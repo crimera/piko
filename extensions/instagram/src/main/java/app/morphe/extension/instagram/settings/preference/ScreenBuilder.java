@@ -13,18 +13,14 @@ import android.content.Context;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.text.format.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.List;
-import java.util.Locale;
-
-import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.patches.devFlags.Flag;
+import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 
-import app.morphe.extension.crimera.downloader.StorageUtils;
+
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
@@ -63,8 +59,14 @@ public class ScreenBuilder {
             linksSection();
         } else if (Constants.PIKO_FRAGMENT_DISTRACTION_FREE.equals(fragmentName)) {
             distractionFreeSection();
-        } else if (Constants.PIKO_FRAGMENT_MISC.equals(fragmentName)) {
-            buildMiscSection();
+        } else if (Constants.PIKO_FRAGMENT_APPEARANCE.equals(fragmentName)) {
+            buildAppearanceSection();
+        } else if (Constants.PIKO_FRAGMENT_PROFILE.equals(fragmentName)) {
+            buildProfileSection();
+        } else if (Constants.PIKO_FRAGMENT_POSTS.equals(fragmentName)) {
+            buildPostsSection();
+        } else if (Constants.PIKO_FRAGMENT_REELS.equals(fragmentName)) {
+            buildReelsSection();
         } else if (Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA.equals(fragmentName)) {
             buildDownloadSection();
         } else if (Constants.PIKO_FRAGMENT_NAV_BTNS.equals(fragmentName)) {
@@ -79,8 +81,8 @@ public class ScreenBuilder {
             dmSection();
         } else if (Constants.PIKO_FRAGMENT_FILTER_CONTENT.equals(fragmentName)) {
             filterContentSection();
-        } else if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) {
-            buildRecommendedFlagsSection();
+        } else if (RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
+            RecommendedFlagsScreen.build(context, screen, fragmentName, false, RecommendedFlags.getFlags(false));
         } else if (Constants.PIKO_FRAGMENT_FOCUS_LOCK.equals(fragmentName)) {
             buildFocusLockSection();
         } else if (Constants.PIKO_FRAGMENT_INSTANTS.equals(fragmentName)) {
@@ -90,9 +92,9 @@ public class ScreenBuilder {
         }
     }
 
-    public void buildFragmentForSearch(String fragmentName) {
-        if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) {
-            buildRecommendedFlagsSection(false);
+    public void buildFragmentForSearch(String fragmentName, List<Flag> flags) {
+        if (RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
+            RecommendedFlagsScreen.build(context, screen, fragmentName, true, flags);
         } else {
             buildFragment(fragmentName);
         }
@@ -144,34 +146,46 @@ public class ScreenBuilder {
     }
 
     public void buildFontSection() {
-        if (!(SettingsStatus.fontSection())) return;
+        if (SettingsStatus.customFont) {
+            // Written here rather than left to the preference framework, which persists only after
+            // this listener has run - FontStorage.useSystemFont() has to read the new value straight
+            // away, from load() on the next start up.
+            SwitchPref useSystemFont = new SwitchPref(context);
+            useSystemFont.setTitle(str("piko_use_system_font"));
+            useSystemFont.setSummary(str("piko_use_system_font_desc"));
+            useSystemFont.setKey(Settings.USE_SYSTEM_FONT.key);
+            useSystemFont.setPersistent(false);
+            useSystemFont.setChecked(FontStorage.useSystemFont());
+            useSystemFont.setOnPreferenceChangeListener((preference, newValue) -> {
+                FontStorage.setUseSystemFont(Boolean.TRUE.equals(newValue));
+                return true;
+            });
+            addPreference(useSystemFont);
 
-        // Written here rather than left to the preference framework, which persists only after
-        // this listener has run - FontStorage.useSystemFont() has to read the new value straight
-        // away, from load() on the next start up.
-        SwitchPref useSystemFont = new SwitchPref(context);
-        useSystemFont.setTitle(str("piko_use_system_font"));
-        useSystemFont.setSummary(str("piko_use_system_font_desc"));
-        useSystemFont.setKey(Settings.USE_SYSTEM_FONT.key);
-        useSystemFont.setPersistent(false);
-        useSystemFont.setChecked(FontStorage.useSystemFont());
-        useSystemFont.setOnPreferenceChangeListener((preference, newValue) -> {
-            FontStorage.setUseSystemFont(Boolean.TRUE.equals(newValue));
-            return true;
-        });
-        addPreference(useSystemFont);
+            addPreference(helper.buttonPreference(
+                    str("piko_pref_add_font"),
+                    str("piko_pref_add_font_desc"),
+                    "piko_pref_add_font"
+            ));
 
-        addPreference(helper.buttonPreference(
-                str("piko_pref_add_font"),
-                str("piko_pref_add_font_desc"),
-                "piko_pref_add_font"
-        ));
-
-        addPreference(helper.buttonPreference(
-                str("piko_pref_delete_font"),
-                "",
-                "piko_pref_delete_font"
-        ));
+            addPreference(helper.buttonPreference(
+                    str("piko_pref_delete_font"),
+                    "",
+                    "piko_pref_delete_font"
+            ));
+        }
+        if (SettingsStatus.customEmojiFont) {
+            addPreference(helper.buttonPreference(
+                    str("piko_pref_add_emoji"),
+                    str("piko_pref_add_font_desc"),
+                    "piko_pref_add_emoji"
+            ));
+            addPreference(helper.buttonPreference(
+                    str("piko_pref_delete_emoji"),
+                    "",
+                    "piko_pref_delete_emoji"
+            ));
+        }
     }
 
     public void buildDeveloperSection() {
@@ -264,6 +278,16 @@ public class ScreenBuilder {
                             str("piko_disable_disappearing_messages_gesture"),
                             str("piko_disable_disappearing_messages_gesture_desc"),
                             Settings.DISABLE_DISAPPEARING_MESSAGES_GESTURE
+                    )
+            );
+        }
+
+        if (SettingsStatus.sendKeyboardGifs) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_send_keyboard_gifs"),
+                            str("piko_send_keyboard_gifs_desc"),
+                            Settings.SEND_KEYBOARD_GIFS
                     )
             );
         }
@@ -711,10 +735,7 @@ public class ScreenBuilder {
         }
     }
 
-    public void buildMiscSection() {
-        if (!(SettingsStatus.miscSection())) return;
-
-        // PreferenceCategory category= addCategory(str("piko_category_misc"));
+    private void buildAppearanceSection() {
         if (MaterialYouTheme.isAmoledAvailable()) {
             addPreference(
                     helper.availableWhen(
@@ -754,15 +775,18 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.moreOptionsOnPost) {
+        if (SettingsStatus.removeEmptyBottomSpace) {
             addPreference(
                     helper.switchPreference(
-                            str("piko_enable_more_options_on_post"),
-                            str("piko_enable_more_options_on_post_desc"),
-                            Settings.ENABLE_MORE_OPTIONS_ON_POST
+                            str("piko_remove_empty_bottom_space"),
+                            "",
+                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
                     )
             );
         }
+    }
+
+    private void buildProfileSection() {
         if (SettingsStatus.followBackIndicator) {
             addPreference(
                     helper.switchPreference(
@@ -796,12 +820,17 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.resumeReelsAfterScrolling) {
-            addPreference(helper.switchPreference(
-                    str("piko_resume_reels_after_scrolling"),
-                    str("piko_resume_reels_after_scrolling_desc"),
-                    Settings.RESUME_REELS_AFTER_SCROLLING
-            ));
+    }
+
+    private void buildPostsSection() {
+        if (SettingsStatus.moreOptionsOnPost) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_enable_more_options_on_post"),
+                            str("piko_enable_more_options_on_post_desc"),
+                            Settings.ENABLE_MORE_OPTIONS_ON_POST
+                    )
+            );
         }
         if (SettingsStatus.improveImageViewing) {
             addPreference(
@@ -821,14 +850,15 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.removeEmptyBottomSpace) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_remove_empty_bottom_space"),
-                            "",
-                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
-                    )
-            );
+    }
+
+    private void buildReelsSection() {
+        if (SettingsStatus.resumeReelsAfterScrolling) {
+            addPreference(helper.switchPreference(
+                    str("piko_resume_reels_after_scrolling"),
+                    str("piko_resume_reels_after_scrolling_desc"),
+                    Settings.RESUME_REELS_AFTER_SCROLLING
+            ));
         }
     }
 
@@ -852,10 +882,35 @@ public class ScreenBuilder {
     }
 
     public void buildDownloadSection() {
-        if (!SettingsStatus.downloadSection()) return;
+        boolean mediaDownloads = SettingsStatus.downloadMedia || SettingsStatus.saveMediaCommentButton;
+        if (mediaDownloads) {
+            addInternalDownloadPreferences();
+        }
+        if (mediaDownloads || SettingsStatus.downloadVoiceMessage) {
+            addDownloadFilePreferences(mediaDownloads);
+        }
+        if (!SettingsStatus.downloadWithExternalDownloader) return;
 
-        // PreferenceCategory category= addCategory(str("piko_category_download_media"));
+        addPreference(
+                helper.switchPreference(
+                        str("piko_download_with_external_downloader"),
+                        "",
+                        Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
+                )
+        );
+        addPreference(
+                helper.availableWhen(
+                        helper.editTextPreference(
+                                str("piko_external_downloader_package_name"),
+                                Pref.externalDownloaderPackageName(),
+                                Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
+                        ),
+                        () -> SharedPref.getBooleanPref(Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER)
+                )
+        );
+    }
 
+    private void addInternalDownloadPreferences() {
         addPreference(
                 helper.switchPreference(
                         str("piko_enable_download"),
@@ -883,13 +938,15 @@ public class ScreenBuilder {
             );
         }
 
-        addPreference(
-                helper.switchPreference(
-                        str("piko_enable_direct_download"),
-                        str("piko_enable_direct_download_desc"),
-                        Settings.ENABLE_DIRECT_DOWNLOAD
-                )
-        );
+        if (SettingsStatus.downloadMedia) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_enable_direct_download"),
+                            str("piko_enable_direct_download_desc"),
+                            Settings.ENABLE_DIRECT_DOWNLOAD
+                    )
+            );
+        }
 
         addPreference(
                 helper.switchPreference(
@@ -925,14 +982,26 @@ public class ScreenBuilder {
                         Settings.EMBED_DOWNLOAD_METADATA
                 )
         );
+    }
 
+    private void addDownloadFilePreferences(boolean showNameTemplate) {
         addPreference(
-                helper.downloadFileNameTemplatePreference(
-                        str("piko_download_file_name_template"),
-                        Pref.downloadFileNameTemplate(),
-                        Settings.DOWNLOAD_FILE_NAME_TEMPLATE
+                helper.listPreference(
+                        str("piko_download_conflict_policy"),
+                        str("piko_download_conflict_policy_desc"),
+                        Settings.DOWNLOAD_CONFLICT_POLICY
                 )
         );
+
+        if (showNameTemplate) {
+            addPreference(
+                    helper.downloadFileNameTemplatePreference(
+                            str("piko_download_file_name_template"),
+                            Pref.downloadFileNameTemplate(),
+                            Settings.DOWNLOAD_FILE_NAME_TEMPLATE
+                    )
+            );
+        }
 
         addPreference(
                 helper.buttonPreference(
@@ -942,26 +1011,6 @@ public class ScreenBuilder {
                 )
         );
 
-        if(SettingsStatus.downloadWithExternalDownloader) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_download_with_external_downloader"),
-                            "",
-                            Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
-                    )
-            );
-
-            addPreference(
-                    helper.availableWhen(
-                            helper.editTextPreference(
-                                    str("piko_external_downloader_package_name"),
-                                    Pref.externalDownloaderPackageName(),
-                                    Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
-                            ),
-                            () -> SharedPref.getBooleanPref(Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER)
-                    )
-            );
-        }
     }
 
     public void buildActionBarSection() {
@@ -1023,23 +1072,10 @@ public class ScreenBuilder {
                     )
             );
 
-            addPreference(
-                    category,
-                    helper.editTextNumPreference(
-                            str("piko_filter_story_minimum_item_count"),
-                            str("piko_filter_story_minimum_item_count_desc"),
-                            Settings.FILTER_STORY_MIN_STORY_ITEMS
-                    )
-            );
-
-            addPreference(
-                    category,
-                    helper.editTextNumPreference(
-                            str("piko_filter_story_maximum_item_count"),
-                            str("piko_filter_story_maximum_item_count_desc"),
-                            Settings.FILTER_STORY_MAX_STORY_ITEMS
-                    )
-            );
+            addPreference(category, new StoryItemCountPreference(context, Settings.FILTER_STORY_MIN_STORY_ITEMS,
+                    str("piko_filter_story_minimum_item_count"), str("piko_filter_story_minimum_item_count_desc")));
+            addPreference(category, new StoryItemCountPreference(context, Settings.FILTER_STORY_MAX_STORY_ITEMS,
+                    str("piko_filter_story_maximum_item_count"), str("piko_filter_story_maximum_item_count_desc")));
         }
     }
 
@@ -1059,53 +1095,6 @@ public class ScreenBuilder {
                         str("piko_navigation_startup_tab_summary")
                 )
         );
-    }
-
-    public void buildRecommendedFlagsSection() {
-        buildRecommendedFlagsSection(true);
-    }
-
-    private void buildRecommendedFlagsSection(boolean notifyErrors) {
-        long lastModified = RecommendedFlags.getLastModified();
-        String lastModifiedAtString = "";
-        if (lastModified > 0L) {
-            Locale locale = context.getResources().getConfiguration().getLocales().get(0);
-            String skeleton = DateFormat.is24HourFormat(context) ? "yMMMEdHm" : "yMMMEdhm";
-            String pattern = DateFormat.getBestDateTimePattern(locale, skeleton);
-            String formattedDate = new SimpleDateFormat(pattern, locale).format(new Date(lastModified));
-            lastModifiedAtString = String.format(str("piko_rec_flags_last_modified_at"), formattedDate);
-        }
-        addPreference(
-            helper.buttonPreference(
-                    str("piko_rec_flags_refresh_file"),
-                    lastModifiedAtString,
-                    "piko_rec_flags_refresh_file"
-            )
-        );
-        List<Flag> recFlags = RecommendedFlags.getFlags(notifyErrors);
-        // The flag names will be English only,
-        // as I want to keep it as a live service
-        // rather than triggering new build
-        // for every a new flag.
-        for(Flag flag : recFlags) {
-            if (flag.isLongType()) {
-                addPreference(
-                        helper.editTextNumPreference(
-                                flag.getName(),
-                                flag.getDesc(),
-                                flag.getCode()
-                        )
-                );
-            } else {
-                addPreference(
-                        helper.listPreference(
-                                flag.getName(),
-                                flag.getDesc(),
-                                flag.getCode()
-                        )
-                );
-            }
-        }
     }
 
     public void aboutSection(TreeMap<String, Boolean> flags) {
@@ -1232,10 +1221,9 @@ public class ScreenBuilder {
         }
         if (SettingsStatus.customiseStoryRingSize) {
             addPreference(
-                    helper.editTextNumPreference(
+                    new StoryRingSizePreference(context,
                             str("piko_customise_story_ring_size"),
-                            str("piko_customise_story_ring_size_desc"),
-                            Settings.CUSTOMISE_STORY_RING_SIZE
+                            str("piko_customise_story_ring_size_desc")
                     )
             );
         }
@@ -1262,6 +1250,16 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.distractionFreeSection()){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_category_distraction_free"),
+                            "",
+                            Constants.PIKO_FRAGMENT_DISTRACTION_FREE
+                    )
+            );
+        }
+
         if (SettingsStatus.ghostSection()){
             addPreference(
                     helper.categoryPreference(
@@ -1282,12 +1280,52 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.profileSection()){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_navigation_tab_profile"),
+                            "",
+                            Constants.PIKO_FRAGMENT_PROFILE
+                    )
+            );
+        }
+
+        if (SettingsStatus.postsSection()){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_category_posts"),
+                            "",
+                            Constants.PIKO_FRAGMENT_POSTS
+                    )
+            );
+        }
+
+        if (SettingsStatus.resumeReelsAfterScrolling){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_navigation_tab_reels"),
+                            "",
+                            Constants.PIKO_FRAGMENT_REELS
+                    )
+            );
+        }
+
         if (SettingsStatus.storySection()){
             addPreference(
                     helper.categoryPreference(
                             str("piko_category_story"),
                             "",
                             Constants.PIKO_FRAGMENT_STORY
+                    )
+            );
+        }
+
+        if (SettingsStatus.instantsDownload){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_instants_title"),
+                            "",
+                            Constants.PIKO_FRAGMENT_INSTANTS
                     )
             );
         }
@@ -1302,26 +1340,6 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.distractionFreeSection()){
-            addPreference(
-                    helper.categoryPreference(
-                            str("piko_category_distraction_free"),
-                            "",
-                            Constants.PIKO_FRAGMENT_DISTRACTION_FREE
-                    )
-            );
-        }
-
-        if (SettingsStatus.miscSection()){
-            addPreference(
-                    helper.categoryPreference(
-                            str("piko_category_misc"),
-                            "",
-                            Constants.PIKO_FRAGMENT_MISC
-                    )
-            );
-        }
-
         if (SettingsStatus.downloadSection()){
             addPreference(
                     helper.categoryPreference(
@@ -1332,12 +1350,12 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.instantsDownload){
+        if (SettingsStatus.appearanceSection()){
             addPreference(
                     helper.categoryPreference(
-                            str("piko_instants_title"),
+                            str("piko_category_appearance"),
                             "",
-                            Constants.PIKO_FRAGMENT_INSTANTS
+                            Constants.PIKO_FRAGMENT_APPEARANCE
                     )
             );
         }

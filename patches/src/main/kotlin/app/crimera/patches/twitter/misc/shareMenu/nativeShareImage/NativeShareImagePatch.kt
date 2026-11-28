@@ -22,6 +22,7 @@ val nativeShareImagePatch =
         description = "Share tweets as rendered image. Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook, browseObjectPatch)
 
         execute {

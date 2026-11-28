@@ -22,6 +22,7 @@ val nativeShareMenuPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch, nativeShareMenuResourcePatch, entityGenerator, shareMenuButtonOnClickHook, browseObjectPatch)
 
         execute {

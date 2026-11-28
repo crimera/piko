@@ -70,6 +70,7 @@ val blockUpdateScreenPatch =
         description = "Blocks the 'This app is out of date' update screen from being shown on launch",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
 
         dependsOn(settingsPatch)
 

@@ -154,13 +154,16 @@ public final class DeletedMessagesActivity {
         synchronized (sControllers) {
             sControllers.put(activity, controller);
         }
-        controller.setup();
         if (activity.getApplication() != null) {
             activity.getApplication().registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
                 @Override public void onActivityCreated(Activity a, Bundle b) {}
                 @Override public void onActivityStarted(Activity a) {}
-                @Override public void onActivityResumed(Activity a) {}
-                @Override public void onActivityPaused(Activity a) {}
+                @Override public void onActivityResumed(Activity a) {
+                    if (a == activity) controller.resume();
+                }
+                @Override public void onActivityPaused(Activity a) {
+                    if (a == activity && !a.isFinishing()) controller.hide();
+                }
                 @Override public void onActivityStopped(Activity a) {}
                 @Override public void onActivitySaveInstanceState(Activity a, Bundle b) {}
                 @Override
@@ -173,6 +176,12 @@ public final class DeletedMessagesActivity {
                     }
                 }
             });
+        }
+    }
+
+    static boolean isShowingOn(Activity activity) {
+        synchronized (sControllers) {
+            return sControllers.containsKey(activity);
         }
     }
 
@@ -190,6 +199,8 @@ public final class DeletedMessagesActivity {
 
     private static class Controller {
         private final Activity activity;
+        private boolean resumed;
+        private boolean confirming;
         private List<String[]> messages;
         private ListView messageList;
         private MessageAdapter adapter;
@@ -206,6 +217,32 @@ public final class DeletedMessagesActivity {
 
         Controller(Activity activity) {
             this.activity = activity;
+        }
+
+        void hide() {
+            resumed = false;
+            activity.findViewById(android.R.id.content).setVisibility(View.INVISIBLE);
+        }
+
+        void close() {
+            hide();
+            activity.finish();
+        }
+
+        private boolean canAct() {
+            return resumed && !InboxLock.mustConfirmToDisable();
+        }
+
+        void resume() {
+            resumed = true;
+            if (activity.isFinishing() || activity.isDestroyed() || confirming) return;
+            confirming = true;
+            InboxLock.confirmIfLocked(activity, () -> {
+                confirming = false;
+                if (!resumed || activity.isFinishing() || activity.isDestroyed()) return;
+                if (adapter == null) setup();
+                activity.findViewById(android.R.id.content).setVisibility(View.VISIBLE);
+            }, this::close);
         }
 
         void setup() {
@@ -296,6 +333,7 @@ public final class DeletedMessagesActivity {
             messageList.setDividerHeight(1);
             messageList.setChoiceMode(ListView.CHOICE_MODE_NONE);
             messageList.setOnItemClickListener((parent, view, position, id) -> {
+                if (!canAct()) return;
                 if (selectionMode) {
                     updateSelectionUi();
                     return;
@@ -312,6 +350,7 @@ public final class DeletedMessagesActivity {
                 }
             });
             messageList.setOnItemLongClickListener((parent, view, position, id) -> {
+                if (!canAct()) return true;
                 if (!selectionMode) {
                     selectionMode = true;
                     messageList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -480,6 +519,7 @@ public final class DeletedMessagesActivity {
             new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(activity))
                     .setMessage(prompt)
                     .setPositiveButton(str("piko_delete"), (dialog, which) -> {
+                        if (!canAct()) return;
                         PikoMessageDb db = PikoMessageDb.getInstance(activity);
                         db.deleteSaved(selectedIds);
                         selectionMode = false;
@@ -513,6 +553,7 @@ public final class DeletedMessagesActivity {
                 new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(activity))
                     .setTitle(str("piko_download_options"))
                     .setItems(options, (d, which) -> {
+                        if (!canAct()) return;
                         try {
                             if (which == 0) {
                                 String fileName = "piko_" + messageId + guessExtension(url, type);

@@ -11,7 +11,8 @@ import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
-import app.crimera.patches.instagram.links.validateLinks.validateLinksPatch
+import app.crimera.patches.instagram.misc.actionBar.chatActionBarButton.chatActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton.inboxActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.hideHomeActionButtonsPatch
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.userProfileActionBarButtonPatch
@@ -20,6 +21,8 @@ import app.crimera.patches.instagram.misc.dm.hideChatCallButtonsPatch
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
+import app.crimera.patches.instagram.misc.onboarding.disableOnboardingPermissionPromptsPatch
+import app.crimera.patches.instagram.misc.originalsigners.originalSignersPatch
 import app.crimera.patches.instagram.misc.notification.fixDirectNotificationActionCrashPatch
 import app.crimera.patches.instagram.misc.notification.fixNotificationRegistrationCrashPatch
 import app.crimera.patches.instagram.misc.userProfile.preserveUnknownFriendshipStatusPatch
@@ -29,9 +32,9 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.CONSTANTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.common.parameterRegisterStart
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.shared.parameterRegisterStart
 import app.crimera.utils.InitMethod
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -49,7 +52,6 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.smali.toInstruction
-import app.morphe.patches.all.misc.fix.spoofsignature.spoofSignaturePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.indexOfFirstInstructionOrThrow
@@ -103,11 +105,16 @@ val settingsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(
             sharedExtensionPatch,
+            originalSignersPatch,
             settingsResourcePatch,
+            directShareShortcutLimitPatch,
+            disableOnboardingPermissionPromptsPatch,
             nativeSettingsSwitchStylePatch,
             whitehatIndicatorPatch,
             settingsTaskRemovalPatch,
             mainFeedActionBarButtonPatch,
+            chatActionBarButtonPatch,
+            inboxActionBarButtonPatch,
             hideHomeActionButtonsPatch,
             hideChatCallButtonsPatch,
             userProfileActionBarButtonPatch,
@@ -116,8 +123,6 @@ val settingsPatch =
             hookFlagsPatch,
             fixNotificationRegistrationCrashPatch,
             fixDirectNotificationActionCrashPatch,
-            validateLinksPatch,
-            spoofSignaturePatch,
             removeBuildExpiredPopupPatch,
             preserveUnknownFriendshipStatusPatch,
             profileInfoEntity,
@@ -284,7 +289,6 @@ val settingsPatch =
                     invoke-static {v$freeRegister}, Ljava/lang/Thread;->setDefaultUncaughtExceptionHandler(Ljava/lang/Thread${'$'}UncaughtExceptionHandler;)V
                     
                     ${SSTS_DESCRIPTOR.format("load")}
-                    ${LOAD_FLAGS_DESCRIPTOR.format("load")}
                     ${LOAD_FLAGS_DESCRIPTOR.format("load")}
                     invoke-static {}, $CONSTANTS_DESCRIPTOR/Constants;->load()V
                     """.trimIndent(),

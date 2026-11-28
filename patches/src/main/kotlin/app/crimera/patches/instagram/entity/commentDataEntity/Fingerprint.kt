@@ -74,9 +74,9 @@ internal object RandomGetCommentObjectMediaFingerprint : Fingerprint(
 /**
  * Converts the comment GIF, assigning the GIF fields in order.
  */
-internal object CommentGifConverterFingerprint : Fingerprint(
+internal object CommentGifFieldsFingerprint : Fingerprint(
     classFingerprint = RandomGetCommentObjectMediaFingerprint,
-    parameters = listOf("L"),
+    strings = listOf("photo_comment_child_missing_overlay_info"),
     filters = listOf(
         // GIF tag.
         fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),

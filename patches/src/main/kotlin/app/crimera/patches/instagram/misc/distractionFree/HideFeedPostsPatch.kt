@@ -12,8 +12,10 @@ import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
@@ -30,11 +32,13 @@ private object MainFeedModelsFingerprint : Fingerprint(
     parameters = listOf("L", "L", "L", "Z", "Z", "Z"),
     filters = listOf(
         string("MainfeedAdapter.buildModels"),
-        methodCall(smali = "Ljava/util/List;->size()I"),
-        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
-        opcode(Opcode.CONST_16, location = MatchAfterImmediately()),
+        fieldAccess(type = "I", opcode = Opcode.IGET),
         opcode(Opcode.MOVE_FROM16, location = MatchAfterImmediately()),
-        opcode(Opcode.IF_GE, location = MatchAfterImmediately()),
+        fieldAccess(type = "Ljava/util/List;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        methodCall(smali = "Ljava/util/List;->size()I", location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_FROM16, location = MatchAfterImmediately()),
+        opcode(Opcode.IF_GE, location = MatchAfterWithin(8)),
     ),
 )
 
@@ -59,7 +63,11 @@ private fun mainFeedFooterFingerprint(adapterClass: String) = Fingerprint(
             returnType = "Z",
             location = MatchAfterImmediately(),
         ),
-        string("syncUpdateState"),
+        methodCall(
+            definingClass = "this",
+            parameters = listOf("L", adapterClass, "L", "Ljava/lang/Object;", "Ljava/util/List;"),
+            returnType = "V",
+        ),
     ),
 )
 
@@ -103,18 +111,18 @@ val hideFeedPostsPatch = patch(
 
     execute {
         val match = MainFeedModelsFingerprint.match()
-        val countRegisters = match.instructionMatches[2].instruction.registersUsed
-        val moveRegisters = match.instructionMatches[4].instruction.registersUsed
-        val branchRegisters = match.instructionMatches[5].instruction.registersUsed
-        if (countRegisters.size != 1 || moveRegisters.size != 2 || branchRegisters.size != 2 ||
-            moveRegisters[1] != countRegisters.single() || branchRegisters[1] != moveRegisters[0] ||
-            moveRegisters[0] == countRegisters.single()
+        val countRead = match.instructionMatches[5]
+        val countRegister = countRead.instruction.registersUsed.single()
+        val scratchRegister = match.instructionMatches[6].instruction.registersUsed.first()
+        val loop = match.instructionMatches.last()
+        val loadCount = match.method.getInstruction(loop.index - 2)
+        if (loadCount.opcode != Opcode.MOVE_FROM16 ||
+            loadCount.registersUsed != listOf(loop.instruction.registersUsed[1], countRegister) ||
+            scratchRegister == countRegister
         ) {
             throw PatchException("Could not resolve the home feed item count")
         }
-        val countRegister = countRegisters.single()
-        val scratchRegister = moveRegisters[0]
-        val insertIndex = match.instructionMatches[2].index + 1
+        val insertIndex = countRead.index + 1
 
         // The story header is already built. Skip only the item loop, preserving the feed
         // data and the normal model finalization. The loop reloads the scratch register.

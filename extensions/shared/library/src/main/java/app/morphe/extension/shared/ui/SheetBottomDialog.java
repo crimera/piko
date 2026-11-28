@@ -217,6 +217,10 @@ public class SheetBottomDialog {
         }
 
         private void startDismissAnimation() {
+            if (dialog != null) {
+                dialog.dismiss();
+                return;
+            }
             scroller.startScroll(0, (int) dragOffset,
                     0, getHeight() - (int) dragOffset, animationDuration);
             post(settleRunnable);
@@ -232,13 +236,7 @@ public class SheetBottomDialog {
             if (scroller.computeScrollOffset()) {
                 dragOffset = scroller.getCurrY();
                 setTranslationY(dragOffset);
-
-                if (dragOffset >= getHeight() && dialog != null) {
-                    dialog.dismiss();
-                    scroller.forceFinished(true);
-                } else {
-                    post(settleRunnable);
-                }
+                post(settleRunnable);
             } else {
                 dragOffset = getTranslationY();
             }
@@ -301,6 +299,11 @@ public class SheetBottomDialog {
         @Override
         public void cancel() {
             super.cancel();
+        }
+
+        @Override
+        public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
+            return isDismissing || super.dispatchTouchEvent(event);
         }
 
         @Override

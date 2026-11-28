@@ -42,6 +42,7 @@ jobs:
     needs: pull
     permissions:
       contents: write
+      packages: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout dev
@@ -68,6 +69,7 @@ jobs:
         run: |
           git add -- \
             ':(glob)patches/src/main/resources/addresources/values-*/instagram/strings.xml' \
+            ':(glob)patches/src/main/resources/addresources/values-*/newx/strings.xml' \
             ':(glob)patches/src/main/resources/addresources/values-*/shared/strings.xml' \
             ':(glob)patches/src/main/resources/addresources/values-*/twitter/strings.xml'
           if git diff --cached --quiet; then

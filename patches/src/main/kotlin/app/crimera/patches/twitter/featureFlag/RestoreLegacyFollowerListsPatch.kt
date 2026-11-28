@@ -20,6 +20,7 @@ val restoreLegacyFollowerListsPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
             flagSettings("restoreLegacyFollowerLists")

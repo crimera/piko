@@ -14,16 +14,17 @@ import org.xmlpull.v1.XmlPullParser;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 /**
  * A video rendition of a media's DASH manifest, served as a file of its own, with the manifest's
- * best audio to merge in on download. Instagram lists a fresh video in H.264 at 720p at most and
+ * matching audio to merge in on download. Instagram lists a fresh video in H.264 at 720p at most and
  * adds AV1 (sometimes VP9) up to the upload's size later, which the progressive video_versions
  * never carry. Doubles as a variant in the download dialog.
  */
@@ -64,15 +65,19 @@ public final class DashVideoData implements VideoVariant {
     private static final class Track {
         final boolean video;
         final Codec codec;
+        final String codecs;
+        final int adaptationSet;
         final int width;
         final int height;
         final int bandwidth;
         final Map<Integer, Double> quality;
         String url;
 
-        Track(boolean video, String codecs, int width, int height, int bandwidth, Map<Integer, Double> quality) {
+        Track(boolean video, String codecs, int adaptationSet, int width, int height, int bandwidth, Map<Integer, Double> quality) {
             this.video = video;
             this.codec = Codec.of(codecs);
+            this.codecs = codecs;
+            this.adaptationSet = adaptationSet;
             this.width = width;
             this.height = height;
             this.bandwidth = bandwidth;
@@ -81,26 +86,28 @@ public final class DashVideoData implements VideoVariant {
     }
 
     private final Track track;
-    private final String audioUrl;
+    private final Track audio;
 
-    private DashVideoData(Track track, String audioUrl) {
+    private DashVideoData(Track track, Track audio) {
         this.track = track;
-        this.audioUrl = audioUrl;
+        this.audio = audio;
     }
 
     /**
      * All video renditions this device can remux, sharpest first, retaining alternate files.
-     * Each carries the manifest's highest-bitrate audio. Throws on an unparsable manifest.
+     * Audio alternatives retain the selected mix, best known quality first. Throws on an unparsable manifest.
      */
     public static List<DashVideoData> parse(String manifest) throws Exception {
         List<Track> videos = new ArrayList<>();
-        Track audio = null;
+        List<Track> audioTracks = new ArrayList<>();
         if (manifest != null && !manifest.isEmpty()) {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(new StringReader(manifest));
             // Representations inherit what their AdaptationSet declares.
             String setMimeType = null;
             String setCodecs = null;
+            int adaptationSet = 0;
+            boolean periodSeen = false;
             Track pending = null;
             for (int event = parser.getEventType(); event != XmlPullParser.END_DOCUMENT; event = parser.next()) {
                 if (event != XmlPullParser.START_TAG && event != XmlPullParser.END_TAG) continue;
@@ -110,8 +117,8 @@ public final class DashVideoData implements VideoVariant {
                         if (pending != null && pending.url != null && !pending.url.isEmpty()) {
                             if (pending.video) {
                                 videos.add(pending);
-                            } else if (audio == null || pending.bandwidth > audio.bandwidth) {
-                                audio = pending;
+                            } else {
+                                audioTracks.add(pending);
                             }
                         }
                         pending = null;
@@ -122,7 +129,13 @@ public final class DashVideoData implements VideoVariant {
                     continue;
                 }
                 switch (name) {
+                    case "Period":
+                        // Each URL describes only its own period in a multi-period presentation.
+                        if (periodSeen) return Collections.emptyList();
+                        periodSeen = true;
+                        break;
                     case "AdaptationSet":
+                        adaptationSet++;
                         setMimeType = parser.getAttributeValue(null, "mimeType");
                         setCodecs = parser.getAttributeValue(null, "codecs");
                         break;
@@ -134,6 +147,7 @@ public final class DashVideoData implements VideoVariant {
                                 ? new Track(
                                         video,
                                         codecs == null ? "" : codecs,
+                                        adaptationSet,
                                         parseInt(parser.getAttributeValue(null, "width")),
                                         parseInt(parser.getAttributeValue(null, "height")),
                                         parseInt(parser.getAttributeValue(null, "bandwidth")),
@@ -147,10 +161,18 @@ public final class DashVideoData implements VideoVariant {
             }
         }
 
-        String audioUrl = audio == null ? null : audio.url;
+        audioTracks.sort(Comparator.comparingInt((Track audio) -> audio.bandwidth).reversed());
+        if (!audioTracks.isEmpty()) {
+            Track preferred = audioTracks.get(0);
+            // Other adaptation sets can be a different language or mix. Keep the same audio encoding.
+            audioTracks.removeIf(audio -> audio.adaptationSet != preferred.adaptationSet
+                    || !audio.codecs.equals(preferred.codecs));
+        }
         List<DashVideoData> renditions = new ArrayList<>();
         for (Track video : videos) {
-            if (Build.VERSION.SDK_INT >= video.codec.minSdk) renditions.add(new DashVideoData(video, audioUrl));
+            if (Build.VERSION.SDK_INT < video.codec.minSdk) continue;
+            if (audioTracks.isEmpty()) renditions.add(new DashVideoData(video, null));
+            for (Track audio : audioTracks) renditions.add(new DashVideoData(video, audio));
         }
         List<DashVideoData> ordered = new ArrayList<>();
         for (VideoResolution resolution : VideoResolution.group(renditions)) {
@@ -208,7 +230,20 @@ public final class DashVideoData implements VideoVariant {
 
     @Override
     public String getAudioUrl() {
-        return audioUrl;
+        return audio == null ? null : audio.url;
+    }
+
+    @Override
+    public String getAudioCodec() {
+        if (audio == null) return "";
+        if (audio.codecs.startsWith("mp4a.")) return "audio/mp4a-latm";
+        if (audio.codecs.equalsIgnoreCase("opus")) return "audio/opus";
+        return "";
+    }
+
+    @Override
+    public int getAudioBitrate() {
+        return audio == null ? 0 : audio.bandwidth;
     }
 
     @Override

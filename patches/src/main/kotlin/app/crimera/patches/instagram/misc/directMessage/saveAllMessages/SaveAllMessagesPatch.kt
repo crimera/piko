@@ -6,7 +6,6 @@
 
 package app.crimera.patches.instagram.misc.directMessage.saveAllMessages
 
-import app.crimera.patches.instagram.entity.messageInfoEntity.messageInfoEntity
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -32,7 +31,6 @@ val saveAllMessagesPatch =
         description = "Enables save option for all direct messages",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(messageInfoEntity)
         execute {
 
             // Make Save option available for all DM content.

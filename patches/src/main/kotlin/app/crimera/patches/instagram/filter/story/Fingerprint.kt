@@ -10,10 +10,12 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
 
 internal object PopulateStoryTrayFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     parameters = listOf(
-        "L", "L", "L", "Lcom/instagram/user/model/User;", "Ljava/lang/String;",
+        "L", "L", "L", "L", "Ljava/lang/String;",
         "Ljava/util/List;", "Ljava/util/List;", "Z", "Z",
     ),
     filters = listOf(string("ReelStore.maybeAddNewTrayReelResponseItemIntfs")),
+    custom = { method, _ -> method.parameterTypes.take(4).contains("Lcom/instagram/user/model/User;") },
 )

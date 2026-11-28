@@ -6,6 +6,7 @@
 
 package app.morphe.extension.instagram.constants;
 
+import app.morphe.extension.instagram.utils.InstaUtils;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Dialog;
@@ -41,21 +42,24 @@ public class UI {
     public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
     public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
-    public static final String DRAWABLE_GEAR_ICON = "instagram_settings_pano_filled_24";
+    public static final String DRAWABLE_GEAR_ICON = "fb_ic_settings_outline_24";
     public static final String DRAWABLE_ADS_ICON = "instagram_ads_outline_24";
     public static final String DRAWABLE_GHOST_ICON = "piko_ghost_icon";
     public static final String DRAWABLE_STACK_ICON = "fb_ic_changed_beliefs_outline_24";
     public static final String DRAWABLE_HISTORY_ICON = "instagram_history_outline_24";
     public static final String DRAWABLE_STORY_ICON = "instagram_story_outline_24";
-    public static final String DRAWABLE_SHAPES_ICON = "fb_ic_more_shapes_outline_24";
-    public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
+    public static final String DRAWABLE_APPEARANCE_ICON = "instagram_palette_outline_24";
+    public static final String DRAWABLE_PROFILE_ICON = "instagram_user_outline_24";
+    public static final String DRAWABLE_POSTS_ICON = "fb_ic_post_outline_24";
+    public static final String DRAWABLE_REELS_ICON = "instagram_reels_prism_outline_24";
+    public static final String DRAWABLE_TARGET_ICON = "instagram_target_outline_24";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
     public static final String DRAWABLE_COLLECTIONS_ICON = "instagram_collections_pano_outline_24";
     public static final String DRAWABLE_EYE_STROKE_ICON = "design_ic_visibility_off";
     public static final String DRAWABLE_EYE_ICON = "design_ic_visibility";
     public static final String DRAWABLE_INSTANTS_ICON = "instagram_app_instants_outline_24";
-    public static final String DRAWABLE_SHARE_TO_DIRECT = "tab_prism_direct_drawable";
-    public static final String DRAWABLE_SHARE_TO_REEL = "gallery_share_to_reels_button";
+    public static final String DRAWABLE_DM_ICON = "instagram_direct_prism_outline_24";
+    public static final String DRAWABLE_FILTER_ICON = "fb_ic_filter_sliders_outline_24";
     public static final String DRAWABLE_ARROW_BACK =
             "instagram_arrow_left_pano_outline_24";
     public static final String DRAWABLE_SEARCH = "instagram_search_outline_24";
@@ -217,7 +221,7 @@ public class UI {
                     String selectedOption = options.get(which);
 
                     if (selectedOption.equals(str("piko_ok"))) {
-                        Utils.restartApp(context);
+                        InstaUtils.restartApp(context);
 
                     }
                 } catch (Exception e) {

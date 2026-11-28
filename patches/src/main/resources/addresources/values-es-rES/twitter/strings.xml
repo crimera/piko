@@ -9,7 +9,7 @@
     <string name="piko_pref_undo_posts">Habilitar deshacer publicaciones</string>
     <string name="piko_pref_undo_posts_desc">Permite deshacer publicaciones antes de publicar</string>
     <string name="piko_pref_undo_posts_btn">Configuración de deshacer publicaciones</string>
-    <string name="piko_pref_icon_n_navbar_btn">Configuración de icono de la app y \nbarra de navegación</string>
+    <string name="piko_pref_icon_n_navbar_btn">Configuración de iconos de la app y configuración de la barra de navegación</string>
     <string name="piko_pref_enable_force_pip">Forzar el modo PiP</string>
     <string name="piko_pref_enable_force_pip_desc">Habilita el modo PiP cuando cierras la aplicación</string>
     <!-- Download Settings -->

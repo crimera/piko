@@ -6,8 +6,9 @@
 
 package app.crimera.patches.instagram.misc.directMessage.downloadVoiceMessagePatch
 
+import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.messageInfoEntity.messageInfoEntity
-import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
+import app.crimera.patches.instagram.misc.download.directMessageDownloadPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.patch
@@ -19,7 +20,7 @@ val downloadVoiceMessagePatch =
         description = "Enables ability to download voice messages",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(messageInfoEntity, saveAllMessagesPatch)
+        dependsOn(directMessageDownloadPatch, mediaDataEntity, messageInfoEntity)
         execute {
             enableSettings("downloadVoiceMessage")
         }

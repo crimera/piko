@@ -26,8 +26,11 @@ import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.classDefBy
@@ -37,6 +40,7 @@ import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.addAppResources
@@ -159,8 +163,8 @@ private fun feedUfiBindFingerprint(holderType: String, stateType: String) = Fing
 /** The UFI renderer selector, which returns the static `Integer` that follows the "view" string constant. */
 private object FeedUfiRendererSelectorFingerprint : Fingerprint(
     returnType = INTEGER_DESCRIPTOR,
-    strings = listOf(MAIN_FEED_MODULE, LITHO_UFI_VARIANT),
     filters = listOf(
+        string(LITHO_UFI_VARIANT),
         string(VIEW_UFI_VARIANT),
         fieldAccess(type = INTEGER_DESCRIPTOR, opcode = Opcode.SGET_OBJECT, location = MatchAfterWithin(7)),
     ),
@@ -266,6 +270,27 @@ private fun hookFeedRowBinder(): String {
 private fun pinMainFeedToViewUfi() {
     FeedUfiRendererSelectorFingerprint.let {
         val viewVariantField = it.instructionMatches.last().fieldReference
+        if (it.originalMethod.parameterTypes.isEmpty()) {
+            // On 456 the feed-row builder also inlines the module check. Both paths choose a
+            // renderer only for feed_timeline; the shared parameterless getter serves other surfaces.
+            Fingerprint(filters = listOf(
+                opcode(Opcode.IF_NEZ),
+                string(MAIN_FEED_MODULE, location = MatchAfterImmediately()),
+                methodCall(smali = "$STRING_DESCRIPTOR->equals($OBJECT_DESCRIPTOR)Z", location = MatchAfterImmediately()),
+                opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
+                opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
+                methodCall(reference = it.originalMethod),
+                opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+            )).matchAll(2..2).forEach { match ->
+                val result = match.instructionMatches.last()
+                val register = result.instruction.registersUsed.single()
+                match.method.replaceInstruction(result.index, "sget-object v$register, $viewVariantField")
+                match.method.removeInstruction(result.index - 1)
+                // Always reach the existing module check, even when the renderer experiment is off.
+                match.method.removeInstruction(match.instructionMatches.first().index)
+            }
+            return
+        }
         val method = it.method
         val moduleRegister = method.parameterRegister(STRING_DESCRIPTOR)
         val (expected, module) = method.reserveFreeRegisters(0, 2, maximum = 15)

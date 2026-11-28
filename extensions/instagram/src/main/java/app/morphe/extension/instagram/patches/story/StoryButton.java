@@ -10,6 +10,7 @@ package app.morphe.extension.instagram.patches.story;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.ArrayList;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 
@@ -17,12 +18,11 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
-import app.morphe.extension.instagram.entity.MediaData;
 
 import com.instagram.common.session.UserSession;
+import instagram.features.stories.fragment.ReelViewerFragment;
 
 public class StoryButton {
     private static boolean VIEW_STORY_MENTIONS;
@@ -52,18 +52,37 @@ public class StoryButton {
         return buttonList;
     }
 
-    public static boolean storyDialogAction(CharSequence buttonText, Context ctx, UserSession session,
-                                           Object mediaObject, Object reel,
-                                           DialogInterface.OnDismissListener onDismiss) {
-        if (buttonText.equals(str("piko_view_story_mentions"))) {
-            ViewStoryMentionsPatch.viewMentions(ctx, mediaObject, onDismiss);
-            return true;
-        } else if (buttonText.equals(str("piko_download_options")) || buttonText.equals(str("piko_category_download_media"))) {
-            DownloadUtils.showStoryDownloadOptions(ctx, session, mediaObject, reel, onDismiss);
-            return true;
+    public static boolean storyDialogAction(CharSequence buttonText, Activity activity, UserSession session,
+                                            Object mediaObject, Object reel,
+                                            DialogInterface.OnDismissListener onDismiss, Object fragment, String moduleName) {
+        boolean mentions = buttonText.equals(str("piko_view_story_mentions"));
+        if (!mentions && !buttonText.equals(str("piko_download_options"))
+                && !buttonText.equals(str("piko_category_download_media"))) {
+            return false;
         }
-        return false;
+
+        DialogInterface.OnDismissListener close = onDismiss;
+        if (fragment instanceof ReelViewerFragment) {
+            ReelViewerFragment viewer = (ReelViewerFragment) fragment;
+            viewer.pikoStoryDialogOpen = true;
+            pauseViewer(viewer, "context_switch");
+            close = dialog -> {
+                viewer.pikoStoryDialogOpen = false;
+                if (onDismiss != null) onDismiss.onDismiss(dialog);
+                else resumeViewer(viewer, "resume", false);
+            };
+        }
+        if (mentions) {
+            ViewStoryMentionsPatch.viewMentions(activity, session, mediaObject, moduleName, close);
+        } else {
+            DownloadUtils.showStoryDownloadOptions(activity, session, mediaObject, reel, close);
+        }
+        return true;
     }
+
+    // The patch supplies the viewer's native playback methods.
+    private static void pauseViewer(ReelViewerFragment viewer, String reason) {}
+    private static void resumeViewer(ReelViewerFragment viewer, String reason, boolean force) {}
 
     public static boolean storyButtonAction(CharSequence buttonText, Context ctx, Object mediaObject){
         try {

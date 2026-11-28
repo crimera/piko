@@ -8,6 +8,7 @@ package app.crimera.patches.instagram.misc.instants
 
 import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
+import app.crimera.patches.instagram.misc.download.downloadCachePatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.INSTANTS_DESCRIPTOR
@@ -31,12 +32,11 @@ val instantsDownloadPatch =
         name = "Save Instants",
         description = "Captures view-once Instants as you view them so you can re-view and download them later.",
     ) {
-        dependsOn(settingsPatch, mediaDataEntity)
+        dependsOn(settingsPatch, downloadCachePatch, mediaDataEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            val itemType = (InstantItemFingerprint.matchOrNull()
-                ?: InstantMediaItemFingerprint.match()).originalClassDef.type
+            val itemType = InstantItemFingerprint.originalClassDef.type
             val constructor = instantItemConstructorFingerprint(itemType).method
             if (constructor.parameterTypes.firstOrNull() != MEDIA_CLASS_NAME) {
                 throw PatchException("Expected the instant item's first constructor parameter to be Media")

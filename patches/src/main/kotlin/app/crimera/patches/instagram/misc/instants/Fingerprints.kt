@@ -17,16 +17,13 @@ import com.android.tools.smali.dexlib2.Opcode
  */
 internal object InstantItemFingerprint : Fingerprint(
     name = "hashCode",
-    strings = listOf("NUX_VIDEO", "ONCE", "PERMANENT", "REPLAYABLE"),
-)
-
-internal object InstantMediaItemFingerprint : Fingerprint(
-    name = "hashCode",
     returnType = "I",
     parameters = emptyList(),
     filters = listOf(
         fieldAccess(definingClass = "this", type = MEDIA_CLASS_NAME, opcode = Opcode.IGET_OBJECT),
-        string("NUX_VIDEO"),
+        string("ONCE"),
+        string("PERMANENT"),
+        string("REPLAYABLE"),
     ),
 )
 

@@ -21,6 +21,7 @@ val nativeReaderModePatch =
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(
             nativeReaderModeResourcePatch,
             settingsPatch,

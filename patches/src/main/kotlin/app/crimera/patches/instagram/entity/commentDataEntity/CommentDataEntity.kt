@@ -39,8 +39,9 @@ val commentDataEntity =
             val commentObject = RandomGetCommentObjectMediaFingerprint.originalMethod.returnType
             val commentMediaHelperClass = RandomGetCommentObjectMediaFingerprint.instructionMatches.first().methodReference.definingClass
 
-            val commentGifObject = CommentGifConverterFingerprint.originalMethod.returnType
-            CommentGifConverterFingerprint.instructionMatches.let {
+            val gifFields = CommentGifFieldsFingerprint.instructionMatches
+            val commentGifObject = gifFields.first().fieldReference.definingClass
+            gifFields.let {
                 GetGifCreatorNameMediaExtension.changeFirstString(it[6].fieldReference.name)
                 GetWebpUrlMediaExtension.changeFirstString(it[4].fieldReference.name)
                 GetGifUrlMediaExtension.changeFirstString(it[3].fieldReference.name)

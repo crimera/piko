@@ -25,6 +25,7 @@ import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
+import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -48,13 +49,15 @@ private const val CLICK_HANDLER_CONSTRUCTOR =
     "$CLICK_HANDLER_DESCRIPTOR-><init>($CONTEXT_DESCRIPTOR$USER_SESSION_DESCRIPTOR$OBJECT_DESCRIPTOR)V"
 private const val DOWNLOAD_ICON_METHOD = "pikoCreateDownloadIcon"
 
-private fun saveIconFingerprint(stateType: String) = Fingerprint(
-    parameters = listOf("L", "L", "L", stateType, "Z"),
+private fun saveIconFingerprint(stateType: String, inline: Boolean = false) = Fingerprint(
+    parameters = if (inline) listOf("L") else listOf("L", "L", "L", stateType, "Z"),
     returnType = "L",
     filters = listOf(
         // Neutral icon style, before save state and event handlers are attached.
-        fieldAccess(opcode = Opcode.SGET_OBJECT),
-        fieldAccess(opcode = Opcode.SGET_OBJECT, location = MatchAfterImmediately()),
+        if (inline) methodCall(smali = "Lkotlin/jvm/functions/Function0;->invoke()Ljava/lang/Object;")
+        else fieldAccess(opcode = Opcode.SGET_OBJECT),
+        if (inline) fieldAccess(opcode = Opcode.SGET_OBJECT)
+        else fieldAccess(opcode = Opcode.SGET_OBJECT, location = MatchAfterImmediately()),
         methodCall(parameters = listOf("L", "L"), opcode = Opcode.INVOKE_STATIC, location = MatchAfterImmediately()),
         opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
         opcode(Opcode.CONST, MatchAfterImmediately()),
@@ -83,9 +86,10 @@ private fun saveIconFingerprint(stateType: String) = Fingerprint(
 
 /** The download component is added by the caller, independently of the save helper's visibility. */
 internal fun injectLithoDownloadButton(stateType: String) {
-    val save = saveIconFingerprint(stateType)
+    val legacy = saveIconFingerprint(stateType).matchOrNull()
+    val inline = legacy == null
+    val save = legacy ?: saveIconFingerprint(stateType, inline = true).match()
     val matches = save.instructionMatches
-    val neutralStyle = matches[0].fieldReference
     val alignment = matches[1].fieldReference
     val alignmentSetter = matches[2].methodReference
     val heightResource = matches[4].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
@@ -102,13 +106,19 @@ internal fun injectLithoDownloadButton(stateType: String) {
     val iconConstructor = matches[21].methodReference
     val contextType = save.originalMethod.parameterTypes.first().toString()
     val nodeType = onClickSetter.parameterTypes.first().toString()
+    val neutralStyle = if (inline) Fingerprint(
+        definingClass = save.originalClassDef.type,
+        parameters = listOf("L", "L", "L", stateType, "Z"),
+        returnType = iconConstructor.definingClass,
+        filters = listOf(fieldAccess(definingClass = nodeType, opcode = Opcode.SGET_OBJECT), string("getVisualSearchButtonComponent")),
+    ).instructionMatches.first().fieldReference else matches[0].fieldReference
     if (neutralStyle.definingClass != nodeType ||
         !setsViewProperty(onClickSetter, "ON_CLICK") || !setsViewProperty(onLongClickSetter, "ON_LONG_CLICK") ||
         listOf(alignmentSetter, heightSetter, descriptionSetter, classSetter, idSetter, onClickSetter, onLongClickSetter).any {
             it.parameterTypes.first().toString() != nodeType || it.returnType != nodeType
         } || themeAccessor != matches[20].methodReference ||
         iconConstructor.parameterTypes[1].toString() != nodeType ||
-        save.originalMethod.returnType != iconConstructor.definingClass
+        (!inline && save.originalMethod.returnType != iconConstructor.definingClass)
     ) {
         throw PatchException("Unexpected native save icon style in ${save.originalMethod}")
     }
@@ -118,55 +128,6 @@ internal fun injectLithoDownloadButton(stateType: String) {
             it.parameterTypes.isEmpty() && it.returnType == CONTEXT_DESCRIPTOR
         },
     )
-
-    val caller = Fingerprint(
-        definingClass = save.originalMethod.definingClass,
-        parameters = listOf("L"),
-        filters = listOf(
-            methodCall(reference = save.originalMethod),
-            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
-            methodCall(parameters = listOf("L", "L", "L", "L", USER_SESSION_DESCRIPTOR, "Z", "Z")),
-            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
-            opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
-            methodCall(smali = COMPONENT_LIST_ADD, location = MatchAfterImmediately()),
-        ),
-    )
-    val builder = caller.method
-    val callMatches = caller.instructionMatches
-    val saveIndex = callMatches[0].index
-    val saveCall = callMatches[0].instruction.registersUsed
-    val factoryIndex = callMatches[2].index
-    val factory = callMatches[2].methodReference
-    val call = callMatches[2].instruction.registersUsed
-    val listRegister = callMatches[5].instruction.registersUsed.first()
-    val instructions = builder.instructions.toList()
-    if (call.size != 7 || call != (call.first()..call.last()).toList() ||
-        call.any { it in saveCall } || listRegister in call
-    ) {
-        throw PatchException("Unexpected component factory registers in $builder")
-    }
-    // All staging registers must be overwritten before the native path reads them again.
-    call.forEach { register ->
-        val firstUse = instructions.subList(saveIndex, factoryIndex).firstOrNull { register in it.registersUsed }
-        if (firstUse == null || !firstUse.opcode.setsRegister() || firstUse.registersUsed.first() != register) {
-            throw PatchException("Live component staging register v$register in $builder")
-        }
-    }
-    val sources = call.drop(2).mapIndexed { offset, destination ->
-        val move = instructions[factoryIndex - 5 + offset]
-        if (move.opcode !in listOf(Opcode.MOVE_FROM16, Opcode.MOVE_OBJECT_FROM16) ||
-            (move as TwoRegisterInstruction).registerA != destination
-        ) {
-            throw PatchException("Unexpected component argument staging in $builder")
-        }
-        move.registerB
-    }
-    if (sources.any { it in call }) throw PatchException("Component sources overlap staging registers in $builder")
-    val category = builder.getInstruction(factoryIndex - 6)
-    if (category.opcode != Opcode.SGET_OBJECT || category.registersUsed.single() != call[0]) {
-        throw PatchException("Missing native component category in $builder")
-    }
-    val categoryField = category.getReference<FieldReference>()!!
 
     val owner = mutableClassDefBy(save.originalClassDef)
     if (owner.methods.any { it.name == DOWNLOAD_ICON_METHOD }) throw PatchException("Download icon helper already exists")
@@ -238,6 +199,98 @@ internal fun injectLithoDownloadButton(stateType: String) {
         )
     }
     owner.methods.add(helper)
+    if (inline) {
+        // The saved-items control is optional. Insert into its owning list before native visibility checks.
+        val controls = Fingerprint(
+            definingClass = owner.type,
+            parameters = listOf(contextType),
+            filters = listOf(
+                methodCall(smali = "Ljava/util/ArrayList;-><init>()V"),
+                fieldAccess(definingClass = stateType, type = "Z", opcode = Opcode.IGET_BOOLEAN, location = MatchAfterImmediately()),
+                opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
+                methodCall(parameters = listOf("L", "L", "L", stateType, "Z"), returnType = iconConstructor.definingClass, location = MatchAfterWithin(8)),
+                opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+                opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
+                methodCall(smali = COMPONENT_LIST_ADD, location = MatchAfterImmediately()),
+            ),
+        ).match()
+        val member = controls.method
+        val index = controls.instructionMatches[1].index
+        val list = controls.instructionMatches.first().instruction.registersUsed.single()
+        val state = controls.instructionMatches[1].instruction.registersUsed.last()
+        if (controls.originalMethod != save.originalMethod || list > 15 || state > 15 ||
+            list != controls.instructionMatches.last().instruction.registersUsed.first()
+        ) {
+            throw PatchException("Save icon and native post controls belong to different lists")
+        }
+        val session = owner.instanceFields.single { it.type == USER_SESSION_DESCRIPTOR }
+        val (contextArg, sessionArg) = member.reserveFreeRegisters(index, 2, 15, listOf(state, list))
+        member.addInstructionsWithLabels(
+            index,
+            """
+                ${moveObject(contextArg, member.parameterRegister(contextType))}
+                ${moveObject(sessionArg, member.p0Register)}
+                iget-object v$sessionArg, v$sessionArg, $session
+                invoke-static {v$contextArg, v$sessionArg, v$state}, $helper
+                move-result-object v$contextArg
+                if-eqz v$contextArg, :native
+                invoke-virtual {v$list, v$contextArg}, $COMPONENT_LIST_ADD
+            """.trimIndent(),
+            ExternalLabel("native", member.getInstruction(index)),
+        )
+        return
+    }
+
+    val caller = Fingerprint(
+        definingClass = save.originalMethod.definingClass,
+        parameters = listOf("L"),
+        filters = listOf(
+            methodCall(reference = save.originalMethod),
+            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+            methodCall(parameters = listOf("L", "L", "L", "L", USER_SESSION_DESCRIPTOR, "Z", "Z")),
+            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+            opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
+            methodCall(smali = COMPONENT_LIST_ADD, location = MatchAfterImmediately()),
+        ),
+    )
+    val builder = caller.method
+    val callMatches = caller.instructionMatches
+    val saveIndex = callMatches[0].index
+    val saveCall = callMatches[0].instruction.registersUsed
+    val factoryIndex = callMatches[2].index
+    val factory = callMatches[2].methodReference
+    val call = callMatches[2].instruction.registersUsed
+    val listRegister = callMatches[5].instruction.registersUsed.first()
+    val instructions = builder.instructions.toList()
+    if (call.size != 7 || call != (call.first()..call.last()).toList() ||
+        call.any { it in saveCall } || listRegister in call
+    ) {
+        throw PatchException("Unexpected component factory registers in $builder")
+    }
+    // All staging registers must be overwritten before the native path reads them again.
+    call.forEach { register ->
+        val firstUse = instructions.subList(saveIndex, factoryIndex).firstOrNull { register in it.registersUsed }
+        if (firstUse == null || !firstUse.opcode.setsRegister() || firstUse.registersUsed.first() != register) {
+            throw PatchException("Live component staging register v$register in $builder")
+        }
+    }
+    val sources = call.drop(2).mapIndexed { offset, destination ->
+        val move = instructions[factoryIndex - 5 + offset]
+        if (move.opcode !in listOf(Opcode.MOVE_FROM16, Opcode.MOVE_OBJECT_FROM16) ||
+            (move as TwoRegisterInstruction).registerA != destination
+        ) {
+            throw PatchException("Unexpected component argument staging in $builder")
+        }
+        move.registerB
+    }
+    if (sources.any { it in call }) throw PatchException("Component sources overlap staging registers in $builder")
+    val category = builder.getInstruction(factoryIndex - 6)
+    if (category.opcode != Opcode.SGET_OBJECT || category.registersUsed.single() != call[0]) {
+        throw PatchException("Missing native component category in $builder")
+    }
+    val categoryField = category.getReference<FieldReference>()!!
+
+
     builder.addInstructionsWithLabels(
         saveIndex,
         """

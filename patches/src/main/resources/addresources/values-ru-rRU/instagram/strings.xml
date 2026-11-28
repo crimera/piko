@@ -62,7 +62,6 @@
     <string name="piko_disable_double_tap_like_message">Отключить двойное нажатие для отметки «Нравится» на сообщении</string>
     <string name="piko_disable_double_tap_to_like">Отключить двойное нажатие для отметки «Нравится»</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">Разное</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">Amoled</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
@@ -104,7 +103,6 @@
     <string name="piko_customise_story_timestamp">Настроить отметку времени истории</string>
     <string name="piko_customise_story_timestamp_desc">Настроить отображение времени публикации истории</string>
     <string name="piko_customise_story_ring_size">Настроить размер кольца истории</string>
-    <string name="piko_customise_story_ring_size_desc">Изменить размер кольца истории в процентах (по умолчанию: 100)</string>
     <string name="piko_disable_story_flipping">Отключить перелистывание историй</string>
     <string name="piko_disable_story_flipping_desc">Отключает автоматическое перелистывание к следующей истории</string>
     <string name="piko_loop_story">Зацикливать историю</string>
@@ -303,9 +301,7 @@
     <string name="piko_user_type_unverified">Неподтвержденные пользователи</string>
     <string name="piko_user_type_verified">Подтвержденные пользователи</string>
     <string name="piko_filter_story_minimum_item_count">Мин. количество элементов в истории</string>
-    <string name="piko_filter_story_minimum_item_count_desc">Истории с менее чем X элементами будут скрыты (по умолч. 1)</string>
     <string name="piko_filter_story_maximum_item_count">Макс. количество элементов в истории</string>
-    <string name="piko_filter_story_maximum_item_count_desc">Истории с более чем X элементами будут скрыты (по умолч. 9999)</string>
     <!-- Save Instants -->
     <string name="piko_delete">Удалить</string>
     <!-- Save & view deleted (unsent) direct messages -->
@@ -341,4 +337,5 @@
     <string name="piko_media_like">лайк</string>
     <string name="piko_media_link">ссылка</string>
     <string name="piko_media_activity">активность</string>
+    <!-- Recommended flags -->
 </resources>

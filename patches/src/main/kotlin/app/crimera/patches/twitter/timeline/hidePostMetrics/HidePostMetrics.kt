@@ -41,6 +41,7 @@ val hidePostMetrics =
         description = "Hides like, reposts etc counts.",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

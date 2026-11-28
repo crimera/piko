@@ -13,10 +13,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.lang.ref.WeakReference;
-
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.instagram.patches.customise.emoji.EmojiFontStorage;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
@@ -54,6 +53,13 @@ public class ButtonPref extends Preference {
     }
 
 
+    private static void showFontDeleteResult(FontStorage.DeleteResult result) {
+        Utils.showToastShort(str(
+                result == FontStorage.DeleteResult.DELETED ? "piko_pref_delete_font_success" :
+                result == FontStorage.DeleteResult.NOT_FOUND ? "piko_pref_delete_font_warn" :
+                        "piko_pref_delete_font_fail"));
+    }
+
     private void init() {
 
         setOnPreferenceClickListener(new OnPreferenceClickListener() {
@@ -67,7 +73,8 @@ public class ButtonPref extends Preference {
 
                     if (key.equals("piko_export_dev_overrides") || key.equals("piko_import_dev_overrides") || key.equals("piko_import_id_mapping")
                             || key.equals("piko_export_pref") || key.equals("piko_import_pref")
-                            || key.equals("piko_download_set_path") || key.equals("piko_pref_add_font")) {
+                            || key.equals("piko_download_set_path") || key.equals("piko_pref_add_font")
+                            || key.equals("piko_pref_add_emoji")) {
                         ActivityHook.launchFragment((Activity) context, key);
 
                     } else if (key.equals("piko_reset_pref")) {
@@ -77,11 +84,12 @@ public class ButtonPref extends Preference {
                         FocusLockDialogs.onActionPressed(context, ButtonPref.this);
 
                     } else if (key.equals("piko_pref_delete_font")) {
-                        FontStorage.DeleteResult result = FontStorage.delete();
-                        Utils.showToastShort(str(
-                                result == FontStorage.DeleteResult.DELETED ? "piko_pref_delete_font_success" :
-                                result == FontStorage.DeleteResult.NOT_FOUND ? "piko_pref_delete_font_warn" :
-                                        "piko_pref_delete_font_fail"));
+                        showFontDeleteResult(FontStorage.delete());
+                    } else if (key.equals("piko_pref_delete_emoji")) {
+                        Utils.runOnBackgroundThread(() -> {
+                            FontStorage.DeleteResult result = EmojiFontStorage.delete();
+                            Utils.runOnMainThread(() -> showFontDeleteResult(result));
+                        });
 
                     } else if (key.equals("piko_export_experiment_list")) {
                         InstaUtils.decompileExperiments(false);
@@ -103,9 +111,7 @@ public class ButtonPref extends Preference {
                         FragmentHook.startFragment(key);
 
                     } else if (key.equals("piko_rec_flags_refresh_file")) {
-                        RecommendedFlags.downloadRecommendedFlagsFile(
-                                recreateActivityOnComplete(context)
-                        );
+                        RecommendedFlags.downloadRecommendedFlagsFile();
                     }
                 } catch (Exception e) {
                     Utils.showToastShort(e.getMessage());
@@ -114,19 +120,6 @@ public class ButtonPref extends Preference {
                 return true;
             }
         });
-    }
-
-    private static Runnable recreateActivityOnComplete(Context context) {
-        if (!(context instanceof Activity)) {
-            return null;
-        }
-        WeakReference<Activity> activityReference = new WeakReference<>((Activity) context);
-        return () -> {
-            Activity activity = activityReference.get();
-            if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
-                activity.recreate();
-            }
-        };
     }
 
     @Override
@@ -168,6 +161,8 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_view_saved_instants")
                 || key.equals("piko_pref_add_font")
                 || key.equals("piko_pref_delete_font")
+                || key.equals("piko_pref_add_emoji")
+                || key.equals("piko_pref_delete_emoji")
                 || key.equals("view_deleted_messages")));
     }
 
@@ -201,10 +196,19 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_LINK_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)) {
-            return UI.DRAWABLE_FRAME_CROSSED_ICON;
+            return UI.DRAWABLE_TARGET_ICON;
         }
-        if (key.equals(Constants.PIKO_FRAGMENT_MISC)) {
-            return UI.DRAWABLE_SHAPES_ICON;
+        if (key.equals(Constants.PIKO_FRAGMENT_APPEARANCE)) {
+            return UI.DRAWABLE_APPEARANCE_ICON;
+        }
+        if (key.equals(Constants.PIKO_FRAGMENT_PROFILE)) {
+            return UI.DRAWABLE_PROFILE_ICON;
+        }
+        if (key.equals(Constants.PIKO_FRAGMENT_POSTS)) {
+            return UI.DRAWABLE_POSTS_ICON;
+        }
+        if (key.equals(Constants.PIKO_FRAGMENT_REELS)) {
+            return UI.DRAWABLE_REELS_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)) {
             return UI.DRAWABLE_DOWNLOAD_ICON;
@@ -222,10 +226,10 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_COLLECTIONS_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_DM)) {
-            return UI.DRAWABLE_SHARE_TO_DIRECT;
+            return UI.DRAWABLE_DM_ICON;
         }
         if (key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)) {
-            return UI.DRAWABLE_SHARE_TO_REEL;
+            return UI.DRAWABLE_FILTER_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_INSTANTS)){
             return UI.DRAWABLE_INSTANTS_ICON;

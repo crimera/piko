@@ -15,7 +15,6 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal const val DIRECT_ITEM_CLASS = "$ENTITY_CLASS/DirectItem;"
 
@@ -51,30 +50,12 @@ internal object FieldVisualMediaExtension : Fingerprint(name = "fieldVisualMedia
 internal object FieldXmaExtension : Fingerprint(name = "fieldXma", definingClass = DIRECT_ITEM_CLASS)
 internal object FieldXmaLinkExtension : Fingerprint(name = "fieldXmaLink", definingClass = DIRECT_ITEM_CLASS)
 
-internal object DirectItemDispatchFingerprint : Fingerprint(
-    returnType = "V",
-    parameters = listOf("L", "L", "Ljava/lang/String;"),
-    filters = listOf("item_id", "client_context", "timestamp", "user_id", "text", "hide_in_thread", "thread_key").map { string(it) },
-)
-
-internal object SentByViewerKeyFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    parameters = listOf("I"),
-    filters = listOf(string("is_sent_by_viewer")),
-)
-
-internal fun sentByViewerFieldFingerprint(definingClass: String, keyGetter: MethodReference) = Fingerprint(
-    definingClass = definingClass,
-    filters = listOf(
-        methodCall(reference = keyGetter),
-        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
-        methodCall(smali = "Ljava/lang/String;->equals(Ljava/lang/Object;)Z", location = MatchAfterImmediately()),
-        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
-        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
-        methodCall(parameters = emptyList(), returnType = "Z", opcode = Opcode.INVOKE_VIRTUAL, location = MatchAfterImmediately()),
-        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
-        fieldAccess(type = "Z", opcode = Opcode.IPUT_BOOLEAN, location = MatchAfterImmediately()),
-    ),
+internal object DirectItemJsonParserFingerprint : Fingerprint(
+    name = "unsafeParseFromJson",
+    returnType = "Ljava/lang/Object;",
+    parameters = listOf("L"),
+    filters = listOf("item_id", "client_context", "timestamp", "user_id", "text", "hide_in_thread", "thread_key")
+        .map { string(it) } + opcode(Opcode.RETURN_OBJECT),
 )
 
 private val FIELD_WRITE_OPCODES = listOf(

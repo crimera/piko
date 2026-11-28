@@ -42,6 +42,10 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
+
+import static app.morphe.extension.crimera.constants.ExtensionStrings.PIKO_SETTINGS;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.crimera.PikoUtils;
@@ -53,8 +57,6 @@ import app.morphe.extension.shared.ui.Dim;
 
 /** Hides the inbox and chats behind a cover until the device's biometric or screen lock confirms it is you. */
 public final class InboxLock {
-    private static final String LIST_ID = "inbox_refreshable_thread_list_recyclerview";
-    private static final String LIST_CONTAINER_ID = "list_container";
     // A chat opened from a notification skips the inbox, so its own screen needs the same cover.
     private static final String THREAD_ID = "thread_view_root";
     private static final String THREAD_CONTAINER_ID = "thread_fragment_container";
@@ -67,9 +69,10 @@ public final class InboxLock {
     private static boolean autoPrompted;
     private static Runnable cancelAction;
     private static final Set<Activity> secured = Collections.newSetFromMap(new WeakHashMap<>());
-    private static int startedActivities;
+    private static final Set<Activity> startedActivities = Collections.newSetFromMap(new WeakHashMap<>());
     private static WeakReference<Activity> watched = new WeakReference<>(null);
     private static ViewTreeObserver.OnPreDrawListener drawListener;
+    private static final Set<FrameLayout> inboxViews = Collections.newSetFromMap(new WeakHashMap<>());
     private static final List<WeakReference<View>> covers = new ArrayList<>();
     private static WeakReference<View> bannerWindow = new WeakReference<>(null);
 
@@ -77,18 +80,18 @@ public final class InboxLock {
     }
 
     /** Called once from the application init hook. */
-    public static synchronized void init() {
-        if (initialized || !Pref.inboxLock()) return;
-        initialized = true;
+    public static synchronized void init(Application app) {
+        if (initialized) return;
         try {
-            Application app = (Application) Utils.getContext().getApplicationContext();
+            if (!new PikoSharedPrefCategory(app, PIKO_SETTINGS).getBoolean(
+                    Settings.INBOX_LOCK.key, Settings.INBOX_LOCK.defaultValue)) return;
             app.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-                @Override public void onActivityStarted(Activity activity) { startedActivities++; }
+                @Override public void onActivityStarted(Activity activity) { startedActivities.add(activity); }
 
                 @Override public void onActivityStopped(Activity activity) {
                     // A rotation stops and restarts the activity; only really leaving the app locks again.
-                    startedActivities--;
-                    if (startedActivities <= 0 && !activity.isChangingConfigurations()) unlocked = false;
+                    if (startedActivities.remove(activity) && startedActivities.isEmpty()
+                            && !activity.isChangingConfigurations()) unlocked = false;
                 }
 
                 @Override public void onActivityResumed(Activity activity) { watch(activity); }
@@ -97,9 +100,15 @@ public final class InboxLock {
                 @Override public void onActivitySaveInstanceState(Activity a, Bundle b) { }
                 @Override public void onActivityDestroyed(Activity a) { }
             });
+            initialized = true;
         } catch (Throwable t) {
             Logger.printException(() -> "InboxLock init failed", t);
         }
+    }
+
+    // The Compose inbox hides the legacy thread list. Both inbox layouts share the fragment root.
+    public static void registerInboxView(View root) {
+        if (initialized && root instanceof FrameLayout) inboxViews.add((FrameLayout) root);
     }
 
     // The inbox is a tab of an already resumed activity; checking before each draw covers it without a visible frame.
@@ -125,17 +134,23 @@ public final class InboxLock {
     private static void check(Activity activity) {
         try {
             View decor = activity.getWindow().getDecorView();
-            if (unlocked || !Pref.inboxLock()) {
-                removeCovers();
-                hideFromRecents(activity, unlocked && (isVisible(decor, LIST_ID) || isVisible(decor, THREAD_ID)));
-                return;
+            boolean inboxVisible = false;
+            for (FrameLayout inbox : inboxViews) {
+                if (inbox.getRootView() != decor || !partlyVisible(inbox)) continue;
+                inboxVisible = true;
+                if (!unlocked) cover(activity, inbox);
             }
-            hideFromRecents(activity, false);
-            cover(activity, decor, LIST_ID, LIST_CONTAINER_ID);
-            cover(activity, decor, THREAD_ID, THREAD_CONTAINER_ID);
+            boolean threadVisible = isVisible(decor, THREAD_ID);
+            hideFromRecents(activity, DeletedMessagesActivity.isShowingOn(activity)
+                    || (unlocked && (inboxVisible || threadVisible)));
+            if (unlocked) return;
+            if (threadVisible) {
+                View container = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, THREAD_CONTAINER_ID));
+                if (container instanceof FrameLayout) cover(activity, (FrameLayout) container);
+            }
 
             // Ask once each time a covered screen shows up; cancelling leaves the Unlock button instead of asking in a loop.
-            if (!anyCoverShown()) {
+            if (!anyCoverShown(decor)) {
                 autoPrompted = false;
             } else if (!autoPrompted) {
                 autoPrompted = true;
@@ -179,22 +194,16 @@ public final class InboxLock {
         return view.isShown() && view.getGlobalVisibleRect(new Rect());
     }
 
-    private static boolean anyCoverShown() {
+    private static boolean anyCoverShown(View decor) {
         for (WeakReference<View> reference : covers) {
             View view = reference.get();
-            if (view != null && onScreen(view)) return true;
+            if (view != null && view.getRootView() == decor && onScreen(view)) return true;
         }
         return false;
     }
 
-    /** Puts a cover over the container of the screen found by anchorId; true if one was added now. */
-    private static boolean cover(Activity activity, View decor, String anchorId, String containerId) {
-        View anchor = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, anchorId));
-        if (anchor == null || !partlyVisible(anchor)) return false;
-        View container = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, containerId));
-        if (!(container instanceof FrameLayout)) return false;
-        FrameLayout host = (FrameLayout) container;
-        if (host.findViewWithTag(COVER_TAG) != null) return false;
+    private static void cover(Activity activity, FrameLayout host) {
+        if (host.findViewWithTag(COVER_TAG) != null) return;
 
         View created = buildCover(activity);
         created.setTag(COVER_TAG);
@@ -208,8 +217,7 @@ public final class InboxLock {
         // The composer keeps focus under the cover, so its keyboard would stay on screen.
         created.requestFocus();
         InputMethodManager keyboard = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        if (keyboard != null) keyboard.hideSoftInputFromWindow(decor.getWindowToken(), 0);
-        return true;
+        if (keyboard != null) keyboard.hideSoftInputFromWindow(host.getWindowToken(), 0);
     }
 
     private static View buildCover(Activity activity) {
@@ -256,6 +264,10 @@ public final class InboxLock {
         autoPrompted = false;
     }
 
+    static boolean isEnabled() {
+        return initialized;
+    }
+
     /** True while the lock is up, so turning it off in the settings has to be confirmed first. */
     public static boolean mustConfirmToDisable() {
         return initialized && !unlocked;
@@ -270,6 +282,10 @@ public final class InboxLock {
     public static void confirmIfLocked(Activity activity, Runnable action, Runnable onCancel) {
         if (!mustConfirmToDisable()) {
             action.run();
+            return;
+        }
+        if (prompting) {
+            if (onCancel != null) onCancel.run();
             return;
         }
         cancelAction = onCancel;

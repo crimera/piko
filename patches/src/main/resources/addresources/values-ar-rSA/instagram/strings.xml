@@ -23,7 +23,6 @@
     <!-- Distraction-Free Section -->
     <string name="piko_disable_explore">تعطيل صفحة الإستكشاف</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">اخرى</string>
     <string name="piko_fbi_follows_you">يتابعك</string>
     <string name="piko_copy_comment">نسخ التعليق</string>
     <string name="piko_copy_username">نسخ إسم المستخدم</string>
@@ -65,4 +64,5 @@
     <!-- Story filters -->
     <!-- Save Instants -->
     <!-- Save & view deleted (unsent) direct messages -->
+    <!-- Recommended flags -->
 </resources>

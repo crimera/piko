@@ -13,6 +13,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionFilter
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
@@ -40,16 +41,15 @@ private fun nullableFollowedByUpdateFilters(updaterCall: InstructionFilter) = li
 /**
  * Missing suggestion metadata must not overwrite an existing relationship with false.
  */
-private fun Fingerprint.preserveNullableFollowedBy() {
-    val match = match()
-    val guardIndex = match.instructionMatches.first().index
-    val callIndex = match.instructionMatches.last().index
-    val implementation = match.method.implementation!!
+private fun Match.preserveNullableFollowedBy() {
+    val guardIndex = instructionMatches.first().index
+    val callIndex = instructionMatches.last().index
+    val implementation = method.implementation!!
     implementation.replaceInstruction(
         guardIndex,
         BuilderInstruction21t(
             Opcode.IF_EQZ,
-            match.instructionMatches.first().getInstruction<OneRegisterInstruction>().registerA,
+            instructionMatches.first().getInstruction<OneRegisterInstruction>().registerA,
             implementation.newLabelForIndex(callIndex + 1),
         ),
     )
@@ -111,22 +111,19 @@ val preserveUnknownFriendshipStatusPatch = patch(
             returnType = "V",
             filters = nullableFollowedByUpdateFilters(updaterCall()),
         )
-        val suggestedUserUpdate = if (legacySuggestedUserUpdate.matchOrNull() != null) {
-            legacySuggestedUserUpdate
-        } else {
+        val suggestedUserUpdate = legacySuggestedUserUpdate.matchOrNull() ?:
             Fingerprint(
                 parameters = listOf("L"),
                 returnType = "Ljava/lang/Object;",
                 filters = nullableFollowedByUpdateFilters(updaterCall()),
-            )
-        }
+            ).match()
         suggestedUserUpdate.preserveNullableFollowedBy()
 
-        // Inbox suggestions update.
+        // Older inbox suggestions update the shared User. Version 456 stores the flag on the list item.
         Fingerprint(
             parameters = listOf("Ljava/util/List;", "Ljava/lang/String;"),
             returnType = "V",
             filters = nullableFollowedByUpdateFilters(updaterCall()),
-        ).preserveNullableFollowedBy()
+        ).matchOrNull()?.preserveNullableFollowedBy()
     }
 }

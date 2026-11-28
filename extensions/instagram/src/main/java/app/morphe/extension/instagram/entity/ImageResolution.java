@@ -14,7 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 /** One image size, with URLs captured before the native candidates can change or become unreadable. */
 public final class ImageResolution implements MediaInterface {

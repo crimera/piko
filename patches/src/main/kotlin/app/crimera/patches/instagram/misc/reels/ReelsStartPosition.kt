@@ -16,7 +16,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -33,7 +32,8 @@ internal class ReelStartPosition(val explicit: MethodReference, val paused: Fiel
 private fun trackDeferredReattach(prepare: MutableMethod, state: String, itemId: MethodReference) {
     val reattach = Fingerprint(
         parameters = listOf(state, prepare.parameterTypes[1].toString()), returnType = "Z",
-        filters = listOf(string("android_purge_26_q3_ClipsVideoPlayer_resumeAfterDeferredRelease")),
+        definingClass = ReelPlayerPrepare.originalClassDef.type,
+        filters = listOf(string("out_of_playback_range")),
     ).originalMethod
     val code = prepare.implementation!!.instructions
     val call = code.indices.single { index ->
@@ -46,13 +46,15 @@ private fun trackDeferredReattach(prepare: MutableMethod, state: String, itemId:
     val (listenerPlayer, viewer) = listener.registersUsed
     val result = code[call + 1].registersUsed.single()
     val skip = code[call + 2] as BuilderOffsetInstruction
-    val id = code[call + 3]
-    val item = id.registersUsed.single()
+    val resumed = code[call + 3]
+    val item = resumed.registersUsed.first()
     require(listener.opcode == Opcode.INVOKE_INTERFACE && listenerPlayer == player &&
         listener.getReference<MethodReference>()?.parameterTypes == listOf(prepare.definingClass) &&
         code[call + 1].opcode == Opcode.MOVE_RESULT && skip.opcode == Opcode.IF_EQZ &&
-        skip.registersUsed == listOf(result) && skip.target.location.index > call + 3 &&
-        id.opcode == Opcode.INVOKE_VIRTUAL && id.getReference<MethodReference>() == itemId &&
+        skip.registersUsed == listOf(result) &&
+        resumed.opcode == Opcode.INVOKE_STATIC &&
+        resumed.getReference<MethodReference>()?.parameterTypes?.first() == itemId.definingClass &&
+        resumed.registersUsed[2] == player && resumed.registersUsed[3] == viewer &&
         listOf(viewer, player, item).all { it in 0..15 && it != result } &&
         setOf(viewer, player, item).size == 3) { "Unexpected deferred Reels reattach path" }
     // A retained player can start here while its reel is still offscreen.
@@ -65,13 +67,15 @@ internal fun patchReelsStartPosition(): ReelStartPosition {
     val match = Fingerprint(
         returnType = "V",
         filters = listOf(
-            string("android_purge_26_q3_ClipsVideoPlayerController_preparePlayer"),
+            string("ClipsVideoPlayerController.preparePlayer earlyPrepare="),
             fieldAccess(definingClass = ClipsItemStateToStringFingerprint.originalClassDef.type,
                 type = "Ljava/lang/Integer;", opcode = Opcode.IGET_OBJECT),
             opcode(Opcode.IF_NEZ, location = MatchAfterImmediately()),
+            fieldAccess(definingClass = ClipsItemStateToStringFingerprint.originalClassDef.type,
+                type = "Ljava/lang/Integer;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+            opcode(Opcode.IF_NEZ, location = MatchAfterImmediately()),
             methodCall(definingClass = "this", parameters = listOf("L"), returnType = "Z",
                 opcode = Opcode.INVOKE_DIRECT, location = MatchAfterImmediately()),
-            string("android_purge_26_q3_ClipsVideoPlayerController_getForcedStartPositionMs"),
             fieldAccess(type = config, opcode = Opcode.IGET_OBJECT),
             fieldAccess(definingClass = config, type = "Z", opcode = Opcode.IGET_BOOLEAN, location = MatchAfterImmediately()),
             fieldAccess(definingClass = config, type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT),
@@ -79,22 +83,19 @@ internal fun patchReelsStartPosition(): ReelStartPosition {
         ),
     ).match()
     val hits = match.instructionMatches
-    val hasItemStart = hits[3].methodReference
+    val hasItemStart = hits[5].methodReference
     val itemType = hasItemStart.parameterTypes.single().toString()
-    val itemId = hits[8].methodReference
+    val itemId = hits[9].methodReference
     require(itemId.definingClass == itemType)
-    val stop = hits[1].fieldReference
+    val stop = hits[3].fieldReference
     val state = stop.definingClass
-    val code = match.method.implementation!!.instructions
-    val pausePredicate = code.mapNotNull { it.getReference<MethodReference>() }.distinct().single {
-        it.definingClass == state && it.parameterTypes.isEmpty() && it.returnType == "Z"
-    }
-    val paused = classDefBy(state).methods.single { it == pausePredicate }.implementation!!.instructions
-        .mapNotNull { it.getReference<FieldReference>() }.single()
     // Native prepare reads the manual pause first and falls back to the last stop.
-    val positions = code.filter { it.opcode == Opcode.IGET_OBJECT }.mapNotNull { it.getReference<FieldReference>() }
-        .filter { it.definingClass == state && it.type == stop.type }
-    require(paused != stop && positions == listOf(paused, stop)) { "Unexpected pause and stop positions in Reels player preparation" }
+    val paused = hits[1].fieldReference
+    require(paused != stop &&
+        hits[1].instruction.registersUsed == hits[3].instruction.registersUsed &&
+        match.method.getInstruction<BuilderOffsetInstruction>(hits[2].index).target.location.index ==
+            match.method.getInstruction<BuilderOffsetInstruction>(hits[4].index).target.location.index
+    ) { "Unexpected pause and stop positions in Reels player preparation" }
 
     val explicit = addReelMethod(
         match.method.definingClass, "pikoHasExplicitReelStart", listOf(itemType), "Z", registers = 4,
@@ -103,10 +104,10 @@ internal fun patchReelsStartPosition(): ReelStartPosition {
             invoke-direct {p0, p1}, $hasItemStart
             move-result v0
             if-nez v0, :yes
-            iget-object v0, p0, ${hits[5].fieldReference}
-            iget-boolean v1, v0, ${hits[6].fieldReference}
+            iget-object v0, p0, ${hits[6].fieldReference}
+            iget-boolean v1, v0, ${hits[7].fieldReference}
             if-eqz v1, :no
-            iget-object v0, v0, ${hits[7].fieldReference}
+            iget-object v0, v0, ${hits[8].fieldReference}
             if-eqz v0, :yes
             invoke-virtual {p1}, $itemId
             move-result-object v1
@@ -121,11 +122,11 @@ internal fun patchReelsStartPosition(): ReelStartPosition {
             return v0
         """,
     )
-    val (controller, item) = hits[3].instruction.registersUsed
-    val stopped = hits[2].instruction.registersUsed.single()
-    require(stopped == hits[1].instruction.registersUsed.first())
+    val (controller, item) = hits[5].instruction.registersUsed
+    val stopped = hits[4].instruction.registersUsed.single()
+    require(stopped == hits[3].instruction.registersUsed.first())
     match.method.apply {
-        val index = hits[2].index
+        val index = hits[4].index
         // Both successors call a predicate and overwrite the same scratch register.
         val target = getInstruction<BuilderOffsetInstruction>(index).target.location.index
         val scratch = getInstruction(index + 2).registersUsed.single()
@@ -147,7 +148,7 @@ internal fun patchReelsStartPosition(): ReelStartPosition {
             const/4 v$stopped, 0x0
         """, ExternalLabel("native", getInstruction(index)))
     }
-    markShortReelPrepare(match.method, explicit, stop, pausePredicate)
+    markShortReelPrepare(match.method, explicit, stop, paused)
     trackDeferredReattach(match.method, state, itemId)
     return ReelStartPosition(explicit, paused, stop)
 }

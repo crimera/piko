@@ -11,6 +11,7 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.patch
@@ -25,11 +26,17 @@ private const val PREF_CLASS_DESCRIPTOR = "Lapp/morphe/extension/instagram/utils
 private object ReelsInlineFollowButtonFingerprint : Fingerprint(
     returnType = "L",
     filters = listOf(
-        string("android_purge_26_q3_AuthorInfoUseCase_shouldShowFollowButton"),
-        literal(1),
+        fieldAccess(definingClass = "Lcom/instagram/clips/intf/ClipsViewerSource;", opcode = Opcode.SGET_OBJECT),
+        opcode(Opcode.IF_EQ, location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_OBJECT_FROM16, location = MatchAfterImmediately()),
+        fieldAccess(
+            definingClass = "Lcom/instagram/clips/intf/ClipsViewerConfig;", type = "Z",
+            opcode = Opcode.IGET_BOOLEAN, location = MatchAfterImmediately(),
+        ),
+        literal(1, location = MatchAfterImmediately()),
         opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
         literal(0, location = MatchAfterImmediately()),
-        string("android_purge_26_q3_FollowUseCase_getUiState"),
+        string("clips_viewer_follow_button"),
     ),
 )
 
@@ -46,10 +53,10 @@ val hideReelsFollowButtonPatch =
         execute {
             ReelsInlineFollowButtonFingerprint.let {
                 // Both follow results merge after the disabled result.
-                val disabledIndex = it.instructionMatches[3].index
-                val register = it.instructionMatches[3].getInstruction<OneRegisterInstruction>().registerA
+                val disabled = it.instructionMatches[6]
+                val register = disabled.getInstruction<OneRegisterInstruction>().registerA
                 it.method.addInstructionsAtControlFlowLabel(
-                    disabledIndex + 1,
+                    disabled.index + 1,
                     """
                     invoke-static/range {v$register .. v$register}, $PREF_CLASS_DESCRIPTOR->showReelsFollowButton(Z)Z
                     move-result v$register

@@ -12,7 +12,6 @@ import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
@@ -58,7 +57,7 @@ val directItemEntity =
         description = "Decodes obfuscated DirectItem (DM) field names at patch time.",
     ) {
         execute {
-            val parserClass = DirectItemDispatchFingerprint.originalClassDef.type
+            val parserClass = DirectItemJsonParserFingerprint.originalClassDef.type
 
             val itemId = jsonKeyField("item_id", parserClass)
             GetItemIdExtension.changeFirstString(itemId.name)
@@ -78,10 +77,7 @@ val directItemEntity =
             IsHideInThreadExtension.changeFirstString(hideField)
             SetHideInThreadExtension.changeFirstString(hideField)
 
-            IsSentByViewerExtension.changeFirstString(
-                sentByViewerFieldFingerprint(parserClass, SentByViewerKeyFingerprint.originalMethod)
-                    .instructionMatches.last().fieldReference.name,
-            )
+            IsSentByViewerExtension.changeFirstString(jsonKeyField("is_sent_by_viewer", parserClass).name)
 
             GetThreadKeyExtension.changeFirstString(jsonKeyField("thread_key", parserClass).name)
 

@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.customise.font
 
+import app.crimera.patches.common.declaredParameterRegister
 import app.crimera.patches.instagram.utils.Constants.CUSTOM_FONT_DESCRIPTOR
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -18,7 +19,6 @@ import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
-import app.morphe.util.findInstructionIndicesReversed
 import app.morphe.util.findInstructionIndicesReversedOrThrow
 import app.morphe.patcher.util.getReference
 import app.morphe.util.indexOfFirstInstruction
@@ -28,6 +28,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -257,53 +258,41 @@ internal val PIKO_TEXT_WIDGETS: Replacements =
                 ))
     }
 
-/** A `new-instance` of one of the [replacements]. */
-internal fun Instruction.createsOneOf(replacements: Replacements) =
-    opcode == Opcode.NEW_INSTANCE &&
-        getReference<TypeReference>()?.type in replacements
-
-/**
- * Creates piko's subclass wherever the method creates one of the [replacements], unless a
- * constructor call there is one the subclass lacks.
- */
+/** Replace only a single allocation and the constructor that initializes that same object. */
 internal fun MutableMethod.replaceCreations(replacements: Replacements) {
-    val creations = findInstructionIndicesReversed { createsOneOf(replacements) }
-    val created = creations.map { getInstruction<OneRegisterInstruction>(it).registerA }.toSet()
-    val constructions =
-        findInstructionIndicesReversed {
-            (opcode == Opcode.INVOKE_DIRECT || opcode == Opcode.INVOKE_DIRECT_RANGE) &&
-                getReference<MethodReference>()?.let {
-                    it.name == "<init>" && it.definingClass in replacements
-                } == true &&
-                registersUsed[0] in created
-        }
-    val supported =
-        constructions.all {
-            val reference = getInstruction(it).getReference<MethodReference>()!!
-            reference.parameterTypes.map(CharSequence::toString) in
-                replacements.getValue(reference.definingClass).second
-        }
-    if (constructions.isEmpty() || !supported) return
+    val code = implementation!!.instructions
+    for (allocationIndex in code.indices) {
+        val allocation = code[allocationIndex]
+        if (allocation.opcode != Opcode.NEW_INSTANCE) continue
+        val type = allocation.getReference<TypeReference>()!!.type
+        val (replacement, supportedParameters) = replacements[type] ?: continue
+        val receiver = allocation.registersUsed.single()
 
-    // Last index first, so earlier indices stay valid while instructions are replaced.
-    (creations + constructions).sortedDescending().forEach { index ->
-        val instruction = getInstruction(index)
-        val registers = instruction.registersUsed
-        if (instruction.opcode == Opcode.NEW_INSTANCE) {
-            val replacement = replacements.getValue(instruction.getReference<TypeReference>()!!.type).first
-            replaceInstruction(index, "new-instance v${registers[0]}, $replacement")
-        } else {
-            val reference = instruction.getReference<MethodReference>()!!
-            val replacement = replacements.getValue(reference.definingClass).first
-            val constructor = "$replacement-><init>(${reference.parameterTypes.joinToString("")})V"
-            replaceInstruction(
-                index,
-                if (instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) {
-                    "invoke-direct/range {v${registers.first()} .. v${registers.last()}}, $constructor"
-                } else {
-                    "invoke-direct {${registers.joinToString { "v$it" }}}, $constructor"
-                },
-            )
+        // Registers are reused. Follow this value only until its first use on a straight-line path.
+        for (index in allocationIndex + 1 until code.size) {
+            val instruction = code[index]
+            if (instruction.location.labels.isNotEmpty() || instruction is OffsetInstruction ||
+                !instruction.opcode.canContinue()
+            ) break
+            val registers = instruction.registersUsed
+            if (instruction.opcode.setsWideRegister() && registers.first() + 1 == receiver) break
+            if (receiver !in registers) continue
+            if (instruction.opcode != Opcode.INVOKE_DIRECT && instruction.opcode != Opcode.INVOKE_DIRECT_RANGE) break
+
+            val constructor = instruction.getReference<MethodReference>()!!
+            if (registers.first() != receiver || constructor.definingClass != type || constructor.name != "<init>" ||
+                constructor.parameterTypes.map(CharSequence::toString) !in supportedParameters
+            ) break
+
+            val target = "$replacement-><init>(${constructor.parameterTypes.joinToString("")})V"
+            val call = if (instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) {
+                "invoke-direct/range {v$receiver .. v${registers.last()}}, $target"
+            } else {
+                "invoke-direct {${registers.joinToString { "v$it" }}}, $target"
+            }
+            replaceInstruction(index, call)
+            replaceInstruction(allocationIndex, "new-instance v$receiver, $replacement")
+            break
         }
     }
 }

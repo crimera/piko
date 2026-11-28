@@ -109,7 +109,6 @@
     <string name="piko_disable_double_tap_like_message">メッセージをダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_to_like">ダブルタップでの「いいね！」を無効化</string>
     <!-- Miscellaneous Section -->
-    <string name="piko_category_misc">その他</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>
@@ -162,6 +161,8 @@
     <string name="piko_category_dm">DM</string>
     <string name="piko_disable_disappearing_messages_gesture">消えるメッセージのスワイプ操作を無効化</string>
     <string name="piko_disable_disappearing_messages_gesture_desc">チャットで上にスワイプしても「消えるメッセージ」が有効にならなくなります</string>
+    <string name="piko_send_keyboard_gifs">キーボードからGIFを送信</string>
+    <string name="piko_send_keyboard_gifs_desc">キーボードで選んだGIFをアニメーション画像として送信します。「スタンプアイコンをタップしてGIFを検索・送信」という案内は表示されません。</string>
     <string name="piko_unlimited_replays">一時的なメディアを永続的にする</string>
     <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
     <string name="piko_ephemeral_caption">一時的なメディアの受信方法を表示</string>
@@ -185,7 +186,7 @@
     <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
     <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
     <string name="piko_customise_story_ring_size">ストーリー欄のアイコンのサイズをカスタマイズ</string>
-    <string name="piko_customise_story_ring_size_desc">ストーリー欄のアイコンのサイズをパーセントで変更します。（デフォルト値：100）</string>
+    <string name="piko_customise_story_ring_size_desc">ストーリーズのリングの大きさをパーセントで指定します</string>
     <string name="piko_disable_story_flipping">ストーリーの自動切り替えを無効化</string>
     <string name="piko_disable_story_flipping_desc">次のストーリーに自動で移動しないようにします</string>
     <string name="piko_loop_story">ストーリーをループ再生</string>
@@ -219,6 +220,12 @@
     <string name="piko_dash_audio_aac_lc_desc">ダウンロードしたDASH動画のxHE-AAC音声を、すべてのプレーヤーで再生できる192 kbpsのAAC-LCに再エンコードします</string>
     <string name="piko_embed_download_metadata">メタデータを埋め込む</string>
     <string name="piko_embed_download_metadata_desc">ダウンロードしたMP4ファイルに、キャプション、投稿リンク、作成者、アップロード日を追加します</string>
+    <string name="piko_download_conflict_policy">同名のメディアがある場合</string>
+    <string name="piko_download_conflict_policy_desc">選択したダウンロード先に同じ名前のファイルがある場合に適用します</string>
+    <string name="piko_download_conflict_rename">別の名前で保存</string>
+    <string name="piko_download_conflict_skip">ダウンロード済みのメディアをスキップ</string>
+    <string name="piko_download_conflict_overwrite">既存のファイルを上書き</string>
+    <string name="piko_download_media_exists">同名のメディアがすでにあります</string>
     <string name="piko_download_file_name_template">ファイル名の形式</string>
     <string name="piko_download_file_name_template_invalid">無効なファイル名</string>
     <string name="piko_download_file_name_insert_token">%1$sを挿入</string>
@@ -352,7 +359,7 @@
     <string name="piko_action_bar_button_notifications_icon">通知</string>
     <string name="piko_settings_search_hint">検索</string>
     <string name="piko_settings_search_clear">入力を削除</string>
-    <string name="piko_settings_search_no_results">一致する結果が見つかりませんでした</string>
+    <string name="piko_settings_search_no_results">一致する結果はありませんでした</string>
     <!-- Font Section -->
     <string name="piko_category_font">フォント</string>
     <string name="piko_custom_font">カスタムフォント</string>
@@ -366,12 +373,25 @@
     <string name="piko_pref_delete_font_success">フォントを削除しました</string>
     <string name="piko_pref_delete_font_fail">フォントの削除に失敗しました</string>
     <string name="piko_pref_delete_font_warn">削除するカスタムフォントがありません</string>
+    <string name="piko_emoji_font">絵文字フォント</string>
+    <string name="piko_pref_add_emoji">絵文字フォントを追加</string>
+    <string name="piko_pref_delete_emoji">絵文字フォントを削除</string>
     <string name="piko_use_system_font">システムフォントを使用</string>
     <string name="piko_use_system_font_desc">フォントファイルを追加していない場合にのみ適用されます。追加したフォントが優先されます。</string>
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">おすすめの機能フラグ</string>
     <string name="piko_category_rec_flags_desc">コミュニティが提案した開発者フラグです</string>
     <string name="piko_rec_flags_read_error">キャッシュされたフラグファイルの読み込みに失敗しました</string>
+    <string name="piko_rec_flags_modified">変更済みのフラグ</string>
+    <string name="piko_rec_flags_category_stories">ストーリーズとハイライト</string>
+    <string name="piko_rec_flags_category_reels">リールと動画</string>
+    <string name="piko_rec_flags_category_feed">フィードと発見タブ</string>
+    <string name="piko_rec_flags_category_messages">DMとノート</string>
+    <string name="piko_rec_flags_category_profile">プロフィールとナビゲーション</string>
+    <string name="piko_rec_flags_category_quality">画質とアップロード</string>
+    <string name="piko_rec_flags_category_other">その他</string>
+    <string name="piko_rec_flags_download_hint">「フラグを更新」をタップしておすすめの機能フラグをダウンロードすると、一覧の表示や設定ができます。</string>
+    <string name="piko_rec_flags_invalid_number">-9223372036854775808以上9223372036854775807以下の整数を入力してください</string>
     <string name="piko_rec_flags_no_file">おすすめのフラグファイルが見つかりません</string>
     <string name="piko_rec_flags_refresh_file">フラグを更新</string>
     <string name="piko_rec_flags_last_modified_at">最終更新：%s</string>
@@ -431,9 +451,9 @@
     <string name="piko_user_type_unverified">未認証のユーザー</string>
     <string name="piko_user_type_verified">認証済みのユーザー</string>
     <string name="piko_filter_story_minimum_item_count">ストーリー内の最小件数</string>
-    <string name="piko_filter_story_minimum_item_count_desc">指定した項目数未満のストーリーを非表示にします(デフォルト: 1)</string>
+    <string name="piko_filter_story_minimum_item_count_desc">投稿数がx件未満のストーリーズを非表示にします</string>
     <string name="piko_filter_story_maximum_item_count">ストーリー内の最大件数</string>
-    <string name="piko_filter_story_maximum_item_count_desc">指定した項目数を超えるストーリーを非表示にします(デフォルト: 9999)</string>
+    <string name="piko_filter_story_maximum_item_count_desc">投稿数がx件を超えるストーリーズを非表示にします</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">インスタントを保存</string>
     <string name="piko_instants_download_desc">一度だけ表示できるインスタントを閲覧時に保存し、あとで「保存したインスタントを表示」から再閲覧したりダウンロードしたりできます。</string>
@@ -480,4 +500,116 @@
     <string name="piko_media_activity">アクティビティ</string>
     <string name="piko_patch_theme">テーマ</string>
     <string name="piko_patch_settings">設定を追加</string>
+    <!-- Recommended flags -->
+    <string name="piko_rec_flag_73245_name" formatted="false">"ストーリーズ内の項目をタップしたときに黒いボタンを表示"</string>
+    <string name="piko_rec_flag_118413_name" formatted="false">"投稿後にストーリーズを編集"</string>
+    <string name="piko_rec_flag_118413_desc" formatted="false">"投稿後15分以内に編集できます。"</string>
+    <string name="piko_rec_flag_85030_name" formatted="false">"ストーリーズの新しいフォントとアニメーション"</string>
+    <string name="piko_rec_flag_125004_name" formatted="false">"ストーリーズ用の新しいInstagram Plusフォント"</string>
+    <string name="piko_rec_flag_125004_desc" formatted="false">"利用するには、Instagram Plusの機能を有効にしてください。"</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_name" formatted="false">"Instagram Plusへのアップグレード案内を表示"</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_desc" formatted="false">"オフにすると、Instagram Plusへのアップグレード案内と初回の使い方のヒントを非表示にします"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_name" formatted="false">"Instagram Plusの一部の機能とアクセスボタン"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_desc" formatted="false">"オフにすると、一部のPlus機能へのアクセス、無料プレビュー、無料のスーパーいいね、チャット用フォントの表示を無効にします。他のPlus機能は引き続き利用できます。"</string>
+    <string name="piko_rec_flag_126445_name" formatted="false">"投稿済みのストーリーズの時刻表示を新しいデザインに変更"</string>
+    <string name="piko_rec_flag_93316_name" formatted="false">"ストーリーズをハイライトに直接投稿"</string>
+    <string name="piko_rec_flag_93316_desc" formatted="false">"選んだハイライトに移動できるスタンプも追加します"</string>
+    <string name="piko_rec_flag_105130_name" formatted="false">"他の人の「親しい友達」リストから自分を削除"</string>
+    <string name="piko_rec_flag_105130_desc" formatted="false">"ストーリーズの「親しい友達」アイコンをタップすると、リストから抜けるボタンが表示されます。"</string>
+    <string name="piko_rec_flag_119043_name" formatted="false">"紙飛行機ボタンを長押ししてストーリーズを送信"</string>
+    <string name="piko_rec_flag_119728_name" formatted="false">"ストーリーズの閲覧者一覧を新しいデザインに変更"</string>
+    <string name="piko_rec_flag_58803_name" formatted="false">"フィードのInstagramロゴを「おすすめ」に変更"</string>
+    <string name="piko_rec_flag_103957_name" formatted="false">"フィードのリールと動画を2倍速で再生"</string>
+    <string name="piko_rec_flag_103957_desc" formatted="false">"フィード内の動画の隅を長押しすると、2倍速で再生します。"</string>
+    <string name="piko_rec_flag_109947_name" formatted="false">"リールのその他のメニューで再生速度を変更"</string>
+    <string name="piko_rec_flag_121815_name" formatted="false">"リールのクイック再生メニュー"</string>
+    <string name="piko_rec_flag_121815_desc" formatted="false">"リールを長押しすると、再生メニューが開きます。"</string>
+    <string name="piko_rec_flag_82799_16_name" formatted="false">"短いリールのシークバーを非表示"</string>
+    <string name="piko_rec_flag_82799_16_desc" formatted="false">"すべてのリールにシークバーを表示するには、この設定をオフにして「シークバーを表示するリールの最短時間」を1に設定してください"</string>
+    <string name="piko_rec_flag_82799_41_name" formatted="false">"シークバーを表示するリールの最短時間"</string>
+    <string name="piko_rec_flag_82799_41_desc" formatted="false">"すべてのリールにシークバーを表示するには、この値を1にして「短いリールのシークバーを非表示」をオフにしてください"</string>
+    <string name="piko_rec_flag_98405_name" formatted="false">"DMで消える写真や動画のプレビューを表示"</string>
+    <string name="piko_rec_flag_46551_name" formatted="false">"プロフィール写真の拡大を許可"</string>
+    <string name="piko_rec_flag_46551_desc" formatted="false">"「アカウントのプライバシー」に、プロフィール写真の拡大を許可するか選べる設定を追加します。"</string>
+    <string name="piko_rec_flag_93842_name" formatted="false">"発見タブのズームアニメーション"</string>
+    <string name="piko_rec_flag_group_5a4e2edc04c51be62a40ece694ccdd82_name" formatted="false">"発見タブに「保存済み」ボタンを表示"</string>
+    <string name="piko_rec_flag_124823_name" formatted="false">"発見タブを新しいデザインに変更"</string>
+    <string name="piko_rec_flag_77064_name" formatted="false">"表示名の代わりにユーザーネームを表示"</string>
+    <string name="piko_rec_flag_77064_desc" formatted="false">"通知とDMに適用します"</string>
+    <string name="piko_rec_flag_91066_name" formatted="false">"通知設定を新しいデザインに変更"</string>
+    <string name="piko_rec_flag_127260_name" formatted="false">"ストーリーズのいいねボタンを長押しして絵文字でリアクション"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_name" formatted="false">"Meta AIを開くボタンや案内を表示"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_desc" formatted="false">"オフにすると、Meta AIを開くボタンや案内を非表示にします"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_name" formatted="false">"Meta AIの追加の案内やボタンを非表示"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_desc" formatted="false">"オンにすると、Meta AIのポップアップ、検索アイコン、おすすめ、共有先も非表示にします"</string>
+    <string name="piko_rec_flag_136724_7_name" formatted="false">"Museへの共有ショートカットを非表示"</string>
+    <string name="piko_rec_flag_136724_7_desc" formatted="false">"対応するバージョンのMuseアプリがインストールされている場合は、ショートカットが表示されます"</string>
+    <string name="piko_rec_flag_66222_6_name" formatted="false">"リールの下の「興味あり」「興味なし」ボタンを非表示"</string>
+    <string name="piko_rec_flag_66222_6_desc" formatted="false">"広告以外のリールの下にあるボタンに適用します。その他のメニューには影響しません。"</string>
+    <string name="piko_rec_flag_55922_2_name" formatted="false">"リールのメニューに「興味あり」を表示"</string>
+    <string name="piko_rec_flag_55922_2_desc" formatted="false">"新しいその他のメニューから「興味あり」と「興味なし」を非表示にするには、この設定をオフにして「リールの興味に関する項目の配置」を1に設定してください"</string>
+    <string name="piko_rec_flag_84236_0_name" formatted="false">"リールの興味に関する項目の配置"</string>
+    <string name="piko_rec_flag_84236_0_desc" formatted="false">"新しいその他のメニューから両方の項目を非表示にするには、この値を1にして「リールのメニューに『興味あり』を表示」をオフにしてください"</string>
+    <string name="piko_rec_flag_45023_0_name" formatted="false">"QRコードで共有"</string>
+    <string name="piko_rec_flag_45023_0_desc" formatted="false">"投稿メニューの「QRコード」にも適用します"</string>
+    <string name="piko_rec_flag_97046_1_name" formatted="false">"「すべてのリミックスを見る」を非表示"</string>
+    <string name="piko_rec_flag_97046_1_desc" formatted="false">"リミックスできる元の投稿では、関連するリミックス項目もまとめて非表示になる場合があります"</string>
+    <string name="piko_rec_flag_31983_10_name" formatted="false">"投稿メニューの「フォローをやめる」を非表示"</string>
+    <string name="piko_rec_flag_40597_31_name" formatted="false">"投稿メニューに「お気に入り」を表示"</string>
+    <string name="piko_rec_flag_72006_9_name" formatted="false">"新しいリールメニューに「全画面表示」を追加"</string>
+    <string name="piko_rec_flag_83371_0_name" formatted="false">"リールの自動スクロール"</string>
+    <string name="piko_rec_flag_83371_0_desc" formatted="false">"オフにすると、メニューの項目も非表示になります。ただし、ig_android_long_pressのclips_tabがauto_scrollに設定されている場合は表示されます"</string>
+    <string name="piko_rec_flag_94528_0_name" formatted="false">"DM受信箱のナビゲーションを簡略化"</string>
+    <string name="piko_rec_flag_94528_0_desc" formatted="false">"検索バーの代わりに画面上部に検索アイコンを表示します"</string>
+    <string name="piko_rec_flag_75196_8_name" formatted="false">"DM受信箱のおすすめ"</string>
+    <string name="piko_rec_flag_75196_8_desc" formatted="false">"9000000000に設定すると、DM受信箱のおすすめを非表示にします"</string>
+    <string name="piko_rec_flag_126024_12_name" formatted="false">"フローティングタブバー"</string>
+    <string name="piko_rec_flag_126024_12_desc" formatted="false">"Homecomingのナビゲーションレイアウトでは利用できません"</string>
+    <string name="piko_rec_flag_126411_0_name" formatted="false">"選択中のタブに丸みのある背景を表示"</string>
+    <string name="piko_rec_flag_33903_2_name" formatted="false">"プロフィールにおすすめのアカウントを表示"</string>
+    <string name="piko_rec_flag_78393_3_name" formatted="false">"プロフィールのリールタブで並べ替えの矢印を非表示"</string>
+    <string name="piko_rec_flag_group_3ea1d8e866d3fdcf760c8dcb56c0876b_name" formatted="false">"画面の端までコンテンツを表示"</string>
+    <string name="piko_rec_flag_group_3ea1d8e866d3fdcf760c8dcb56c0876b_desc" formatted="false">"Android 15以降で、ステータスバーとシステムナビゲーションバーの領域までメイン画面を広げます"</string>
+    <string name="piko_rec_flag_109730_name" formatted="false">"リールのその他のメニューにMeta AIを追加"</string>
+    <string name="piko_rec_flag_80654_name" formatted="false">"リールにMeta AIの説明ボタンを追加"</string>
+    <string name="piko_rec_flag_111509_3_name" formatted="false">"検索にMeta AIのおすすめを表示"</string>
+    <string name="piko_rec_flag_111509_3_desc" formatted="false">"オフにすると、代わりに最近検索したプロフィールを表示します。"</string>
+    <string name="piko_rec_flag_111509_9_name" formatted="false">"検索履歴を折りたたむ"</string>
+    <string name="piko_rec_flag_111509_9_desc" formatted="false">"オフにすると、検索履歴が折りたたまれずに表示されます。"</string>
+    <string name="piko_rec_flag_111509_21_name" formatted="false">"検索履歴を横にスクロール"</string>
+    <string name="piko_rec_flag_111509_21_desc" formatted="false">"オフにすると、検索履歴を縦の一覧で表示します。"</string>
+    <string name="piko_rec_flag_111509_25_name" formatted="false">"検索バーのヒントを順番に表示"</string>
+    <string name="piko_rec_flag_111509_26_name" formatted="false">"検索バーのヒントを順番に表示（動的）"</string>
+    <string name="piko_rec_flag_group_cb40d6eb2313fdb53365bfcf626bd4ab_name" formatted="false">"検索語を入力する前におすすめのユーザーを表示"</string>
+    <string name="piko_rec_flag_group_cb40d6eb2313fdb53365bfcf626bd4ab_desc" formatted="false">"オフにすると、検索画面のおすすめアカウントを非表示にします。"</string>
+    <string name="piko_rec_flag_111509_17_name" formatted="false">"検索履歴の最大表示件数（Android）"</string>
+    <string name="piko_rec_flag_111509_17_desc" formatted="false">"検索履歴に残すプロフィールの件数です。従来の設定は25件です。"</string>
+    <string name="piko_rec_flag_111509_1_name" formatted="false">"検索履歴の最大表示件数"</string>
+    <string name="piko_rec_flag_111509_1_desc" formatted="false">"検索履歴に残すプロフィールの件数です。従来の設定は25件です。"</string>
+    <string name="piko_rec_flag_109125_name" formatted="false">"Ultra HDRを常に有効にする"</string>
+    <string name="piko_rec_flag_109125_desc" formatted="false">"オフにすると、Ultra HDR写真を最大輝度で表示しなくなります。"</string>
+    <string name="piko_rec_flag_68885_name" formatted="false">"HDRコンテンツのSDRスーパーホワイト"</string>
+    <string name="piko_rec_flag_68885_desc" formatted="false">"オフにすると、HDR対応画面でリールや動画を再生するときの輝度の引き上げを無効にします。"</string>
+    <string name="piko_rec_flag_65057_0_name" formatted="false">"ノートの地図機能"</string>
+    <string name="piko_rec_flag_65057_0_desc" formatted="false">"オフにすると、ノートの地図機能と友達マップを無効にします。"</string>
+    <string name="piko_rec_flag_75711_0_name" formatted="false">"ノートのGIF機能"</string>
+    <string name="piko_rec_flag_75711_0_desc" formatted="false">"オフにすると、ノートでGIFを使えなくなります。"</string>
+    <string name="piko_rec_flag_121655_0_name" formatted="false">"ノートのアンケート機能"</string>
+    <string name="piko_rec_flag_121655_0_desc" formatted="false">"オンにすると、ノートにアンケートを追加できます。環境によっては利用できない場合があります。"</string>
+    <string name="piko_rec_flag_76757_0_name" formatted="false">"ブレンド"</string>
+    <string name="piko_rec_flag_76757_0_desc" formatted="false">"オフにすると、対応するチャットの上部にあるブレンドボタンを非表示にします。"</string>
+    <string name="piko_rec_flag_140592_0_name" formatted="false">"プロフィールのMuseボタン"</string>
+    <string name="piko_rec_flag_140592_0_desc" formatted="false">"オフにすると、プロフィールのナビゲーションバーにあるMuseボタンを非表示にします"</string>
+    <string name="piko_rec_flag_58467_20_name" formatted="false">"プロフィールのThreadsボタン"</string>
+    <string name="piko_rec_flag_58467_20_desc" formatted="false">"オフにすると、プロフィールのThreadsボタンを非表示にします。"</string>
+    <string name="piko_rec_flag_83371_10_name" formatted="false">"起動するたびに自動スクロールをリセット"</string>
+    <string name="piko_rec_flag_83371_10_desc" formatted="false">"オフにすると、Instagramを閉じても自動スクロールの設定が保持され、次回も同じ状態で使えます。"</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_name" formatted="false">"高画質でアップロード"</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_desc" formatted="false">"オンにすると、より高い画質でアップロードします。"</string>
+    <string name="piko_rec_flag_group_d635982bb65ea560b908003df98afb8c_name" formatted="false">"機械学習で動画を高解像度化してアップロード"</string>
+    <string name="piko_rec_flag_group_d635982bb65ea560b908003df98afb8c_desc" formatted="false">"オンにすると、1080p未満の動画を端末上の機械学習で1080pに拡大してアップロードします。"</string>
+    <string name="piko_rec_flag_80122_1_name" formatted="false">"ギャラリー画像のWebP圧縮"</string>
+    <string name="piko_rec_flag_80122_1_desc" formatted="false">"DM用にギャラリーの写真の一時コピーを作成するときは、100に設定するとWebPの画質が最高になります。igd_webp_device_galleryが有効な場合に適用します。"</string>
+    <string name="piko_rec_flag_55416_1_name" formatted="false">"HEIC画像のアップロード時の圧縮"</string>
+    <string name="piko_rec_flag_55416_1_desc" formatted="false">"通常のHEIC画像を最高画質でアップロードするには、100に設定してください。"</string>
 </resources>

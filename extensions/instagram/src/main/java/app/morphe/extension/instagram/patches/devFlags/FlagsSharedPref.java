@@ -28,7 +28,7 @@ public class FlagsSharedPref extends BaseSharedPref {
 
     // Static Wrapper Delegates
     public static String getStringPref(StringSetting setting) {
-        return INSTANCE.getString(setting);
+        return INSTANCE.getString(setting.key, setting.defaultValue);
     }
 
     public static Boolean setStringPref(String key, String val) {

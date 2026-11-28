@@ -35,7 +35,9 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.entity.ImageData;
@@ -226,9 +228,10 @@ final class DownloadSelectionSheet {
         image.setBackground(background);
         image.setClipToOutline(true);
         UI.setThemedIcon(image, video ? "tab_clips_drawable" : "instagram_photo_outline_24");
-        row.addView(image, new LinearLayout.LayoutParams(dp(48), dp(48)));
-        String thumbnail = thumbnailUrl(item);
-        image.setTag(thumbnail);
+        int previewSize = dp(48);
+        row.addView(image, new LinearLayout.LayoutParams(previewSize, previewSize));
+        List<String> urls = thumbnailUrls(item, previewSize);
+        image.setTag(urls);
 
         TextView name = text(label, 16, true);
         name.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -250,7 +253,7 @@ final class DownloadSelectionSheet {
         image.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override public void onViewAttachedToWindow(View view) {
                 image.removeOnAttachStateChangeListener(this);
-                thumbnails.load(thumbnail, image);
+                thumbnails.load(urls, image);
             }
             @Override public void onViewDetachedFromWindow(View view) {}
         });
@@ -335,22 +338,31 @@ final class DownloadSelectionSheet {
         return Utils.getActivity();
     }
 
-    private static String thumbnailUrl(MediaData item) {
+    private static List<String> thumbnailUrls(MediaData item, int targetSize) {
+        Set<String> urls = new LinkedHashSet<>();
+        String best = null;
+        int bestSize = 0;
         try {
-            ImageData best = null;
-            int bestSize = 0;
-            for (Object candidate : item.getImageVariants()) {
-                ImageData image = (ImageData) candidate;
-                int size = Math.min(image.getWidth(), image.getHeight());
-                if (size <= 0) continue;
-                if (best == null || (bestSize < 256 ? size > bestSize : size >= 256 && size < bestSize)) {
-                    best = image;
-                    bestSize = size;
+            for (ImageData image : item.getImageVariants()) {
+                try {
+                    String url = image.getPreviewUrl();
+                    if (url == null || url.isEmpty()) continue;
+                    urls.add(url);
+                    int size = Math.min(image.getWidth(), image.getHeight());
+                    if (size > 0 && (bestSize < targetSize ? size > bestSize : size >= targetSize && size < bestSize)) {
+                        best = url;
+                        bestSize = size;
+                    }
+                } catch (Exception ignored) {
+                    // A malformed variant must not hide the other previews.
                 }
             }
-            return best == null ? null : best.getUrl();
-        } catch (Exception e) {
-            return null;
+        } catch (Exception ignored) {
+            // Some items do not expose image variants.
         }
+        List<String> ordered = new ArrayList<>();
+        if (best != null && urls.remove(best)) ordered.add(best);
+        ordered.addAll(urls);
+        return ordered;
     }
 }

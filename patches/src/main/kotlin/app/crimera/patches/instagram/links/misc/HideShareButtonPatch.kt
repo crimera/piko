@@ -11,16 +11,18 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.hideFeedUfiStates
+import app.crimera.patches.instagram.utils.storyComponentType
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.patch
-import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
@@ -46,7 +48,12 @@ val hideShareButtonPatch = patch(
         val reels = Fingerprint(
             returnType = "Z",
             parameters = listOf("Lcom/instagram/clips/intf/ClipsViewerConfig;", "L", "L", "L"),
-            filters = listOf(string("android_purge_26_q3_UfiUseCase_shouldShowShareButton")),
+            filters = listOf(
+                literal("non_sponsored_product".hashCode()),
+                fieldAccess(definingClass = "Lcom/instagram/clips/intf/ClipsViewerConfig;", type = "Z", opcode = Opcode.IGET_BOOLEAN),
+                literal("disable_share".hashCode()),
+                literal("ig_media_sharing_disabled".hashCode()),
+            ),
         ).method
         val scratch = reels.findFreeRegister(0)
         // Instagram's false result selects the hidden state for both the button and count.
@@ -61,34 +68,33 @@ val hideShareButtonPatch = patch(
             """.trimIndent(),
             ExternalLabel("original", reels.getInstruction(0)),
         )
-        val storyComponent = Fingerprint(
-            returnType = "Ljava/lang/String;",
-            parameters = emptyList(),
-            filters = listOf(string("StoryReshareButtonViewComponent")),
-        ).originalMethod.definingClass
+        val storyComponent = storyComponentType("StoryReshareButtonViewComponent")
         // The component has separate button and label visibility gates, shared by
         // both layouts. Leave its independent layout-selection boolean untouched.
         val storyStates = listOf(
-            listOf(methodCall(smali = "Landroid/view/View;->getContentDescription()Ljava/lang/CharSequence;", location = MatchAfterImmediately())),
             listOf(
-                fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+                opcode(Opcode.IF_NEZ, location = MatchAfterImmediately()),
+                fieldAccess(definingClass = storyComponent, opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+            ),
+            listOf(
+                fieldAccess(definingClass = storyComponent, opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
                 methodCall(name = "getValue", parameters = emptyList(), returnType = "Ljava/lang/Object;", location = MatchAfterImmediately()),
             ),
         ).map { tail ->
             Fingerprint(
-                definingClass = storyComponent,
                 returnType = "V",
-                parameters = listOf("Ljava/lang/Object;"),
+                parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
                 filters = listOf(
+                    checkCast(storyComponent),
                     fieldAccess(type = "Z", opcode = Opcode.IGET_BOOLEAN),
                     opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
                 ) + tail,
             )
         }
-        storyStates.sortedByDescending { it.instructionMatches.first().index }.forEach { fingerprint ->
-            val read = fingerprint.instructionMatches.first()
+        storyStates.sortedByDescending { it.instructionMatches[1].index }.forEach { fingerprint ->
+            val read = fingerprint.instructionMatches[1]
             val registers = read.instruction.registersUsed
-            if (registers.size != 2 || fingerprint.instructionMatches[1].instruction.registersUsed != listOf(registers[0])) {
+            if (registers.size != 2 || fingerprint.instructionMatches[2].instruction.registersUsed != listOf(registers[0])) {
                 throw PatchException("Unexpected story share visibility branch")
             }
             val visible = registers[0]

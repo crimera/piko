@@ -37,10 +37,24 @@ internal object GetAudioUrlExtension : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
+internal object GetAudioDashManifestExtension : Fingerprint(
+    name = "getAudioDashManifest",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
+internal object GetDurationExtension : Fingerprint(
+    name = "getDurationMs",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
 internal object OriginalSoundMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
     filters = listOf(
         string("audio_asset_id"),
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, location = MatchAfterImmediately()),
+        string("dash_manifest"),
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, location = MatchAfterImmediately()),
+        string("duration_in_ms"),
         methodCall(opcode = Opcode.INVOKE_INTERFACE, location = MatchAfterImmediately()),
         string("hide_remixing"),
         // User data, read after the hide remixing entry is added.

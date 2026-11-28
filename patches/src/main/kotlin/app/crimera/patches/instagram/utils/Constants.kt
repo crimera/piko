@@ -21,10 +21,10 @@ object Constants {
             targets =
                 listOf(
                     AppTarget(
-                        version = "452.1.0.53.64",
+                        version = "456.0.0.53.78",
                         versionCodes =
                             mapOf(
-                                ARM64_V8A to 385811006,
+                                ARM64_V8A to 386214534,
                             ),
                     ),
                 ),

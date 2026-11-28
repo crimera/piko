@@ -9,16 +9,20 @@ package app.crimera.patches.instagram.misc.disableVideoAutoplay
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.patch
+import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 
 object DisableVideoAutoplayMethodFingerprint : Fingerprint(
-    strings = listOf("ig_olympus_disable_video_autoplay", "ig_disable_video_autoplay", "ig_video_setting"),
+    isStatic = true,
+    parameters = listOf(USER_SESSION_CLASS),
     returnType = "Z",
+    filters = listOf(string("ig_olympus_disable_video_autoplay"), string("ig_disable_video_autoplay")),
 )
 
 // Credits to MyInsta

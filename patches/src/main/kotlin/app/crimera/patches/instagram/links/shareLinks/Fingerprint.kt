@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.links.shareLinks
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
@@ -48,10 +49,58 @@ internal object StoryItemThirdPartySharingUrlResponseImplFingerprint : Fingerpri
     filters = listOf(opcode(Opcode.RETURN_OBJECT)),
 )
 
+internal object StoryItemShareUrlReadFingerprint : Fingerprint(
+    filters = listOf(
+        literal("story_item_to_share_url".hashCode()),
+        methodCall(
+            parameters = listOf("I"),
+            returnType = "Ljava/lang/String;",
+            opcode = Opcode.INVOKE_INTERFACE,
+            location = MatchAfterImmediately(),
+        ),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+    ),
+)
+
 internal object LiveThirdPartySharingUrlResponseImplFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     definingClass = "Lcom/instagram/api/schemas/LiveThirdPartySharingUrlResponseImpl;",
     filters = listOf(opcode(Opcode.RETURN_OBJECT)),
+)
+
+internal object PandoLiveShareUrlGetterFingerprint : Fingerprint(
+    definingClass = "Lcom/instagram/api/schemas/ImmutablePandoLiveThirdPartySharingUrlResponse;",
+    returnType = "Ljava/lang/String;",
+    filters = listOf(literal("live_to_share_url".hashCode()), opcode(Opcode.RETURN_OBJECT)),
+)
+
+private val liveShareUrlRead = listOf(
+    literal("live_to_share_url".hashCode()),
+    methodCall(
+        parameters = listOf("I"),
+        returnType = "Ljava/lang/String;",
+        opcode = Opcode.INVOKE_INTERFACE,
+        location = MatchAfterImmediately(),
+    ),
+    opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+)
+
+internal object LiveShareUrlCallbackFingerprint : Fingerprint(
+    returnType = "V",
+    parameters = listOf("Ljava/lang/Object;"),
+    filters = liveShareUrlRead,
+)
+
+internal object LiveShareUrlEventFingerprint : Fingerprint(
+    name = "invokeSuspend",
+    parameters = listOf("Ljava/lang/Object;"),
+    filters = liveShareUrlRead + listOf(
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        methodCall(definingClass = "Ljava/lang/String;", name = "length", location = MatchAfterImmediately()),
+        // The options dialog reads the same field again to emit the URL after the empty check.
+        methodCall(parameters = listOf("I"), returnType = "Ljava/lang/String;", opcode = Opcode.INVOKE_INTERFACE),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+    ),
 )
 
 internal object HighlightShareUrlRequestFingerprint : Fingerprint(

@@ -54,6 +54,7 @@ public class Settings {
     public static final StringSetting CUSTOMISE_STORY_TIMESTAMP = new StringSetting("customise_story_timestamp", "default", REQUIRED);
     public static final BooleanSetting UNLIMITED_REPLAYS = new BooleanSetting("unlimited_replays", false, REQUIRED);
     public static final BooleanSetting DISABLE_DISAPPEARING_MESSAGES_GESTURE = new BooleanSetting("disable_disappearing_messages_gesture", false, REQUIRED);
+    public static final BooleanSetting SEND_KEYBOARD_GIFS = new BooleanSetting("send_keyboard_gifs", true, NOT_REQUIRED);
     public static final BooleanSetting EPHEMERAL_MEDIA_CAPTION = new BooleanSetting("ephemeral_media_caption", false, NOT_REQUIRED);
     public static final BooleanSetting HIDE_LIKES = new BooleanSetting("hide_likes", false, REQUIRED);
     public static final BooleanSetting HIDE_SHARE_BUTTON = new BooleanSetting("hide_share_button", false, NOT_REQUIRED);
@@ -100,6 +101,7 @@ public class Settings {
     public static final BooleanSetting REEL_DOWNLOAD_BUTTON = new BooleanSetting("reel_download_button", true, NOT_REQUIRED);
     public static final BooleanSetting STORY_DOWNLOAD_BUTTON = new BooleanSetting("story_download_button", true, NOT_REQUIRED);
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false, REQUIRED);
+    public static final StringSetting DOWNLOAD_CONFLICT_POLICY = new StringSetting("download_conflict_policy", "rename", NOT_REQUIRED);
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false, NOT_REQUIRED);
     public static final BooleanSetting EMBED_DOWNLOAD_METADATA = new BooleanSetting("embed_download_metadata", false, NOT_REQUIRED);
     public static final BooleanSetting PREFER_DASH_FORMAT = new BooleanSetting("prefer_dash_format", true, NOT_REQUIRED);
